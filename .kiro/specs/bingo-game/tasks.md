@@ -522,30 +522,61 @@
   - コミット: "style: グローバルスタイルを追加"
 
 - [ ] 14.3 Start画面スタイリング
-  - Start画面のCSSを実装
+  - docs/design/design/image.pngのデザインに忠実に実装
+  - BGMトグル、3つのボタン配置、背景色など
   - 要件: 10.1, 10.4
   - ファイル: `app/components/start/*.css`
   - コミット: "style: Start画面のスタイリングを追加"
 
-- [ ] 14.4 Game画面スタイリング
-  - Game画面の3カラムレイアウトCSSを実装
+- [ ] 14.4 確認ダイアログスタイリング
+  - docs/design/design/image 1.pngのデザインに忠実に実装
+  - 「はじめから」押下時のダイアログ
+  - 要件: 10.1, 10.2
+  - ファイル: `app/components/common/ConfirmDialog.css`
+  - コミット: "style: 確認ダイアログのスタイリングを追加"
+
+- [ ] 14.5 Game画面スタイリング
+  - docs/design/design/image 2.pngのデザインに忠実に実装
+  - 3カラムレイアウト（履歴、抽選エリア、景品リスト）
   - 要件: 10.1, 10.4
   - ファイル: `app/components/game/*.css`
   - コミット: "style: Game画面のスタイリングを追加"
 
-- [ ] 14.5 Setting画面スタイリング
-  - Setting画面のテーブルレイアウトCSSを実装
+- [ ] 14.6 過去の番号確認ダイアログスタイリング
+  - docs/design/design/image 3.pngのデザインに忠実に実装
+  - 全当選番号一覧モーダル
+  - 要件: 10.1
+  - ファイル: `app/components/game/AllNumbersModal.css`
+  - コミット: "style: 過去の番号確認ダイアログのスタイリングを追加"
+
+- [ ] 14.7 ルーレットダイアログスタイリング
+  - docs/design/design/image 4.pngとimage 5.pngのデザインに忠実に実装
+  - ルーレット演出と停止後の画面
+  - 要件: 10.1
+  - ファイル: `app/components/game/RouletteWheel.css`
+  - コミット: "style: ルーレットダイアログのスタイリングを追加"
+
+- [ ] 14.8 Setting画面スタイリング
+  - docs/design/design/image 6.pngのデザインに忠実に実装
+  - 景品テーブルレイアウト、DnDハンドル、ボタン配置など
   - 要件: 10.1, 10.4
   - ファイル: `app/components/setting/*.css`
   - コミット: "style: Setting画面のスタイリングを追加"
 
-- [ ] 14.6 レスポンシブ対応
+- [ ] 14.9 Chrome MCPでデザイン確認
+  - 各画面をdocs/design/design/配下の画像と比較
+  - レイアウト、色、フォント、間隔などが一致しているか確認
+  - 必要に応じて微調整
+  - 要件: 10.1
+  - コミット: "style: デザイン確認と微調整完了"
+
+- [ ] 14.10 レスポンシブ対応
   - デスクトップ優先のレスポンシブCSSを追加
   - 要件: 10.4
   - ファイル: 各CSSファイル（更新）
   - コミット: "style: レスポンシブ対応を追加"
 
-- [ ] 14.7 ドメイン完了 - mainへマージ
+- [ ] 14.11 ドメイン完了 - mainへマージ
   - コマンド: `git checkout main && git merge feature/domain-14-styling`
 
 
