@@ -1,12 +1,16 @@
-import type { LoaderFunctionArgs, ActionFunctionArgs } from "@react-router/node";
+import { useState } from "react";
 import { json, redirect } from "@react-router/node";
+import type { LoaderFunctionArgs } from "@react-router/node";
+import { useNavigation, useSubmit } from "react-router";
 import { startSession, resumeSession } from "~/common/services/sessionService";
+import { StartMenu } from "~/components/start/StartMenu";
+import { ContinueDialog } from "~/components/start/ContinueDialog";
 
 export const loader = async () => {
   return json({});
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: LoaderFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
@@ -32,43 +36,53 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function StartRoute() {
+  const [continueDialogOpen, setContinueDialogOpen] = useState(false);
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state !== "idle";
+
+  const handleStart = () => {
+    submit(
+      { intent: "start" },
+      {
+        method: "post",
+      },
+    );
+  };
+
+  const handleResumeConfirm = () => {
+    submit(
+      { intent: "resume" },
+      {
+        method: "post",
+      },
+    );
+    setContinueDialogOpen(false);
+  };
+
+  const handleSetting = () => {
+    submit(
+      { intent: "setting" },
+      {
+        method: "post",
+      },
+    );
+  };
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="space-y-4 text-center">
-        <h1 className="text-3xl font-bold">Start</h1>
-        <div className="space-x-4">
-          <form method="post">
-            <button
-              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white"
-              name="intent"
-              value="start"
-              type="submit"
-            >
-              はじめから
-            </button>
-          </form>
-          <form method="post">
-            <button
-              className="rounded bg-emerald-600 px-4 py-2 font-semibold text-white"
-              name="intent"
-              value="resume"
-              type="submit"
-            >
-              続きから
-            </button>
-          </form>
-          <form method="post">
-            <button
-              className="rounded bg-slate-600 px-4 py-2 font-semibold text-white"
-              name="intent"
-              value="setting"
-              type="submit"
-            >
-              設定
-            </button>
-          </form>
-        </div>
-      </div>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 px-6 py-10">
+      <StartMenu
+        onStart={handleStart}
+        onResumeRequest={() => setContinueDialogOpen(true)}
+        onNavigateSetting={handleSetting}
+        isSubmitting={isSubmitting}
+      />
+      <ContinueDialog
+        open={continueDialogOpen}
+        onConfirm={handleResumeConfirm}
+        onCancel={() => setContinueDialogOpen(false)}
+        isSubmitting={isSubmitting}
+      />
     </main>
   );
 }
