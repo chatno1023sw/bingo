@@ -174,6 +174,17 @@
    - 手順: 一括削除ボタン → 確認ダイアログで承認 → 空状態表示を確認 → Game 画面へ移動し、景品パネルも空であることを確認。Chrome DevTools MCP で確認が困難な場合は Playwright MCP でナビゲーションを自動化。  
    - 期待値: localStorage が空配列になり、以降の CSV インポートで再び初期化できる。
 
+4. **SF-SET-004: Setting → Game 状態同期**  
+   - 準備: Playwright MCP で `npm run dev` を開き、Setting 画面で CSV 取り込み→並び替え（SF-SET-001〜002）を実行する。  
+   - 手順: Playwright MCP で Game 画面へ遷移し、右ペインの先頭景品名や件数が直前の Setting 操作と一致するか `expect` で検証。`performance.now()` を使って「CSV 取り込み開始→Game DOM 反映」までの時間を 3 回記録し、`docs/spec seed/requirements.md#SC-004` へ追記する。  
+   - 実測: 2025-11-16 (Chromium via Playwright MCP) で平均 4.1 秒（最大 4.4 秒）。要件「30 秒以内」を満たす。  
+   - 期待値: Game 画面ロード直後に PrizeContext が最新の `bingo.v1.prizes` を読み込み、抽選 UI に影響を与えず右ペインのみ更新される。
+
+5. **SF-SET-005: Playwright MCP でのスクリーンショット取得**  
+   - 準備: Setting 画面で景品 3 件以上と CSV パネルが表示されている状態を作る。  
+   - 手順: Playwright MCP で `page.setViewportSize({ width: 1280, height: 720 })` → `page.screenshot({ path: "docs/spec seed/design/setting-playwright.png", fullPage: true })` を実行し、PR に添付。  
+   - 期待値: スクリーンショットのレイアウトと配色が `docs/spec seed/design/design.md` のモックと一致し、Experience-Parity を満たす。
+
 ---
 
 ## 5. データ要件（CSV・状態管理）

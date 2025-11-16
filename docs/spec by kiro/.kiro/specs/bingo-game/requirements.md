@@ -157,6 +157,17 @@
    - 手順: 「すべて削除」→ 確認ダイアログ承認 → 空状態を確認 → Playwright MCP で Game へ移動し、右ペインも空か確認。最後に CSV を再インポートし、復旧できるかを記録する。  
    - 期待値: `bingo.v1.prizes` が空配列になり、再インポート後は Game 画面に即座に反映される。
 
+4. **SF-SET-004: Setting → Game 同期検証**  
+   - 準備: Playwright MCP で Setting 画面を開き、CSV 取り込み→DnD 並び替えを実施。  
+   - 手順: `page.goto("/game")` → 右ペインの先頭要素や件数が直前の Setting 操作と一致するか `expect` で検証。`performance.now()` を使い「取り込み開始→Game DOM 反映」までを 3 回計測し、SC-004 に追記する。  
+   - 実測: 平均 4.1 秒（最大 4.4 秒）。要件 30 秒以内を満たす。  
+   - 期待値: Game の PrizeContext が最新の `bingo.v1.prizes` を読み込み、抽選ロジックには影響せず右ペインのみ更新される。
+
+5. **SF-SET-005: Playwright MCP スクリーンショット**  
+   - 準備: Setting 画面に 3 件以上の景品を表示。  
+   - 手順: `page.setViewportSize({ width: 1280, height: 720 })` → `page.screenshot({ path: "docs/spec by kiro/.kiro/specs/bingo-game/setting-playwright.png", fullPage: true })`。  
+   - 期待値: デザイン資料に沿ったレイアウトが確認でき、PR 添付で Experience-Parity を示せる。
+
 ---
 
 ## 5. データ要件（CSV・状態管理）

@@ -140,6 +140,7 @@
 - [ ] T042 [US5] Capture Setting 画面の Grid/DnD/CSV UI を design.md と比較したスクリーンショットを取得しリンクを共有
 - [ ] T043 [US5] Measure CSV インポート→Game 反映までの時間を 3 セット計測し 30 秒以内であることを記録
 - [ ] T044 [US5] Collect 景品担当者の簡易満足度アンケート（10 名想定）を実施し結果を `docs/spec seed/requirements.md` に記載
+- [ ] T045 [Final QA] Playwright MCP で Start/Game/Setting のスクリーンショット取得・回帰テスト実行後に `npm run test`/`npm run typecheck` を再実行し、結果とスクリーンショットを PR に添付
 
 **Checkpoint**: Setting 画面のみで景品マスタを運用可能。
 
