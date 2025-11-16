@@ -10,5 +10,6 @@ export default defineConfig({
     include: ["app/**/*.test.{ts,tsx}"],
     exclude: ["vendor/**/*"],
     css: true,
+    pool: "threads",
   },
 });
