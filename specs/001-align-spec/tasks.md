@@ -11,7 +11,7 @@
 
 **Purpose**: 仕様同期とツールチェーン整備で共通基盤を固める
 
-- [ ] T001 Compare spec seed/design と spec by kiro を突き合わせ、相違点を `docs/spec seed/requirements.md` と `docs/spec by kiro/.kiro/specs/bingo-game/requirements.md` に反映
+- [x] T001 Compare spec seed/design と spec by kiro を突き合わせ、相違点を `docs/spec seed/requirements.md` と `docs/spec by kiro/.kiro/specs/bingo-game/requirements.md` に反映
 - [ ] T002 Add Vitest + React Testing Library + `@react-router/testing` 依存と設定を `package.json`, `vitest.config.ts`, `tsconfig.json` に追加し `npm run test` スクリプトを定義
 - [ ] T003 Wire `mizchi/similarity` チェックを `package.json` と `README.md` に追記し、開発ルールとして `docs/spec seed/requirements.md` に記録
 

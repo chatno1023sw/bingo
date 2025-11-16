@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## 共通設定
+- ターミナルに出力する言葉はすべて日本語で出力してください
+
 ## プロジェクト構成とモジュール配置
 主要ソースは `app/` に集約し、`root.tsx` が HTML シェルとメタ情報、`app/routes/` が React Router v7 のルート (`start`, `game`, `setting`) を担当します。各ルートは loader/action/コンポーネントのみを記述し、抽選ロジックや UI パーツは `app/common` や `app/components` (必要に応じて新設) へ分離してください。静的アセットは `public/`、要件と画面モックは `docs/spec seed/requirements.md` および `docs/spec seed/design/design.md` を参照して実装を揃えます。設定ファイル (`react-router.config.ts`, `tsconfig.json`, `vite.config.ts`) はリポジトリ直下で統一管理し、MCP 関連は `.codex` と `mcp.config.json` を更新して共有します。
 

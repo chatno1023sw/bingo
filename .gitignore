@@ -11,3 +11,8 @@ mcp.config.json
 /build/
 
 .vscode
+dist/
+coverage/
+*.log
+.env.local
+.env.*.local
