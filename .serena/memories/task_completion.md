@@ -1,0 +1,4 @@
+- 実装前に docs/spec seed/requirements.md へ対象機能のテストシナリオを追記すること。
+- 作業後は Chrome DevTools MCP で画面を確認し、`npm run typecheck`（必要に応じて `npm run build`, `npm run test`）を通す。
+- 重大な設定変更や外部依存、CSV/BGM などを追加したら requirements.md や README へ補記する。
+- Git コミットは add:/update: などのプレフィックスを付け、PR には検証結果やスクリーンショット等をまとめる。
