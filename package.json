@@ -11,6 +11,8 @@
     "similarity": "node ./scripts/run-similarity.mjs"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^7.0.2",
     "@mui/icons-material": "^7.3.4",
     "@react-router/node": "^7.9.2",
     "@react-router/serve": "^7.9.2",

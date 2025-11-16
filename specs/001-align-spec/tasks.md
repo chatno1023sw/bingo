@@ -133,9 +133,9 @@
 ### Implementation for User Story 5
 
 - [x] T030 [US5] Build CSV パーサー/エクスポーター本体 (`app/common/utils/csvParser.ts`) と prizeService import/export 実装 (`app/common/services/prizeService.ts`)
-- [ ] T031 [US5] Implement Setting route layout と DnD 並び替え (`app/routes/setting.tsx`, `app/components/setting/PrizeSortableList.tsx`) using `@dnd-kit/core`
-- [ ] T032 [P] [US5] Create CSV 操作用コンポーネント (`app/components/setting/CsvControls.tsx`) とエクスポート/インポートダイアログ UI
-- [ ] T033 [US5] Add 一括削除 UI + 確認ダイアログ (`app/components/setting/BulkActions.tsx`) と localStorage 更新
+- [x] T031 [US5] Implement Setting route layout と DnD 並び替え (`app/routes/setting.tsx`, `app/components/setting/PrizeSortableList.tsx`) using `@dnd-kit/core`
+- [x] T032 [P] [US5] Create CSV 操作用コンポーネント (`app/components/setting/CsvControls.tsx`) とエクスポート/インポートダイアログ UI
+- [x] T033 [US5] Add 一括削除 UI + 確認ダイアログ (`app/components/setting/BulkActions.tsx`) と localStorage 更新
 - [ ] T034 [US5] Ensure Setting と Game の状態同期 (`app/common/contexts/PrizeContext.tsx`, `app/routes/game.tsx`) を import/export の結果で再描画
 - [ ] T042 [US5] Capture Setting 画面の Grid/DnD/CSV UI を design.md と比較したスクリーンショットを取得しリンクを共有
 - [ ] T043 [US5] Measure CSV インポート→Game 反映までの時間を 3 セット計測し 30 秒以内であることを記録

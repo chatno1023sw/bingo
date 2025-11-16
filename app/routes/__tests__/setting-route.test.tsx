@@ -15,6 +15,15 @@ const basePrizes: PrizeList = [
     selected: false,
     memo: null,
   },
+  {
+    id: "p-2",
+    order: 1,
+    prizeName: "二等",
+    itemName: "ギフトカード",
+    imagePath: null,
+    selected: false,
+    memo: null,
+  },
 ];
 
 const routerMocks = vi.hoisted(() => ({
@@ -67,6 +76,8 @@ describe("SettingRoute component", () => {
     prizeManagerMock.applyPrizes.mockReset();
     prizeManagerMock.applyPrizes.mockResolvedValue(undefined);
     routerMocks.useLoaderData.mockReturnValue({ prizes: basePrizes });
+    csvParserMocks.parsePrizesCsv.mockReset();
+    csvParserMocks.parsePrizesCsv.mockReturnValue({ prizes: basePrizes, skipped: [] });
   });
 
   it("renders prize list", () => {
@@ -100,6 +111,16 @@ describe("SettingRoute component", () => {
 
     await waitFor(() => expect(prizeManagerMock.applyPrizes).toHaveBeenCalledWith([]));
   });
+
+  it("reorders prizes when pressing 上へ移動", async () => {
+    render(<SettingRoute />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "上へ移動" })[1]);
+
+    await waitFor(() => expect(prizeManagerMock.applyPrizes).toHaveBeenCalled());
+    const reordered = prizeManagerMock.applyPrizes.mock.calls[0][0] as PrizeList;
+    expect(reordered[0].id).toBe("p-2");
+  });
 });
 
 describe("setting loader", () => {
@@ -110,7 +131,7 @@ describe("setting loader", () => {
     const data = await response.json();
 
     expect(prizeServiceMocks.getPrizes).toHaveBeenCalled();
-    expect(data.prizes).toHaveLength(1);
+    expect(data.prizes).toHaveLength(2);
   });
 });
 const routerNodeMocks = vi.hoisted(() => ({
