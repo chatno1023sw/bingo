@@ -6,13 +6,13 @@ A modern, production-ready template for building full-stack React applications u
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- 🚀 React Router v7 + SSR + HMR（Vite）
+- 🔒 TypeScript 5.9 + Vitest + React Testing Library
+- 🎯 Start/Game/Setting 3 画面構成（docs/spec seed/requirements.md に沿った UI）
+- 🎰 `react-custom-roulette` による抽選演出 + PrizeContext ベースの景品管理
+- 🧊 Tailwind CSS・@dnd-kit/core・@mui/icons-material を利用したレスポンシブ UI
+- 📦 localStorage (`bingo.v1.*`) による完全オフライン運用、CSV 入出力ユーティリティ同梱
+- 🧰 Chrome DevTools MCP / Playwright MCP を用いた TDD + 手動検証フローをドキュメント化
 
 ## Getting Started
 
@@ -33,6 +33,16 @@ npm run dev
 ```
 
 Your application will be available at `http://localhost:5173`.
+
+## Testing & QA
+
+```
+npm run test       # Vitest suites (storage/session/game/setting など)
+npm run typecheck  # react-router typegen + tsc
+```
+
+- Chrome DevTools MCP で Start/Game/Setting のシナリオを実行し、`docs/spec seed/requirements.md` に沿ってログを残してください。
+- Playwright MCP が利用できる環境では `page.screenshot()` や `setInputFiles` を使って CSV 取り込み・画面キャプチャを自動化できます（SF-PRIZE/SF-SET セクション参照）。
 
 ## Building for Production
 
