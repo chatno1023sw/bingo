@@ -5,6 +5,7 @@ import {
   togglePrize as togglePrizeService,
   savePrizes as savePrizesService,
 } from "~/common/services/prizeService";
+import { storageKeys } from "~/common/utils/storage";
 
 export type PrizeContextValue = {
   prizes: PrizeList;
@@ -64,6 +65,21 @@ export const PrizeProvider = ({ initialPrizes, children }: PrizeProviderProps) =
       /* エラーメッセージは refresh 内で設定済み */
     });
   }, [initialPrizes, refresh]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return () => {};
+    }
+    const handler = (event: StorageEvent) => {
+      if (event.key === storageKeys.prizes) {
+        refresh().catch(() => {
+          /* refresh 内でエラーハンドリング済み */
+        });
+      }
+    };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [refresh]);
 
   const togglePrize = useCallback(
     async (id: string, nextSelected?: boolean) => {
