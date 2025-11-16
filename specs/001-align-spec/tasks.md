@@ -128,11 +128,11 @@
 ### Tests for User Story 5
 
 - [ ] T028 [US5] 追加テストケースを `docs/spec seed/requirements.md#Setting画面` と spec by kiro counterparts に記載
-- [ ] T029 [US5] Implement csvParser のユニットテスト (`app/common/utils/__tests__/csvParser.test.ts`) と Setting ルート統合テスト (`app/routes/__tests__/setting-route.test.tsx`)
+- [x] T029 [US5] Implement csvParser のユニットテスト (`app/common/utils/__tests__/csvParser.test.ts`) と Setting ルート統合テスト (`app/routes/__tests__/setting-route.test.tsx`)
 
 ### Implementation for User Story 5
 
-- [ ] T030 [US5] Build CSV パーサー/エクスポーター本体 (`app/common/utils/csvParser.ts`) と prizeService import/export 実装 (`app/common/services/prizeService.ts`)
+- [x] T030 [US5] Build CSV パーサー/エクスポーター本体 (`app/common/utils/csvParser.ts`) と prizeService import/export 実装 (`app/common/services/prizeService.ts`)
 - [ ] T031 [US5] Implement Setting route layout と DnD 並び替え (`app/routes/setting.tsx`, `app/components/setting/PrizeSortableList.tsx`) using `@dnd-kit/core`
 - [ ] T032 [P] [US5] Create CSV 操作用コンポーネント (`app/components/setting/CsvControls.tsx`) とエクスポート/インポートダイアログ UI
 - [ ] T033 [US5] Add 一括削除 UI + 確認ダイアログ (`app/components/setting/BulkActions.tsx`) と localStorage 更新

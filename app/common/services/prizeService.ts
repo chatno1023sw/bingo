@@ -1,4 +1,5 @@
 import type { CsvImportResult, Prize, PrizeList } from "~/common/types";
+import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
 export type ReorderPayload = {
@@ -60,15 +61,24 @@ export const reorderPrizes = async (payload: ReorderPayload): Promise<PrizeList>
 /**
  * `/prizes/import`
  */
-export const importPrizes = async (_file: File): Promise<CsvImportResult> => {
-  throw new Error("importPrizes is not implemented yet.");
+export const importPrizes = async (file: File): Promise<CsvImportResult> => {
+  const text = await file.text();
+  const { prizes, skipped } = parsePrizesCsv(text);
+  await savePrizes(prizes);
+  return {
+    sourceName: file.name,
+    addedCount: prizes.length,
+    skipped,
+    processedAt: new Date().toISOString(),
+  };
 };
 
 /**
  * `/prizes/export`
  */
-export const exportPrizes = async (_prizes: PrizeList): Promise<Blob> => {
-  throw new Error("exportPrizes is not implemented yet.");
+export const exportPrizes = async (prizes: PrizeList): Promise<Blob> => {
+  const csv = generatePrizesCsv(prizes);
+  return new Blob([csv], { type: "text/csv;charset=utf-8" });
 };
 
 /**
