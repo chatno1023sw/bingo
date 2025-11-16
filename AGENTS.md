@@ -21,3 +21,10 @@ Git ログは `add: ...` や `update: ...` など動詞プレフィックスで�
 
 ## セキュリティと設定の注意
 運用形態は「ローカル環境完結 + オフライン要件あり」(要件 1.3) です。外部 API を導入する際はオフライン fallback を用意し、ネットワーク依存が発生した場合は `requirements.md` に理由と緩和策を追記します。景品 CSV は個人情報を含む可能性があるため `.gitignore` 済みのパスを利用し、共有時はダミーデータに置き換えてください。BGM やサウンドを追加する場合は `public/` に配置し、ライセンス表記を `requirements.md` の付録や README に追記して再配布可否を明示します。
+
+## Active Technologies
+- TypeScript 5.9 + React 19（React Router v7、Vite） + React Router v7、Tailwind CSS、react-custom-roulette、@mui/icons-material、@dnd-kit/core、mizchi/similarity、Vite、Chrome DevTools MCP (001-align-spec)
+- ブラウザ localStorage（バージョン付きキー）＋ CSV ファイル（`data/prizes.csv` 想定） (001-align-spec)
+
+## Recent Changes
+- 001-align-spec: Added TypeScript 5.9 + React 19（React Router v7、Vite） + React Router v7、Tailwind CSS、react-custom-roulette、@mui/icons-material、@dnd-kit/core、mizchi/similarity、Vite、Chrome DevTools MCP
