@@ -61,12 +61,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T017 [US3] Append 抽選/履歴テストケースを `docs/spec seed/requirements.md#Game画面` と spec by kiro requirements へ追記
-- [ ] T018 [US3] Implement Vitest で `bingoEngine` のユニットテスト (`app/common/utils/__tests__/bingoEngine.test.ts`)
+- [x] T017 [US3] Append 抽選/履歴テストケースを `docs/spec seed/requirements.md#Game画面` と spec by kiro requirements へ追記
+- [x] T018 [US3] Implement Vitest で `bingoEngine` のユニットテスト (`app/common/utils/__tests__/bingoEngine.test.ts`)
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Build `bingoEngine` 本体 (`app/common/utils/bingoEngine.ts`) と `historyService` を contracts `/draws` `/history` に沿って実装
+- [x] T019 [US3] Build `bingoEngine` 本体 (`app/common/utils/bingoEngine.ts`) と `historyService` を contracts `/draws` `/history` に沿って実装
 - [ ] T020 [P] [US3] Create `GameRoulette` と中央表示 UI (`app/components/game/GameRoulette.tsx`, `app/components/game/CurrentNumber.tsx`) using `react-custom-roulette`
 - [ ] T021 [US3] Update `app/routes/game.tsx` loader/action と `app/components/game/HistoryPanel.tsx` を新ロジックに接続し、抽選中ボタンの状態制御を実装
 - [ ] T022 [US3] Add React Testing Library integration tests (`app/routes/__tests__/game-draw.test.tsx`) で抽選/履歴/モーダル表示を検証

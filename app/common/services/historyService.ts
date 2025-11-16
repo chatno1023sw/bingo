@@ -8,6 +8,16 @@ export type HistoryView = {
 /**
  * `/history` 相当のスタブ。
  */
-export const getHistoryView = async (_gameState: GameState): Promise<HistoryView> => {
-  throw new Error("getHistoryView is not implemented yet.");
+const RECENT_LIMIT = 10;
+
+const sortBySequence = (history: DrawHistoryEntry[]): DrawHistoryEntry[] =>
+  [...history].sort((a, b) => a.sequence - b.sequence);
+
+export const getHistoryView = async (gameState: GameState): Promise<HistoryView> => {
+  const sorted = sortBySequence(gameState.drawHistory);
+  const recent = sorted.slice(-RECENT_LIMIT).reverse();
+  return {
+    recent,
+    all: sorted,
+  };
 };

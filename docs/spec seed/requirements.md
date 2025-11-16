@@ -108,6 +108,23 @@
 | 景品の取消線表示 | 当選済みの景品は行全体またはテキストに取消線を表示し、一目で配布済みとわかるようにする。 |
 | 景品の当選管理 | 右ペインの各行に「当選」／「戻す」ボタンやトグルを設け、進行役が手動で当選状態を切り替えられるようにする。当選状態はゲーム状態としてブラウザローカルに保存する。 |
 
+#### Game 画面 - Chrome DevTools MCP テストシナリオ
+
+1. **SF-GAME-001: 抽選ボタンで履歴と `localStorage` が同期される**  
+   - 準備: DevTools Console で `localStorage.setItem("bingo.v1.gameState", JSON.stringify({ currentNumber: null, drawHistory: [], isDrawing: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }))` を実行し、未抽選状態にリセットする。  
+   - 手順: `npm run dev` → Game 画面を表示 → 「抽選開始」→「抽選ストップ」を 1 回実行。演出終了直後に DevTools から `JSON.parse(localStorage.getItem("bingo.v1.gameState")!)` を取得し、`drawHistory.length` が 1 増えて `currentNumber` と最後の履歴エントリの `number` が一致するか確認する。  
+   - 期待値: `isDrawing` は抽選開始時に `true`、停止後は `false` に戻り、`updatedAt` が現在時刻へ更新される。Recent 履歴リストと中央表示が同じ当選番号を示す。
+
+2. **SF-GAME-002: 重複抽選を拒否する失敗先行テスト**  
+   - 準備: DevTools で `drawHistory` を 3 件ほど手動挿入し（例: 5, 10, 15）、`currentNumber` にも同じ番号を設定した JSON を `bingo.v1.gameState` へ保存する。  
+   - 手順: Game 画面で抽選を 5 回繰り返し、各回の `localStorage` を監視する。抽選ごとに `drawHistory` の `number` が一意になっているか、既存番号が再度選ばれていないかを failure-first（先に重複を意図的に入れてから修正）で確認する。`drawHistory.length` が 75 に達した場合は抽選ボタンが無効化され、`/draws` 相当で 409 エラー扱いになることも合わせて確認する。  
+   - 期待値: 未抽選番号セットが都度再計算され、重複は発生しない。全番号抽選後はボタンに「抽選済み」のメッセージやトーストを表示して追加抽選を防止する。
+
+3. **SF-GAME-003: 履歴モーダルと直近 10 件ビューを検証**  
+   - 準備: DevTools Console で `drawHistory` に 12 件以上のダミーデータを注入する（`sequence` 1 origin、`drawnAt` は ISO8601）。  
+   - 手順: Game 画面左ペインで直近履歴を確認し、最新 10 件のみが降順で表示されているかチェック。その後「これまでの当選番号を見る」を開き、モーダル内で 12 件すべてが昇順/sequence 順に表示されているかを確認する。failure-first として `drawHistory` が `sequence` 順になっていないデータを入れて UI が崩れることを観察してから、historyService 実装で整列する。  
+   - 期待値: Recent ビューは `drawHistory.slice(-10).reverse()` の結果と一致し、モーダルは `sequence` 昇順ですべてのエントリを表示する。`bingo.v1.gameState` の内容が UI と乖離しない。
+
 ---
 
 ### 4.3 Setting 画面
