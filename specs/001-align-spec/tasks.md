@@ -86,13 +86,13 @@
 ### Tests for User Story 4
 
 - [ ] T023 [US4] 追加テストシナリオを `docs/spec seed/requirements.md#景品管理` へ記述し spec by kiro tasks を同期
-- [ ] T024 [US4] Add Vitest suite for prize state管理 (`app/common/contexts/__tests__/PrizeContext.test.tsx`)
+- [x] T024 [US4] Add Vitest suite for prize state管理 (`app/common/contexts/__tests__/PrizeContext.test.tsx`)
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Implement `PrizeContext` + `usePrizeManager` (`app/common/contexts/PrizeContext.tsx`, `app/common/hooks/usePrizeManager.ts`) で contracts `/prizes/toggle` を利用
-- [ ] T026 [P] [US4] Build 景品一覧 UI (`app/components/game/PrizeList.tsx`, `app/components/game/PrizeListItem.tsx`) に取消線・トグルボタンを追加
-- [ ] T027 [US4] Wire Game 右ペイン (`app/components/game/SidePanel.tsx`) で PrizeContext を使用し、localStorage と同期
+- [x] T025 [US4] Implement `PrizeContext` + `usePrizeManager` (`app/common/contexts/PrizeContext.tsx`, `app/common/hooks/usePrizeManager.ts`) で contracts `/prizes/toggle` を利用
+- [x] T026 [P] [US4] Build 景品一覧 UI (`app/components/game/PrizeList.tsx`, `app/components/game/PrizeListItem.tsx`) に取消線・トグルボタンを追加
+- [x] T027 [US4] Wire Game 右ペイン (`app/components/game/SidePanel.tsx`) で PrizeContext を使用し、localStorage と同期
 
 **Checkpoint**: 景品当選管理が Game 画面のみで完結。
 

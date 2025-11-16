@@ -1,11 +1,29 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@react-router/node";
-import type { GameStateEnvelope, DrawHistoryEntry } from "~/common/types";
+import type { GameStateEnvelope, DrawHistoryEntry, PrizeList } from "~/common/types";
 import GameRoute, { action, loader, type LoaderData } from "~/routes/game";
 
 vi.mock("react-custom-roulette", () => ({
   Wheel: () => null,
+}));
+
+vi.mock("~/common/contexts/PrizeContext", () => ({
+  PrizeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+const prizeManagerMock = vi.hoisted(() => ({
+  prizes: [] as PrizeList,
+  isLoading: false,
+  isMutating: false,
+  error: null as string | null,
+  togglePrize: vi.fn(),
+  refresh: vi.fn(),
+  applyPrizes: vi.fn(),
+}));
+
+vi.mock("~/common/hooks/usePrizeManager", () => ({
+  usePrizeManager: () => prizeManagerMock,
 }));
 
 const routerNodeMocks = vi.hoisted(() => ({
@@ -69,6 +87,16 @@ const fetcherMock = {
 
 const loaderDataMock: LoaderData = createLoaderData();
 
+const resetPrizeManager = () => {
+  prizeManagerMock.prizes = [];
+  prizeManagerMock.isLoading = false;
+  prizeManagerMock.isMutating = false;
+  prizeManagerMock.error = null;
+  prizeManagerMock.togglePrize.mockReset();
+  prizeManagerMock.refresh.mockReset();
+  prizeManagerMock.applyPrizes.mockReset();
+};
+
 vi.mock("react-router", async () => {
   const actual = await vi.importActual<typeof import("react-router")>("react-router");
   return {
@@ -111,6 +139,7 @@ describe("GameRoute component", () => {
     loaderDataMock.historyView = createLoaderData().historyView;
     loaderDataMock.availableNumbers = [1, 2, 3];
     loaderDataMock.gameState = createEnvelope().gameState;
+    resetPrizeManager();
   });
 
   it("renders current number and history entries", () => {
@@ -153,6 +182,7 @@ describe("game loader", () => {
     sessionMocks.startSession.mockReset();
     historyMocks.getHistoryView.mockReset();
     engineMocks.getAvailableNumbers.mockReset();
+    resetPrizeManager();
   });
 
   it("falls back to startSession when resumeSession returns null", async () => {
@@ -184,6 +214,7 @@ describe("game action", () => {
     historyMocks.getHistoryView.mockReset();
     engineMocks.getAvailableNumbers.mockReset();
     engineMocks.drawNextNumber.mockReset();
+    resetPrizeManager();
   });
 
   const buildRequest = (intent: string) =>
