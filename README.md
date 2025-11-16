@@ -42,6 +42,21 @@ Create a production build:
 npm run build
 ```
 
+## Similarity チェック（mizchi/similarity）
+
+コードの重複検出は `mizchi/similarity`（similarity-ts）を用いた `npm run similarity` コマンドで行います。
+
+1. Rust (cargo) をインストールします。
+2. このリポジトリ同梱の `vendor/mizchi-similarity` からバイナリをビルドします:
+
+```bash
+cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force
+```
+
+3. 以降は `npm run similarity` を実行すると、`app` と `docs` 配下をスキャンします。対象を絞りたい場合は引数を渡してください（例：`npm run similarity -- app/common app/components`）。
+
+`similarity-ts` バイナリを別パスで管理する場合は、環境変数 `SIMILARITY_BIN` に実行パスを指定してください。
+
 ## Deployment
 
 ### Docker Deployment

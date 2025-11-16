@@ -35,7 +35,7 @@
 | UI アイコン | `@mui/icons-material` を使用する（例：BGM のオン／オフアイコンなど）。 |
 | DnD | 賞品並び替えには `DNDContext`（例：`@dnd-kit/core`）を使用する。 |
 | データ管理 | マスターデータ（景品情報など）は CSV ファイルで管理する。ゲーム進行状態はブラウザローカル（例：localStorage）で管理する。 |
-| 重複コード検出 | `mizchi/similarity` を使用してコード類似度を計測し、SRP を考慮しながら共通化を行う。 |
+| 重複コード検出 | `npm run similarity` で `mizchi/similarity`（similarity-ts）を実行し、`app` と `docs` 配下の重複コードを検出する。バイナリは `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force` で構築するか、`SIMILARITY_BIN` 環境変数に外部パスを指定する。 |
 | 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
 
 ---
@@ -166,7 +166,7 @@
 | ファイル行数 | 1 ファイルが 200 行を超える場合は、責務ごとに分割を検討すること。AI による自動リファクタリングも許可する。 |
 | SRP | 単一責任原則（SRP）を意識し、コンポーネントや関数の責務をなるべく絞る。 |
 | 一貫した実装 | 「同じ動作をする箇所は同じように実装する」こと。例：モーダル表示ロジック、ローディング状態管理などは共通フックまたは共通コンポーネントに切り出して統一する。 |
-| 重複コード検出 | `mizchi/similarity` を用いて類似度の高いコードを検出し、SRP を損なわない範囲で共通化する。定期的に実行するスクリプトを用意すること。 |
+| 重複コード検出 | `npm run similarity`（内部で `mizchi/similarity` を実行）を定期的に流し、結果を `docs/spec seed/requirements.md` のテスト欄へ記録する。local バイナリが未配置の場合は `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked` または `SIMILARITY_BIN` で経路を指定する。 |
 
 ---
 

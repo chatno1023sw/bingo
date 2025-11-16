@@ -16,3 +16,9 @@ coverage/
 *.log
 .env.local
 .env.*.local
+
+vendor/*
+!vendor/react-router-testing/
+!vendor/react-router-testing/**
+!vendor/mizchi-similarity/
+!vendor/mizchi-similarity/**

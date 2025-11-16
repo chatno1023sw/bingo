@@ -7,7 +7,8 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "similarity": "node ./scripts/run-similarity.mjs"
   },
   "dependencies": {
     "@mui/icons-material": "^7.3.4",
