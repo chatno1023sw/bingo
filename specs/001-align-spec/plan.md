@@ -10,6 +10,7 @@
 - Start/Game/Setting 3 画面で抽選・履歴・景品・CSV 操作を司会 1 人で完結させ、spec の成功指標（抽選 3 秒以内、状態復元 100%、CSV 反映 30 秒以内）を満たす。
 - ルート責務分離・localStorage 永続化・Tailwind UI の要件を TDD + オフライン検証で守るため、Phase0 で調査し Phase1 でデータ・契約・手順に落とし込む。
 - テストスタックは `npm run typecheck` + Vitest/React Testing Library + Chrome DevTools MCP で統一し、抽選ロジック・CSV I/O・UI 操作を failure-first で検証する。
+- ユーザーストーリー実行順は US1（Start）→ US3（抽選/履歴）→ US4（景品管理）→ US2（BGM）→ US5（Setting）を基本とし、US2 は US1 完了後であれば並列進行可とする。
 
 ## Technical Context
 

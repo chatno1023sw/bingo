@@ -46,32 +46,14 @@
 - [ ] T010 [US1] Update `app/routes/start.tsx` loader/action を sessionService と連携させ、useNavigation とリダイアログ制御を追加
 - [ ] T011 [P] [US1] Build Start UI コンポーネント (`app/components/start/StartMenu.tsx`, `app/components/start/ContinueDialog.tsx`) を Tailwind と design.md に合わせて実装
 - [ ] T012 [US1] Add React Testing Library tests for Start 画面 (`app/routes/__tests__/start-route.test.tsx`) でボタン押下時の遷移とダイアログ挙動を検証
+- [ ] T037 [US1] Capture Start 画面のモック整合スクリーンショットと BGM トグル表示を Chrome DevTools MCP で取得し `docs/spec seed/design/` へのリンクを記録
+- [ ] T038 [US1] Run 3 回連続リロードと「続きから」復元シナリオ（Chrome DevTools MCP）を実行し結果を `docs/spec seed/requirements.md` に追記
 
 **Checkpoint**: Start 画面のみでゲームの新規開始/再開が検証済み。
 
 ---
 
-## Phase 4: User Story 2 - BGM を場面に応じて制御する (Priority: P2)
-
-**Goal**: Start 右上トグルで BGM のオン/オフと音量を即時反映し、localStorage に永続化する。
-
-**Independent Test**: Start 画面のみで BGM トグルと音量調整を操作し、再読み込み後も設定が保持されることを Chrome DevTools MCP と Vitest hook テストで確認。
-
-### Tests for User Story 2
-
-- [ ] T013 [US2] Document BGM 制御テストを `docs/spec seed/requirements.md#BGM制御` と spec by kiro tasks に追加
-- [ ] T014 [US2] Add Vitest suite for `useBGM` フック (`app/common/hooks/__tests__/useBGM.test.ts`) でオン/オフと音量 persistence を確認
-
-### Implementation for User Story 2
-
-- [ ] T015 [US2] Implement `BGMContext` と `useBGM` (`app/common/contexts/BGMContext.tsx`, `app/common/hooks/useBGM.ts`) で audio 要素制御と localStorage 同期を追加
-- [ ] T016 [P] [US2] Create BGM トグル UI (`app/components/common/BgmToggle.tsx`) と音源配置 `public/audio/bgm.mp3`、Start 画面統合 (`app/routes/start.tsx`)
-
-**Checkpoint**: BGM 設定は Start 単独で変更・永続できる。
-
----
-
-## Phase 5: User Story 3 - 抽選と履歴提示を正しく運用する (Priority: P1)
+## Phase 4: User Story 3 - 抽選と履歴提示を正しく運用する (Priority: P1)
 
 **Goal**: Game 画面で抽選ボタンからルーレット演出→番号確定→履歴表示までを重複なしで完結させる。
 
@@ -88,12 +70,14 @@
 - [ ] T020 [P] [US3] Create `GameRoulette` と中央表示 UI (`app/components/game/GameRoulette.tsx`, `app/components/game/CurrentNumber.tsx`) using `react-custom-roulette`
 - [ ] T021 [US3] Update `app/routes/game.tsx` loader/action と `app/components/game/HistoryPanel.tsx` を新ロジックに接続し、抽選中ボタンの状態制御を実装
 - [ ] T022 [US3] Add React Testing Library integration tests (`app/routes/__tests__/game-draw.test.tsx`) で抽選/履歴/モーダル表示を検証
+- [ ] T039 [US3] Capture Game 画面全体（ルーレット・履歴・右ペイン）を design.md と比較するスクリーンショットを取得し `docs/spec seed/design/` にリンク
+- [ ] T040 [US3] Measure 抽選 20 回のボタン押下→確定までの時間を Chrome DevTools MCP でロギングし 3 秒以内であることを記録
 
 **Checkpoint**: Game 画面で抽選～履歴閲覧まで単独稼働。
 
 ---
 
-## Phase 6: User Story 4 - 景品の配布状況を一元管理する (Priority: P1)
+## Phase 5: User Story 4 - 景品の配布状況を一元管理する (Priority: P1)
 
 **Goal**: Game 画面右ペインで景品表示・当選切替・視覚化を行い、localStorage と同期する。
 
@@ -111,6 +95,27 @@
 - [ ] T027 [US4] Wire Game 右ペイン (`app/components/game/SidePanel.tsx`) で PrizeContext を使用し、localStorage と同期
 
 **Checkpoint**: 景品当選管理が Game 画面のみで完結。
+
+---
+
+## Phase 6: User Story 2 - BGM を場面に応じて制御する (Priority: P2)
+
+**Goal**: Start 右上トグルで BGM のオン/オフと音量を即時反映し、localStorage に永続化する。
+
+**Independent Test**: Start 画面のみで BGM トグルと音量調整を操作し、再読み込み後も設定が保持されることを Chrome DevTools MCP と Vitest hook テストで確認。
+
+### Tests for User Story 2
+
+- [ ] T013 [US2] Document BGM 制御テストを `docs/spec seed/requirements.md#BGM制御` と spec by kiro tasks に追加
+- [ ] T014 [US2] Add Vitest suite for `useBGM` フック (`app/common/hooks/__tests__/useBGM.test.ts`) でオン/オフと音量 persistence を確認
+
+### Implementation for User Story 2
+
+- [ ] T015 [US2] Implement `BGMContext` と `useBGM` (`app/common/contexts/BGMContext.tsx`, `app/common/hooks/useBGM.ts`) で audio 要素制御と localStorage 同期を追加
+- [ ] T016 [P] [US2] Create BGM トグル UI (`app/components/common/BgmToggle.tsx`) と音源配置 `public/audio/bgm.mp3`、Start 画面統合 (`app/routes/start.tsx`)
+- [ ] T041 [US2] Validate BGM 再生/音量バランスを design.md の指示と一致させ、Chrome DevTools MCP で録音ログとスクリーンショットを取得
+
+**Checkpoint**: BGM 設定は Start 単独で変更・永続できる。
 
 ---
 
@@ -132,6 +137,9 @@
 - [ ] T032 [P] [US5] Create CSV 操作用コンポーネント (`app/components/setting/CsvControls.tsx`) とエクスポート/インポートダイアログ UI
 - [ ] T033 [US5] Add 一括削除 UI + 確認ダイアログ (`app/components/setting/BulkActions.tsx`) と localStorage 更新
 - [ ] T034 [US5] Ensure Setting と Game の状態同期 (`app/common/contexts/PrizeContext.tsx`, `app/routes/game.tsx`) を import/export の結果で再描画
+- [ ] T042 [US5] Capture Setting 画面の Grid/DnD/CSV UI を design.md と比較したスクリーンショットを取得しリンクを共有
+- [ ] T043 [US5] Measure CSV インポート→Game 反映までの時間を 3 セット計測し 30 秒以内であることを記録
+- [ ] T044 [US5] Collect 景品担当者の簡易満足度アンケート（10 名想定）を実施し結果を `docs/spec seed/requirements.md` に記載
 
 **Checkpoint**: Setting 画面のみで景品マスタを運用可能。
 
