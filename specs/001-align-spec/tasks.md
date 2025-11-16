@@ -67,9 +67,9 @@
 ### Implementation for User Story 3
 
 - [x] T019 [US3] Build `bingoEngine` 本体 (`app/common/utils/bingoEngine.ts`) と `historyService` を contracts `/draws` `/history` に沿って実装
-- [ ] T020 [P] [US3] Create `GameRoulette` と中央表示 UI (`app/components/game/GameRoulette.tsx`, `app/components/game/CurrentNumber.tsx`) using `react-custom-roulette`
-- [ ] T021 [US3] Update `app/routes/game.tsx` loader/action と `app/components/game/HistoryPanel.tsx` を新ロジックに接続し、抽選中ボタンの状態制御を実装
-- [ ] T022 [US3] Add React Testing Library integration tests (`app/routes/__tests__/game-draw.test.tsx`) で抽選/履歴/モーダル表示を検証
+- [x] T020 [P] [US3] Create `GameRoulette` と中央表示 UI (`app/components/game/GameRoulette.tsx`, `app/components/game/CurrentNumber.tsx`) using `react-custom-roulette`
+- [x] T021 [US3] Update `app/routes/game.tsx` loader/action と `app/components/game/HistoryPanel.tsx` を新ロジックに接続し、抽選中ボタンの状態制御を実装
+- [x] T022 [US3] Add React Testing Library integration tests (`app/routes/__tests__/game-draw.test.tsx`) で抽選/履歴/モーダル表示を検証
 - [ ] T039 [US3] Capture Game 画面全体（ルーレット・履歴・右ペイン）を design.md と比較するスクリーンショットを取得し `docs/spec seed/design/` にリンク
 - [ ] T040 [US3] Measure 抽選 20 回のボタン押下→確定までの時間を Chrome DevTools MCP でロギングし 3 秒以内であることを記録
 
