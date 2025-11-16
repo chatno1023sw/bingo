@@ -125,6 +125,23 @@
    - 手順: Game 画面左ペインで直近履歴を確認し、最新 10 件のみが降順で表示されているかチェック。その後「これまでの当選番号を見る」を開き、モーダル内で 12 件すべてが昇順/sequence 順に表示されているかを確認する。failure-first として `drawHistory` が `sequence` 順になっていないデータを入れて UI が崩れることを観察してから、historyService 実装で整列する。  
    - 期待値: Recent ビューは `drawHistory.slice(-10).reverse()` の結果と一致し、モーダルは `sequence` 昇順ですべてのエントリを表示する。`bingo.v1.gameState` の内容が UI と乖離しない。
 
+#### 景品管理 - Chrome DevTools MCP / Playwright MCP テストシナリオ
+
+1. **SF-PRIZE-001: トグル操作で localStorage と UI が同期**  
+   - 準備: Game 画面を開き、`bingo.v1.prizes` にダミー景品（最低 3 件）を投入してからリロード。Chrome DevTools MCP の Console で `JSON.parse(localStorage.getItem("bingo.v1.prizes")!)` を確認し、`selected=false` の景品が含まれている状態を failure-first で作る。  
+   - 手順: 右ペインで任意の景品の「当選」をクリック → 取消線表示とサマリー（総数/当選済み/残り）のカウント更新を確認 → DevTools Console で該当 ID の `selected` が `true` に変わったかを確認。  
+   - 期待値: UI と localStorage が即時同期し、残りカウントが 1 減る。Chrome DevTools MCP で UI 操作が難しい場合は Playwright MCP を用いて同手順を自動化しても良い（結果ログは requirements.md に貼り付ける）。
+
+2. **SF-PRIZE-002: 「戻す」で当選状態を解除**  
+   - 準備: `selected=true` の景品を含む状態を作り、`bingo.v1.prizes` に `selected:true` が記録されていることを Console で確認。  
+   - 手順: 右ペインで当選済み景品の「戻す」を押下し、取消線が解除されるまで待つ。続けてブラウザをリロードし、状態が保持されているか確認。Chrome DevTools MCP で連続リロードが負荷になる場合は Playwright MCP の `page.reload()` を利用しても良い。  
+   - 期待値: 戻す操作で `selected=false` が保存され、リロード後も UI が未当選状態で描画される。
+
+3. **SF-PRIZE-003: 再読み込みボタンで最新データを取得**  
+   - 準備: DevTools Console から `localStorage.setItem("bingo.v1.prizes", ...)` を使い別タブ想定の変更を反映させる。  
+   - 手順: Game 画面右上の「再読み込み」をクリック。Chrome DevTools MCP で UI が更新されない場合は Playwright MCP から同ボタンをクリックしてログを採取する。  
+   - 期待値: `PrizeContext` が最新の JSON を読み込み、カウンターとリスト表示に即時反映される。失敗時はエラーメッセージを表示し、requirements.md に再現ログを追記する。
+
 ---
 
 ### 4.3 Setting 画面

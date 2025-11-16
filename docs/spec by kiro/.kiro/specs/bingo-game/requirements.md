@@ -108,6 +108,23 @@
    - 手順: Game 画面左ペインで直近 10 件のみが新しい順で表示されるかを確認し、その後「これまでの当選番号を見る」をクリックしてモーダル内で全件が `sequence` 昇順で表示されるかを確認。failure-first では `sequence` や `drawnAt` が未整列のデータを入れて UI が崩れることを観察する。  
    - 期待値: Recent ビューは `drawHistory.slice(-10).reverse()`、モーダルは `sequence` 昇順のリストと一致し、`bingo.v1.gameState` の JSON と乖離しない。
 
+#### 景品管理 - Chrome DevTools MCP / Playwright MCP テストシナリオ
+
+1. **SF-PRIZE-001: トグル操作の同期確認**  
+   - 準備: `bingo.v1.prizes` に未当選のダミーデータを登録し、Game 画面右ペインに反映させる。  
+   - 手順: Chrome DevTools MCP で任意の景品の「当選」を押下し、取消線・カウント・`localStorage` の `selected` が同時に更新されるかを確認。操作が困難な場合は Playwright MCP を利用し、同じステップを自動化してログを記録する。  
+   - 期待値: トグル操作後に UI/サマリー/`bingo.v1.prizes` がすべて一致し、残りカウントが減少する。
+
+2. **SF-PRIZE-002: 戻す操作と永続化**  
+   - 準備: `selected=true` の景品を含む状態を作成しておく。  
+   - 手順: 「戻す」を押し、表示から取消線が消えることを確認 → ブラウザリロード（Playwright MCP 可）後も `selected=false` で描画されるか確認。  
+   - 期待値: 操作内容が localStorage に保存され、再描画時も同じ状態になる。
+
+3. **SF-PRIZE-003: 再読み込みボタンでの外部変更反映**  
+   - 準備: Console で `localStorage.setItem("bingo.v1.prizes", ...)` を実行し、別タブで変更された想定の JSON を保存。  
+   - 手順: Game 画面右ペインの「再読み込み」を押下。Chrome DevTools MCP で UI 更新が難しい場合は Playwright MCP を利用。  
+   - 期待値: `PrizeContext` が新しい JSON を読み直し、リスト・カウンターが即時反映される。失敗時は requirements に記録し、バグ修正前提で再テストする。
+
 ---
 
 ### 4.3 Setting 画面
