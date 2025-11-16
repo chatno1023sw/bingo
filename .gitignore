@@ -2,6 +2,9 @@
 .env
 /node_modules/
 mcp.config.json
+.codex
+.specify/scripts
+.specify/templates
 
 # React Router
 /.react-router/
