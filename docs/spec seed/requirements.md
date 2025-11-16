@@ -73,6 +73,23 @@
 | BGM オン／オフ | 右上に BGM トグルアイコンを表示する。`@mui/icons-material` の音量系アイコンを利用し、オン／オフ状態を視覚的に区別する。 |
 | BGM 設定の保存 | BGM のオン／オフ状態はブラウザローカルに保存し、アプリ再訪問時にも状態を復元する。 |
 
+#### Start 画面 - Chrome DevTools MCP テストシナリオ
+
+1. **SF-START-001: 「はじめから」で localStorage を初期化**  
+   - 準備: Chrome DevTools MCP で `localStorage.clear()` を実行し、`bingo.v1.*` が存在しない状態にする。  
+   - 手順: `npm run dev` → Start 画面で「はじめから」を押下。Game 画面に遷移後、DevTools Console で `localStorage.getItem("bingo.v1.gameState")` を確認し、`drawHistory` が空配列・`currentNumber=null` になっていることを failure-first で確認（初回は任意に壊した JSON をセットしてから再実行）。  
+   - 期待値: Game 画面中央は「--」や未確定表示になり、右ペインの景品は全件 `selected=false` で描画される。Start に戻ると BGM トグルは直前の状態（デフォルト ON）を維持する。
+
+2. **SF-START-002: 「続きから」で保存済み状態を復元**  
+   - 準備: Game 画面で 2 回抽選 → 景品 1 件を当選処理 → Start へ戻る（ブラウザバックまたはメニュー）。  
+   - 手順: Start 画面で「続きから」を押下。遷移直後に DevTools Console で `JSON.parse(localStorage.getItem("bingo.v1.gameState")!)` を取得し、`drawHistory.length === 2` と `currentNumber` が最後の番号であることを確認。`bingo.v1.prizes` の対象 ID が `selected=true` になっているかも合わせて確認。  
+   - 期待値: Game 画面ロード後に中央表示へ最後の番号が表示され、右ペインでは当選済み景品に取消線が入る。`updatedAt` が復元前と同一であることを Chrome DevTools MCP のコンソールで比較する。
+
+3. **SF-START-003: 保存データが無い状態で「続きから」を押下した際のフォールバック**  
+   - 準備: DevTools Console で `localStorage.removeItem("bingo.v1.gameState")` `localStorage.removeItem("bingo.v1.prizes")` を実行し、`bingo.v1.bgm` のみ残した状態を作る。  
+   - 手順: Start 画面で「続きから」を押下。レスポンスが 204 相当であると仮定し、Start と同等の初期化が走るまで待つ。  
+   - 期待値: Game 画面へ遷移しても履歴 0 件・景品未選出の状態となり、Start 画面に戻るとトースト／バナーで「保存データが無いため新規開始しました」といった案内が表示される（failure-first では案内が無いことを確認してから実装で追加）。BGM トグルは `bingo.v1.bgm` の状態を維持し、`localStorage` へ新しい `bingo.v1.gameState` が作成される。
+
 ---
 
 ### 4.2 Game 画面
