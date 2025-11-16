@@ -21,9 +21,9 @@
 
 **Purpose**: 以降の全ストーリーが依存する型・ストレージ・サービス骨格を実装
 
-- [ ] T004 Create TypeScript モデル (`app/common/types/game.ts`, `app/common/types/prize.ts`, `app/common/types/bgm.ts`, `app/common/types/index.ts`) を data-model.md に合わせて定義
-- [ ] T005 Implement 版管理付き localStorage ユーティリティと単体テスト (`app/common/utils/storage.ts`, `app/common/utils/__tests__/storage.test.ts`) で `bingo.v1.*` キーを管理
-- [ ] T006 Scaffold service 層 (`app/common/services/sessionService.ts`, `app/common/services/prizeService.ts`, `app/common/services/bgmService.ts`, `app/common/services/historyService.ts`) と契約スタブを contracts/app.yaml に対応するメソッドで用意
+- [x] T004 Create TypeScript モデル (`app/common/types/game.ts`, `app/common/types/prize.ts`, `app/common/types/bgm.ts`, `app/common/types/index.ts`) を data-model.md に合わせて定義
+- [x] T005 Implement 版管理付き localStorage ユーティリティと単体テスト (`app/common/utils/storage.ts`, `app/common/utils/__tests__/storage.test.ts`) で `bingo.v1.*` キーを管理
+- [x] T006 Scaffold service 層 (`app/common/services/sessionService.ts`, `app/common/services/prizeService.ts`, `app/common/services/bgmService.ts`, `app/common/services/historyService.ts`) と契約スタブを contracts/app.yaml に対応するメソッドで用意
 
 **Checkpoint**: Foundation ready - user story implementation can begin.
 
