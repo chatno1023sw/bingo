@@ -29,6 +29,8 @@ Git ログは `add: ...` や `update: ...` など動詞プレフィックスで�
 ## Active Technologies
 - TypeScript 5.9 + React 19（React Router v7、Vite） + React Router v7、Tailwind CSS、react-custom-roulette、@mui/icons-material、@dnd-kit/core、mizchi/similarity、Vite、Chrome DevTools MCP (001-align-spec)
 - ブラウザ localStorage（バージョン付きキー）＋ CSV ファイル（`data/prizes.csv` 想定） (001-align-spec)
+- TypeScript 5.9 + React 19（Vite/React Router v7） + Biome CLI, react-hook-form, Chrome DevTools MCP, Playwright MCP, Node.js/npm (001-editorconfig-biome)
+- Git リポジトリ上のソースコード・docs（設定ファイルのみ） (001-editorconfig-biome)
 
 ## Recent Changes
 - 001-align-spec: Added TypeScript 5.9 + React 19（React Router v7、Vite） + React Router v7、Tailwind CSS、react-custom-roulette、@mui/icons-material、@dnd-kit/core、mizchi/similarity、Vite、Chrome DevTools MCP
