@@ -34,6 +34,18 @@ npm run dev
 
 Your application will be available at `http://localhost:5173`.
 
+## Cipher MCP（byterover-cipher）メモリー運用
+
+- byterover-cipher MCP サーバーを起動し、plan/spec/tasks/PR すべての開始前にエントリを作成してください。
+- 進捗や要求変更が発生したら 24 時間以内に同エントリへ追記し、ID を各ドキュメントヘッダーに「Cipher MCP Entry」として記録します。
+- レビュワーは byterover-cipher の履歴が最新であることを確認できない場合、実装レビューを進めてはいけません。
+
+## テスト・コミット運用
+
+- 各タスク完了ごとに単独コミットを作成し、コミットメッセージへタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` の証跡パスを含めます。
+- Chrome DevTools MCP をデフォルトの検証環境とし、Chrome DevTools で取得できない証跡（スクリーンショット等）は Playwright MCP を利用してください。その際は `apt install chromium-browser` で導入した Chromium ブラウザからスクリーンショットを取得します。
+- テストログ・スクリーンショット・動画などの結果ファイルは必ず `docs/result/<branch>/<task>/` に配置し、PR からリンクします。
+
 ## Building for Production
 
 Create a production build:

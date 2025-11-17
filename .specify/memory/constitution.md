@@ -1,12 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.2.1 → 1.3.0
 - Modified principles:
-  - Spec-Driven Japanese Delivery → Dual-Spec Japanese Delivery
-  - Route-Scoped Implementation Boundaries → Route-Scoped Implementation Boundaries
-  - Test-First Offline Reliability → Test-First Offline Reliability
-  - Prize Data Stewardship → Prize Data Stewardship
-  - Experience-Parity UI & Audio → Experience-Parity UI & Audio
+  - Test-First Offline Reliability → Test-First Offline Reliability（Chrome DevTools/Playwright/結果保存ルール追加）
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates:
@@ -25,6 +21,12 @@ Sync Impact Report
 - Feature ブランチはドメイン ID（例: `feature/domain-02-utils`）を採用し、コミット・PR には参照した spec seed / spec by kiro の節番号を必ず記載する。  
 Rationale: 利用者が作成した spec seed と AWS Kiro が生成する spec by kiro の双方を同期させることで、仕様伝達の齟齬を排除し信頼できる進行を保証する。
 
+### Cipher MCP Task Memory
+- すべての plan/spec/tasks/tickets には開始前に cipher MCP（byterover-cipher MCP サーバー）へのメモリーエントリ（要約・該当 spec seed / spec by kiro 節番号・ブランチ名・関連 MCP コマンドログ）を作成し、当該ドキュメントから参照 ID を明記する。  
+- 進捗・要件変更・ブロッカー発生から 24 時間以内に byterover-cipher への記録を更新し、履歴 ID を PR／テストレポート／`docs/spec seed/requirements.md` の該当節に追記する。  
+- レビューや引き継ぎでは cipher MCP（byterover-cipher）の履歴を一次ソースとして参照し、欠落している場合は作業を中断し補完する。  
+Rationale: byterover-cipher を継続的な記憶領域として利用することで、MCP 群を跨ったタスク状況の再現性と監査性を確保し、長期的な仕様遵守を保証する。
+
 ### Route-Scoped Implementation Boundaries
 - `app/routes/*` では React Router v7 の loader/action/ルートコンポーネントのみを担当し、ビジネスロジックや UI ピースは `app/common` / `app/components` へ分離する。  
 - 新規機能では `~/` エイリアスを活用し、`mizchi/similarity` で重複コードを検知して SRP に反する実装を撲滅する。  
@@ -35,6 +37,8 @@ Rationale: 会場投影されるアプリの安定性を支えるため、ルー
 - 各ユーザーストーリーは failure-first のテストシナリオを `docs/spec seed/requirements.md` に追記してから着手し、`npm run typecheck` と Chrome DevTools MCP が緑になるまでマージを禁止する。  
 - オフライン運用を前提に、ネットワークアクセスや外部 API 依存を組み込む場合は spec seed / spec by kiro の該当章に fallback 手順を先に記録する。  
 - UI やルーレット演出の検証結果（スクリーンショット・動画）は PR に添付し、再現手順を spec 文書へリンクする。  
+- Chrome DevTools MCP をデフォルトのテスト実行環境とし、Chrome DevTools で取得できない証跡（スクリーンショット、録画等）は Playwright MCP を利用する。その際のスクリーンショットは `apt install chromium-browser` で導入した Chromium ブラウザで取得する。  
+- すべてのテストログ・スクリーンショット・録画は `docs/result/<ブランチ名>/<タスクID>/` に保存し、ファイル名に日時と MCP 種別を含める。  
 Rationale: 新年会本番でネットワークがない環境でも確実に動くことが最優先であり、TDD とオフライン検証を徹底する必要がある。
 
 ### Prize Data Stewardship
@@ -56,13 +60,17 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - UI 文言・コメント・ドキュメントは日本語で統一し、アクセシビリティ（キーボード操作、色コントラスト）対応を spec seed に反映する。  
 - 依存ライブラリ追加時はオフライン fallback を設計し、BGM/音声/フォントは `public/` にバンドル可能なライセンスのみを許可する。  
 - spec seed を一次情報として変更を確定しつつ、spec by kiro（requirements/design/tasks）にも同内容を即時反映し、差分を放置しない。  
-- Chrome DevTools MCP、GitMCP、CONTEXT7 MCP など指定 MCP ツールの結果ログを残し、開発トレースを保持する。
+- Chrome DevTools MCP、GitMCP、CONTEXT7 MCP など指定 MCP ツールの結果ログを残し、開発トレースを保持する。  
+- cipher MCP（byterover-cipher）を公式の長期記憶として運用し、plan/spec/tasks/PR から参照できるエントリ ID を必ず記録する。  
 
 ## Workflow & Review Process
 
-- `/specs/[feature]` 配下の plan/spec/tasks は Constitution Check を満たすまで進行禁止とし、spec seed と spec by kiro の該当章を引用して差分を明示したうえで要件を固める。  
+- `specs/` 配下の plan/spec/tasks は Constitution Check を満たすまで進行禁止とし、spec seed と spec by kiro の該当章を引用して差分を明示したうえで要件を固める。  
 - `docs/spec seed/requirements.md` をテストケースと制約の一次記録源とし、`docs/spec by kiro/.kiro/specs/bingo-game/*.md` にも同じ修正を速やかに反映する。  
+- 各 spec/plan/tasks の公開前に cipher MCP（byterover-cipher）へのメモリーを更新し、「Cipher MCP Entry: （エントリ ID）」を明示していない成果物はレビューやマージを禁止する。  
+- 各タスク完了時点で単独コミットを作成し、コミットメッセージにタスク ID・参照 spec 節・対応テスト結果パス (`docs/result/<branch>/<task>/`) を記載する。  
 - PR はブランチ命名規則 (`feature/domain-xx-*`) を守り、`npm run typecheck`, `npm run build`, Chrome DevTools MCP 確認結果、スクリーンショット、CSV 変更点、参照した spec seed / spec by kiro の章番号を必須チェック項目として列挙する。  
+- Chrome DevTools MCP / Playwright MCP で得た結果ファイルを `docs/result/<ブランチ名>/<タスクID>/` に集約し、PR 説明にも同パスをリンクする。  
 - ルートファイル追加や共有モジュール更新時は AGENTS.md の構造方針を引用し、SRP を破る場合は Complexity Tracking を記入して承認を得る。  
 - コードレビューでは本憲章、Operational Constraints、Workflow 手順、spec seed / spec by kiro への反映状況をチェックリスト化し、逸脱時は両ドキュメントと README を同時修正する。
 
@@ -74,4 +82,4 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - ラストアメンド日は更新当日に記録し、初版の Ratified 日付は変更しない。  
 - コンプライアンスレビューは各マイルストーンおよび主要 PR ごとに実施し、plan/spec/tasks/requirements/README/AGENTS/spec seed/spec by kiro の整合性を確認する。違反が見つかった場合は是正計画と期限を明記し再レビューする。
 
-**Version**: 1.1.0 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-11-16
+**Version**: 1.3.0 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-11-17
