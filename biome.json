@@ -1,5 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "extends": ["biome", "biome/react"],
+  "files": {
+    "ignore": ["node_modules", "build", "dist", "docs/result"]
+  },
   "formatter": {
     "enabled": true,
     "indentWidth": 2,
@@ -10,7 +14,8 @@
     "rules": {
       "style": {
         "useConst": "error",
-        "noUnusedTemplateLiteral": "error"
+        "noUnusedTemplateLiteral": "error",
+        "useImportSorting": "error"
       },
       "correctness": {
         "noUnusedImports": "error",

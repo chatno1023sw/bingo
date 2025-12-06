@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@react-router/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import type { GameStateEnvelope, DrawHistoryEntry, PrizeList } from "~/common/types";
 import GameRoute, { action, loader, type LoaderData } from "~/routes/game";
 
@@ -25,27 +25,6 @@ const prizeManagerMock = vi.hoisted(() => ({
 vi.mock("~/common/hooks/usePrizeManager", () => ({
   usePrizeManager: () => prizeManagerMock,
 }));
-
-const routerNodeMocks = vi.hoisted(() => ({
-  json: vi.fn(
-    (data: unknown, init?: ResponseInit) =>
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...(init?.headers ?? {}),
-        },
-      }),
-  ),
-}));
-
-vi.mock("@react-router/node", async () => {
-  const actual = await vi.importActual<typeof import("@react-router/node")>("@react-router/node");
-  return {
-    ...actual,
-    json: routerNodeMocks.json,
-  };
-});
 
 const createEnvelope = (): GameStateEnvelope => ({
   gameState: {
@@ -197,8 +176,7 @@ describe("game loader", () => {
     historyMocks.getHistoryView.mockResolvedValue(historyPayload);
     engineMocks.getAvailableNumbers.mockReturnValue([1, 2, 3]);
 
-    const response = await loader({} as LoaderFunctionArgs);
-    const data = await response.json();
+    const data = await loader({} as LoaderFunctionArgs);
 
     expect(sessionMocks.startSession).toHaveBeenCalled();
     expect(data.availableNumbers).toEqual([1, 2, 3]);
@@ -246,15 +224,17 @@ describe("game action", () => {
     engineMocks.drawNextNumber.mockReturnValue(nextGameState);
     engineMocks.getAvailableNumbers.mockReturnValue([1]);
 
-    const response = await action({ request: buildRequest("draw") } as ActionFunctionArgs);
-    const data = await response.json();
+    const actionResult = await action({ request: buildRequest("draw") } as ActionFunctionArgs);
 
     expect(sessionMocks.persistSessionState).toHaveBeenCalledWith({
       ...envelope,
       gameState: nextGameState,
     });
-    expect(data.gameState.currentNumber).toBe(20);
-    expect(data.availableNumbers).toEqual([1]);
+    if (actionResult instanceof Response) {
+      throw new Error("expected loader data but received Response");
+    }
+    expect(actionResult.gameState.currentNumber).toBe(20);
+    expect(actionResult.availableNumbers).toEqual([1]);
   });
 
   it("returns 409 when all numbers are drawn", async () => {
@@ -264,6 +244,9 @@ describe("game action", () => {
     });
 
     const response = await action({ request: buildRequest("draw") } as ActionFunctionArgs);
+    if (!(response instanceof Response)) {
+      throw new Error("expected Response for exhausted draws");
+    }
     expect(response.status).toBe(409);
     const payload = await response.json();
     expect(payload.error).toBe("no-available-numbers");
@@ -271,6 +254,9 @@ describe("game action", () => {
 
   it("returns 400 for unsupported intents", async () => {
     const response = await action({ request: buildRequest("noop") } as ActionFunctionArgs);
+    if (!(response instanceof Response)) {
+      throw new Error("expected Response for unsupported intent");
+    }
     expect(response.status).toBe(400);
   });
 });

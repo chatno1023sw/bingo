@@ -17,6 +17,26 @@
 ## コーディングスタイルと命名規約
 仕様書は「ドキュメント言語=日本語」のため、コメント/TSDoc も日本語で統一します。TypeScript + 2 スペースインデント + named export を基本とし、文字列はダブルクォーテーション。`~/` エイリアスは `app/` にマップされるため深い相対パスを避ける際に使用します。Start/Game/Setting 各画面の UI は Tailwind Utility を用いて `docs/spec seed/design/design.md` のモックに合わせ、Setting 画面は `<table>` 禁止なので Flex/Grid で「テーブル風」レイアウトを実装します。CSV 入出力やルーレット演出は `requirements.md` の該当章 (2,4,5 章) に沿って命名・構成してください。
 
+### EditorConfig ガイド
+- VSCode では「EditorConfig for VS Code」を必須インストールとし、保存時に 2 スペース/LF/UTF-8/末尾スペース削除/末尾改行が適用されることを Chrome DevTools MCP で確認する。
+- CLI では `npm run format:check` → 差分が出た場合 `npm run format` → 直後に `npm run typecheck` を実行し、`docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` へ結果を保存する。
+- `git status` / `git diff` のスクリーンショットを `docs/result/001-editorconfig-biome/<task>/YYYYMMDD-HHMM_chromedevtools.png` に記録し、EditorConfig による差分のみであることを証跡化する。
+
+## TSDoc 運用
+- すべての公開 API（hooks、context、UI コンポーネント、サーバーユーティリティ）は N1 レベルの日本語で TSDoc を記述し、副作用・入力制約・戻り値・Chrome DevTools MCP で検証した操作手順を箇条書きにまとめる。
+- 実装順序は「TSDoc→型定義→処理実装」とし、TSDoc が欠落している関数はレビュー前に必ず補完する。TSDoc の無い PR は reviewer が無条件で差し戻す。
+- コメントの語彙・助詞は丁寧体で統一し、専門用語は requirements.md の表記ゆれに合わせる。
+
+## インターフェース集約ルール
+- 画面/ドメイン別の型は `app/interface/start`, `app/interface/game`, `app/interface/setting`, `app/interface/shared` へ配置し、`index.ts` でエクスポートを集約する。実装側は `~/interface/<domain>` から import する。
+- 3 つ以上の引数や複数ファイルから参照される構造体は必ず interface ディレクトリに切り出し、命名は `SomethingParams`, `SomethingPayload` のように責務を示すサフィックスを付ける。
+- 新しい型を追加した場合は README / docs/spec seed/requirements.md の関連章を更新し、共有ルールと証跡パスを追記する。
+
+## Typecheck と証跡保存フロー
+1. 各タスクのローカル作業をまとめる前に `npm run typecheck` を実行し、`react-router typegen` 生成物も含めて検証する。
+2. 実行ログは `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` という命名で保存し、PR 説明のチェックリストにリンクを貼る。Chrome DevTools MCP/Playwright MCP の証跡も同ディレクトリに並べる。
+3. 失敗ログは削除せず `..._failed.log` などで残し、原因を `docs/spec seed/requirements.md` 相当章へ記録する。再実行後の成功ログも同じタスクフォルダに時系列で保存する。
+
 ## テスト指針
 Spec では「TDD + Chrome DevTools MCP」が必須です。各機能着手時に `docs/spec seed/requirements.md` へテストシナリオを追記するか、対象モジュール直下にコメントとして記述し、`npm run typecheck` と MCP 上の動作確認を完了してから実装を進めます。`bingoEngine` や `csvParser` などユーティリティはテストシナリオ→実装→スクリーンショット共有の順で進め、重大な手順は `docs/spec seed/requirements.md` の該当セクションに補記してください。
 

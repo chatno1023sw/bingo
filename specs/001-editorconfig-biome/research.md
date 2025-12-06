@@ -29,3 +29,8 @@
 - **Rationale**: 実装後のルールを 1 箇所にまとめ、README・requirements・contracts・PR テンプレートへ整合を取るため。
 - **Implementation Notes**: `.editorconfig` / `biome.json` / `docs/spec seed/requirements/form-adoption-checklist.md` を公開し、`docs/result/001-editorconfig-biome/README.md` に証跡命名規則を記述、README へ Code Quality + react-hook-form フローを追加した。`docs/spec seed/requirements.md` では FR-001〜FR-005 と FormAdoptionChecklist スコアリング表を整備し、Start/Game/Setting 各章へ評価指針と evidence_path 記載を追加。PR テンプレートにチェックボックスを設け、Chrome DevTools MCP / Playwright MCP / Biome ログのリンクを必須化した。
 - **Evidence**: `docs/result/001-editorconfig-biome/README.md`（命名ルール）、`docs/spec seed/requirements/form-adoption-checklist.md`（テンプレート）、`.github/pull_request_template.md`（チェックリスト）。
+
+## Decision 7: TSDoc / Interface / Typecheck 証跡の統合
+- **Rationale**: TSDoc の義務化と interface ディレクトリの運用、lint/format/typecheck ログ保存の循環を 1 つの手続きとして結び付け、審査しやすい証跡を残すため。
+- **Implementation Notes**: README の Code Quality > react-hook-form 節（`README.md:71-77`）へ Checklist → interface 更新 → lint/format/typecheck 実行の流れを追加し、`app/interface/start|game|setting|shared` を参照する規約を再確認した。`docs/spec seed/requirements.md:52-56,96-142,266-270` では evidence_path / typecheck_log の命名を仕様化し、Start/Game/Setting の FormAdoptionChecklist にログ参照を必須化。Quickstart（`specs/001-editorconfig-biome/quickstart.md:1-9`）も同手順に合わせて更新し、PR テンプレート（`.github/pull_request_template.md:5-10`）へ typecheck ログのチェックボックスを追加した。
+- **Evidence**: `README.md`（react-hook-form 採用フロー）、`docs/spec seed/requirements.md`（FormAdoptionChecklist と証跡要件）、`specs/001-editorconfig-biome/quickstart.md`（導入手順）、`.github/pull_request_template.md`（チェックリスト）。

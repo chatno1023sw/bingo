@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { json } from "@react-router/node";
-import type { LoaderFunctionArgs } from "@react-router/node";
-import { useLoaderData } from "react-router";
+import { type LoaderFunctionArgs, useLoaderData } from "react-router";
 import type { CsvImportResult, PrizeList } from "~/common/types";
 import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
 import { getPrizes } from "~/common/services/prizeService";
@@ -13,7 +11,7 @@ import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
 
 export const loader = async (_args: LoaderFunctionArgs) => {
   const prizes = await getPrizes();
-  return json({ prizes });
+  return { prizes };
 };
 
 export type LoaderData = { prizes: PrizeList };

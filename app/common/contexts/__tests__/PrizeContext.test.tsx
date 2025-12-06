@@ -5,7 +5,7 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 
 const serviceMocks = vi.hoisted(() => ({
-  getPrizes: vi.fn<[], Promise<PrizeList>>(),
+  getPrizes: vi.fn<() => Promise<PrizeList>>(),
   togglePrize: vi.fn<(id: string, selected: boolean) => Promise<PrizeList>>(),
   savePrizes: vi.fn<(prizes: PrizeList) => Promise<void>>(),
 }));

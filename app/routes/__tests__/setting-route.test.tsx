@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { LoaderFunctionArgs } from "@react-router/node";
+import type { LoaderFunctionArgs } from "react-router";
 import SettingRoute, { loader } from "~/routes/setting";
 import type { PrizeList } from "~/common/types";
 
@@ -26,7 +26,7 @@ const basePrizes: PrizeList = [
   },
 ];
 
-const routerMocks = vi.hoisted(() => ({
+const reactRouterMocks = vi.hoisted(() => ({
   useLoaderData: vi.fn(),
 }));
 
@@ -34,7 +34,7 @@ vi.mock("react-router", async () => {
   const actual = await vi.importActual<typeof import("react-router")>("react-router");
   return {
     ...actual,
-    useLoaderData: routerMocks.useLoaderData,
+    useLoaderData: reactRouterMocks.useLoaderData,
   };
 });
 
@@ -75,7 +75,7 @@ describe("SettingRoute component", () => {
     prizeManagerMock.error = null;
     prizeManagerMock.applyPrizes.mockReset();
     prizeManagerMock.applyPrizes.mockResolvedValue(undefined);
-    routerMocks.useLoaderData.mockReturnValue({ prizes: basePrizes });
+    reactRouterMocks.useLoaderData.mockReturnValue({ prizes: basePrizes });
     csvParserMocks.parsePrizesCsv.mockReset();
     csvParserMocks.parsePrizesCsv.mockReturnValue({ prizes: basePrizes, skipped: [] });
   });
@@ -127,30 +127,9 @@ describe("setting loader", () => {
   it("fetches prizes via prizeService", async () => {
     prizeServiceMocks.getPrizes.mockResolvedValueOnce(basePrizes);
 
-    const response = await loader({} as LoaderFunctionArgs);
-    const data = await response.json();
+    const data = await loader({} as LoaderFunctionArgs);
 
     expect(prizeServiceMocks.getPrizes).toHaveBeenCalled();
     expect(data.prizes).toHaveLength(2);
   });
-});
-const routerNodeMocks = vi.hoisted(() => ({
-  json: vi.fn(
-    (data: unknown, init?: ResponseInit) =>
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...(init?.headers ?? {}),
-        },
-      }),
-  ),
-}));
-
-vi.mock("@react-router/node", async () => {
-  const actual = await vi.importActual<typeof import("@react-router/node")>("@react-router/node");
-  return {
-    ...actual,
-    json: routerNodeMocks.json,
-  };
 });

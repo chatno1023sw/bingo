@@ -20,13 +20,13 @@
 ## Phase 1: Setup (Shared Infrastructure)
 
 - [X] T001 Capture cipher MCP summary and embed entry ID/date into `specs/001-editorconfig-biome/plan.md` と `specs/001-editorconfig-biome/spec.md` のメタデータを更新する。（2025-12-06 時点では byterover-cipher quota exceeded のため BLOCKED 記述で代替、ID 取得後に再更新）
-- [ ] T002 Update `docs/result/001-editorconfig-biome/README.md` に typecheck ログ (`YYYYMMDD-HHMM_typecheck.log`) を含む証跡命名規則と Chrome DevTools MCP / Playwright MCP 併用手順を追加する。
+- [X] T002 Update `docs/result/001-editorconfig-biome/README.md` に typecheck ログ (`YYYYMMDD-HHMM_typecheck.log`) を含む証跡命名規則と Chrome DevTools MCP / Playwright MCP 併用手順を追加する。
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T003 Synchronize `docs/spec seed/requirements.md` の共通テスト章へ、`npm run typecheck` 必須・ログ保存手順・`docs/result/<branch>/<task>/` 格納ルールを追記する。
-- [ ] T004 Extend `README.md` と `AGENTS.md` に TSDoc（N1）記載義務、インターフェース集約ルール、typecheck 実行＆証跡保存フローを章立てで明文化する。
-- [ ] T005 Create `app/interface/start/`, `app/interface/game/`, `app/interface/setting/`, `app/interface/shared/` ディレクトリを追加し、`index.ts` に共通型エクスポート骨子（TSDoc 付き TODO）を配置して import 経路を示す。
+- [X] T003 Synchronize `docs/spec seed/requirements.md` の共通テスト章へ、`npm run typecheck` 必須・ログ保存手順・`docs/result/<branch>/<task>/` 格納ルールを追記する。
+- [X] T004 Extend `README.md` と `AGENTS.md` に TSDoc（N1）記載義務、インターフェース集約ルール、typecheck 実行＆証跡保存フローを章立てで明文化する。
+- [X] T005 Create `app/interface/start/`, `app/interface/game/`, `app/interface/setting/`, `app/interface/shared/` ディレクトリを追加し、`index.ts` に共通型エクスポート骨子（TSDoc 付き TODO）を配置して import 経路を示す。
 
 ## Phase 3: User Story 1 - 編集者はどの IDE でも同一フォーマットを得られる (Priority: P1)
 
@@ -35,9 +35,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Create `.editorconfig`（リポジトリ直下）で TypeScript/TSX/JSON/MD の 2 スペース・LF・UTF-8・末尾スペース除去・最終行改行ルールを定義する。
-- [ ] T007 [P] [US1] Update `README.md` と `AGENTS.md` の Coding Standards 節へ EditorConfig 使い方（VSCode 拡張、CLI 検証、typecheck 実行手順）を追記する。
-- [ ] T008 [P] [US1] Document EditorConfig ポリシーと git diff 証跡取得方法を `docs/spec seed/requirements.md`（1.3/FR-001/FR-002）へ追記し、関連証跡パスを記載する。
+- [X] T006 [US1] Create `.editorconfig`（リポジトリ直下）で TypeScript/TSX/JSON/MD の 2 スペース・LF・UTF-8・末尾スペース除去・最終行改行ルールを定義する。
+- [X] T007 [P] [US1] Update `README.md` と `AGENTS.md` の Coding Standards 節へ EditorConfig 使い方（VSCode 拡張、CLI 検証、typecheck 実行手順）を追記する。
+- [X] T008 [P] [US1] Document EditorConfig ポリシーと git diff 証跡取得方法を `docs/spec seed/requirements.md`（1.3/FR-001/FR-002）へ追記し、関連証跡パスを記載する。
 
 ## Phase 4: User Story 2 - Biome による lint/format を共通基準にできる (Priority: P1)
 
@@ -46,12 +46,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Add `@biomejs/cli` 依存を `package.json` / `package-lock.json` に追加し、`npm install` 後の差分を確認する。
-- [ ] T010 [US2] Create `biome.json` で React/TypeScript/style プリセット・2 スペース整形・import sort ルールを設定し、Tailwind ディレクティブ解析を有効化する。
-- [ ] T011 [US2] Update `package.json` scripts (`lint`, `format`, `format:check`) を Biome CLI 呼び出しに置換し、`npm run typecheck` 前に実行するワークフローを README へ記述する。
-- [ ] T012 [P] [US2] Expand `README.md` Coding Standards > Biome 節にコマンド使用方法、失敗例、`docs/result/<branch>/<task>/YYYYMMDD-HHMM_biome-*.log` 保存フローを追記する。
-- [ ] T013 [P] [US2] Update `docs/spec seed/requirements.md` FR-003〜FR-005 へ Biome ルールセット、CI/pre-commit 連携、typecheck との順序を明記する。
-- [ ] T014 [P] [US2] Sync `specs/001-editorconfig-biome/contracts/formatting.md` のコマンド行と証跡ファイル名を最新 npm script・typecheck ルールに合わせて更新する。
+- [X] T009 [US2] Add `@biomejs/cli` 依存を `package.json` / `package-lock.json` に追加し、`npm install` 後の差分を確認する。
+- [X] T010 [US2] Create `biome.json` で React/TypeScript/style プリセット・2 スペース整形・import sort ルールを設定し、Tailwind ディレクティブ解析を有効化する。
+- [X] T011 [US2] Update `package.json` scripts (`lint`, `format`, `format:check`) を Biome CLI 呼び出しに置換し、`npm run typecheck` 前に実行するワークフローを README へ記述する。
+- [X] T012 [P] [US2] Expand `README.md` Coding Standards > Biome 節にコマンド使用方法、失敗例、`docs/result/<branch>/<task>/YYYYMMDD-HHMM_biome-*.log` 保存フローを追記する。
+- [X] T013 [P] [US2] Update `docs/spec seed/requirements.md` FR-003〜FR-005 へ Biome ルールセット、CI/pre-commit 連携、typecheck との順序を明記する。
+- [X] T014 [P] [US2] Sync `specs/001-editorconfig-biome/contracts/formatting.md` のコマンド行と証跡ファイル名を最新 npm script・typecheck ルールに合わせて更新する。
 
 ## Phase 5: User Story 3 - フォーム実装者は react-hook-form を基準に選択できる (Priority: P2)
 
@@ -60,16 +60,16 @@
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Add `react-hook-form` 依存（必要なら `@types/react-hook-form`）を `package.json` / `package-lock.json` へ追加し、`npm run typecheck` が通ることを確認する。
-- [ ] T016 [P] [US3] Update `docs/spec seed/requirements.md`（章 2/4/5）へ FormAdoptionChecklist スコアリング基準・evidence_path の書式・typecheck ログの添付要件を追記する。
-- [ ] T017 [P] [US3] Create `docs/spec seed/requirements/form-adoption-checklist.md` テンプレートを整備し、各フィールドに N1 TSDoc 形式の説明を付ける。
-- [ ] T018 [P] [US3] Extend `README.md` に react-hook-form 採用ワークフロー（Checklist, interface ディレクトリ活用, typecheck 必須, EvidenceArtifact 連携）を記載する。
-- [ ] T019 [P] [US3] Update `specs/001-editorconfig-biome/quickstart.md` で依存インストール手順と Checklist 駆動のレビュー・証跡保存方法を刷新する。
+- [X] T015 [US3] Add `react-hook-form` 依存（必要なら `@types/react-hook-form`）を `package.json` / `package-lock.json` へ追加し、`npm run typecheck` が通ることを確認する。
+- [X] T016 [P] [US3] Update `docs/spec seed/requirements.md`（章 2/4/5）へ FormAdoptionChecklist スコアリング基準・evidence_path の書式・typecheck ログの添付要件を追記する。
+- [X] T017 [P] [US3] Create `docs/spec seed/requirements/form-adoption-checklist.md` テンプレートを整備し、各フィールドに N1 TSDoc 形式の説明を付ける。
+- [X] T018 [P] [US3] Extend `README.md` に react-hook-form 採用ワークフロー（Checklist, interface ディレクトリ活用, typecheck 必須, EvidenceArtifact 連携）を記載する。
+- [X] T019 [P] [US3] Update `specs/001-editorconfig-biome/quickstart.md` で依存インストール手順と Checklist 駆動のレビュー・証跡保存方法を刷新する。
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T020 Refresh `.github/pull_request_template.md` に EditorConfig/Biome/react-hook-form/typecheck ログのチェックボックスを追加する。
-- [ ] T021 Summarize最終決定を `specs/001-editorconfig-biome/research.md` に追記し、TSDoc/Interface/Typecheck ルールと証跡リンクを整理する。
+- [X] T020 Refresh `.github/pull_request_template.md` に EditorConfig/Biome/react-hook-form/typecheck ログのチェックボックスを追加する。
+- [X] T021 Summarize最終決定を `specs/001-editorconfig-biome/research.md` に追記し、TSDoc/Interface/Typecheck ルールと証跡リンクを整理する。
 
 ---
 

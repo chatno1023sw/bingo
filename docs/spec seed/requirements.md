@@ -30,6 +30,13 @@
 - すべてのテストログ／スクリーンショットは `docs/result/001-editorconfig-biome/<task-id>/` に保存し、ファイル名を `YYYYMMDD-HHMM_<tool>.log` または `.png` の形式に揃える。`<tool>` は `chromedevtools` / `playwright` / `biome-lint` など実行した MCP や CLI を明示する。
 - Chrome DevTools MCP を主要検証ツールとし、ブラウザ操作や Console ログを取得したら即時に前述のパスへアップロードする。UI 操作が自動化が必要な場合は Playwright MCP (Chromium) を併用し、取得したスクリーンショット／動画を同一タスク配下へ格納する。
 - `npm run lint` / `npm run format` / `npm run format:check` の結果ログも証跡として保存し、PR では各タスク ID ごとの証跡パスを記載する。証跡運用の詳細手順は `docs/result/001-editorconfig-biome/README.md` を参照すること。
+- 各タスク実行前後で `npm run typecheck` を必ず実行し、結果を `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` という形式で保存する。失敗した場合もログを残し、原因と再実行計画を PR で共有する。
+
+### 1.3 EditorConfig 運用と git diff 証跡
+
+- `.editorconfig` に定義した 2 スペース / LF / UTF-8 / 末尾スペース削除 / 最終行改行ルールは、VSCode (EditorConfig 拡張) と CLI (`npm run format:check`) の両方で必ず検証する。
+- フォーマット修正後は `npm run typecheck` を即時に実行し、整形差分で副作用が無いことを `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` で証跡化する。
+- Chrome DevTools MCP で `git status` / `git diff` を確認したスクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.png` として保存し、EditorConfig 変更に伴う差分のみであることを保証する。
 
 ---
 
@@ -43,6 +50,10 @@
 | UI アイコン | `@mui/icons-material` を使用する（例：BGM のオン／オフアイコンなど）。 |
 | DnD | 賞品並び替えには `DNDContext`（例：`@dnd-kit/core`）を使用する。 |
 | フォーム制御 | 入力フィールドが 3 以上、バリデーションが複数、非同期送信がある場合は `react-hook-form` を採用し、FormAdoptionChecklist の score >=3 で必須、=2 で推奨、<=1 で任意とする。評価結果は `docs/result/001-editorconfig-biome/<task>/` に証跡保存する。 |
+
+- **FormAdoptionChecklist テンプレート**: `docs/spec seed/requirements/form-adoption-checklist.md` を複製し、Start/Game/Setting 各フォームの `form_id`・score・`recommendation` を記録する。
+- **evidence_path 命名規則**: Checklist JSON には `evidence_path="docs/result/<branch>/<task>/YYYYMMDD-HHMM_form-<form-id>.json"` を記載し、Chrome DevTools MCP / Playwright MCP のスクリーンショットも同ディレクトリに保存する。
+- **Typecheck 連動**: react-hook-form を導入する／評価を更新するたびに `npm run typecheck` を実行し、結果を `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` へ追記する。Checklist の `typecheck_log` プロパティにもこのパスを記述する。
 | データ管理 | マスターデータ（景品情報など）は CSV ファイルで管理する。ゲーム進行状態はブラウザローカル（例：localStorage）で管理する。 |
 | 重複コード検出 | `npm run similarity` で `mizchi/similarity`（similarity-ts）を実行し、`app` と `docs` 配下の重複コードを検出する。バイナリは `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force` で構築するか、`SIMILARITY_BIN` 環境変数に外部パスを指定する。 |
 | 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP（github-mcp-server）：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
@@ -85,7 +96,7 @@
 #### Start 画面 - FormAdoptionChecklist
 
 - 入力要素はボタン＋BGM トグルのみでクロスフィールド依存も無いため、Checklist の score は 1 以下（`recommendation=optional`）。
-- `FormAdoptionChecklist` に `form_id=start`, `input_fields_count=1`, `validation_complexity=none`, `async_submission=false` を記録し、評価ログを `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などで保存する。
+- `FormAdoptionChecklist` に `form_id=start`, `input_fields_count=1`, `validation_complexity=none`, `async_submission=false` を記録し、`evidence_path="docs/result/001-editorconfig-biome/<task-id>/start-checklist.json"` を明記する。更新後は `npm run typecheck` を実行し、`typecheck_log` に `docs/result/.../YYYYMMDD-HHMM_typecheck.log` を保存する。
 - react-hook-form を導入する必要は現時点で無いが、フィールドが 3 つ以上に増えた場合は再評価し、score が 2 以上なら移行タスクを起票する。
 
 #### Start 画面 - Chrome DevTools MCP テストシナリオ
@@ -127,7 +138,7 @@
 
 - Game 画面で入力を伴う UI は抽選ボタンと景品管理パネルのトグル群。景品管理は `input_fields_count=3+`, `cross_field_dependencies=true`（サマリー更新有り）で score=2（推奨）。
 - 抽選ボタンは単体動作のため別フォームとして score=1（任意）を記録。複数フィールドをまとめるユースケースが増えた場合は react-hook-form へ移行。
-- 各評価結果は `form_id=game-prize-controls` などで checklist に追記し、ログを `docs/result/001-editorconfig-biome/<task-id>/game-checklist.json` に保存する。
+- 各評価結果は `form_id=game-prize-controls` などで checklist に追記し、`evidence_path` を `docs/result/001-editorconfig-biome/<task-id>/game-checklist.json` として記録する。Game 画面のフォーム仕様を更新した場合も `npm run typecheck` を再実行し、`typecheck_log` に最新パスを記載する。
 
 #### Game 画面 - Chrome DevTools MCP テストシナリオ
 
@@ -181,7 +192,7 @@
 #### Setting 画面 - FormAdoptionChecklist
 
 - `form_id=setting-prize-editor`。入力要素が 6+（テキスト、ファイル選択、DnD、チェックボックス等）、`validation_complexity=advanced`、`async_submission=true`（CSV import）で score>=3 のため react-hook-form を必須採用とする。
-- Checklist には `cross_field_dependencies=true`（CSV 取り込み→一覧表示→Game 反映）のワークフローを記録し、UI 操作の証跡を `docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json` ＋ Chrome DevTools MCP スクリーンショットで保存する。
+- Checklist には `cross_field_dependencies=true`（CSV 取り込み→一覧表示→Game 反映）のワークフローを記録し、`evidence_path="docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json"` を記載する。UI 操作とあわせて `npm run typecheck` のログ (`..._typecheck.log`) を EvidenceArtifact として保存する。
 - 既存フォームからの移行タスクを作成する際は Checklist の `evidence_path` に `docs/result/...` を記録し、PR テンプレートでもリンクする。
 
 #### Setting 画面 - Chrome DevTools MCP / Playwright MCP テストシナリオ
@@ -252,11 +263,11 @@
 
 | score | 条件例 | 推奨度 | 証跡 |
 | --- | --- | --- | --- |
-| 0-1 | 入力 1〜2 件、バリデーションなし、同期送信のみ | 任意 | Checklist に `recommendation=optional` を記載し、評価ログを `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などに保存する。 |
-| 2 | 入力 3 件以上、単純なバリデーション or カウンター連動 | 推奨 | `recommendation=recommended`。Game 画面などで将来の移行を検討し、証跡リンクを PR に添付。 |
-| 3+ | 入力 3 件以上 + クロスフィールド依存 or 非同期送信 or CSV アップロード | 必須 | `recommendation=required`。Setting 画面などで react-hook-form を導入し、Chrome DevTools MCP ログ＋Playwright MCP スクショを `docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json` に保存。 |
+| 0-1 | 入力 1〜2 件、バリデーションなし、同期送信のみ | 任意 | Checklist に `recommendation=optional` を記載し、`evidence_path` を `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などに設定する。 |
+| 2 | 入力 3 件以上、単純なバリデーション or カウンター連動 | 推奨 | `recommendation=recommended`。Game 画面などで将来の移行を検討し、`typecheck_log` に同タスクの `YYYYMMDD-HHMM_typecheck.log` を記録して PR に添付。 |
+| 3+ | 入力 3 件以上 + クロスフィールド依存 or 非同期送信 or CSV アップロード | 必須 | `recommendation=required`。Setting 画面などで react-hook-form を導入し、Chrome DevTools MCP ログ＋Playwright MCP スクショを evidence_path 先へ保存する。 |
 
-Checklist の評価は `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートに従い、Start/Game/Setting で最新スコアを記録する。
+Checklist の評価は `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートに従い、Start/Game/Setting で最新スコアを記録する。各チェックの JSON には `evidence_path` と `typecheck_log` を必須フィールドとして追加し、PR テンプレートでも参照する。
 
 ---
 
@@ -355,25 +366,30 @@ AI にこの要件定義書と **一緒に渡しておくと精度が上がる�
 - リポジトリ直下に配置した `.editorconfig` で全ファイル（`*.ts`, `*.tsx`, `*.json`, `*.md` など）へ 2 スペース / LF / UTF-8 / 末尾スペース削除 / 最終行改行を強制する。
 - VSCode 以外の IDE（JetBrains, NeoVim 等）でも EditorConfig が有効なことを確認し、設定が有効でない場合は該当 IDE のプラグイン導入手順を記録する。
 - ルール違反は `npm run format:check` で検出し、結果ログを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-format-check.log` として保存し、PR でリンクする。
+- VSCode では「EditorConfig for VS Code」拡張を必須化し、CLI 実行後は `npm run typecheck` のログとセットで証跡化する。PR 説明には 1.3 節のパス命名ルールを転記する。
 
 ### FR-002: Multi-IDE Diff ガイドライン
 
 - Chrome DevTools MCP で `git status` / `git diff` を確認し、EditorConfig 適用後に余計な差分（末尾スペース、インデント違反）が無いことを証跡化する。
 - `docs/spec seed/requirements.md` を含むすべてのドキュメント編集時に、保存直後の diff スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.png` として記録する。
 - マルチ IDE メンバー向けに `.editorconfig` を参照する導線を README の「Code Quality Workflow」に統一し、タスク完了時は当該 README 節のリンクを PR 説明へ貼り付ける。
+- `git diff` 証跡は typecheck ログと同じディレクトリに保存し、差分とログのタイムスタンプが一致していることを PR コメントで明記する。
 
 ### FR-003: BiomeRuleSet
 
 - `biome.json` で `extends: ["biome", "biome/react"]` を指定し、`app/**/*.{ts,tsx}` および `docs/**/*.md` に 2 スペース + lineWidth 100 + import 並び替えを適用する。
 - `files.ignore` で `node_modules`, `build`, `dist`, `docs/result/**` を除外する。
 - import 重複や未使用変数は `linter.rules.correctness.noUnusedImports/noUnusedVariables = "error"` でブロックする。
+- `npm run lint` / `npm run format` / `npm run format:check` を実装・レビュー前に順番に実行し、ログを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-*.log` として保存する。完了後に `npm run typecheck` を実行し、lint 未完了の状態で typecheck を進めない。
 
 ### FR-004: Biome コマンドと CI
 
 - `npm run lint`（`biome lint --error-on-warnings`）を PR 前に必ず実行し、exit code 0 で完了したログを `docs/result/001-editorconfig-biome/<task-id>/..._biome-lint.log` に保存する。
 - `npm run format` / `npm run format:check` を pre-commit / CI で実行し、未整形ファイルがある場合は push を拒否する。CI ログにも証跡リンクを出力する。
+- CI では `npm run lint` → `npm run format:check` → `npm run typecheck` → `npm run build` の順で動かし、途中失敗時は EvidenceArtifact に失敗ログをそのまま保存する。
 
 ### FR-005: EvidenceArtifact 連携
 
 - Biome コマンドの成功/失敗ログとスクリーンショットを EvidenceArtifact として `docs/result/001-editorconfig-biome/<task-id>/` に保存し、PR テンプレートのチェック項目で確認する。
 - フォーマット違反修正後は `git status` のスクリーンショットを添付し、余計な差分が無いことを reviewers が確認できるようにする。
+- Biome ログ (`_biome-lint.log`, `_biome-format.log`, `_biome-format-check.log`) と `YYYYMMDD-HHMM_typecheck.log` は同じタスクフォルダに配置し、PR ではこれらファイル名を evidence_path として列挙する。

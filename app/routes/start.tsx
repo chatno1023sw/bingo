@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { json, redirect } from "@react-router/node";
-import type { LoaderFunctionArgs } from "@react-router/node";
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
 import { useNavigation, useSubmit } from "react-router";
 import { startSession, resumeSession } from "~/common/services/sessionService";
 import { StartMenu } from "~/components/start/StartMenu";
 import { ContinueDialog } from "~/components/start/ContinueDialog";
 
-export const loader = async () => {
-  return json({});
+export const loader = async (_args: LoaderFunctionArgs) => {
+  return {};
 };
 
-export const action = async ({ request }: LoaderFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
@@ -32,7 +31,7 @@ export const action = async ({ request }: LoaderFunctionArgs) => {
     return redirect("/setting");
   }
 
-  return json({ error: "unsupported-intent" }, { status: 400 });
+  return Response.json({ error: "unsupported-intent" }, { status: 400 });
 };
 
 export default function StartRoute() {

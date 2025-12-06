@@ -1,42 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import type { LoaderFunctionArgs } from "@react-router/node";
+import type { ActionFunctionArgs } from "react-router";
 import StartRoute, { action } from "~/routes/start";
 import type { GameStateEnvelope } from "~/common/types";
-
-const routerNodeMocks = vi.hoisted(() => ({
-  json: vi.fn(
-    (data: unknown, init?: ResponseInit) =>
-      new Response(JSON.stringify(data), {
-        status: init?.status ?? 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...(init?.headers ?? {}),
-        },
-      }),
-  ),
-  redirect: vi.fn(
-    (location: string, init?: number | ResponseInit) =>
-      new Response(null, {
-        status: typeof init === "number" ? init : init?.status ?? 302,
-        headers: {
-          Location: location,
-          ...((typeof init === "object" && init?.headers) || {}),
-        },
-      }),
-  ),
-}));
-
-vi.mock("@react-router/node", async () => {
-  const actual = await vi.importActual<typeof import("@react-router/node")>(
-    "@react-router/node",
-  );
-  return {
-    ...actual,
-    json: routerNodeMocks.json,
-    redirect: routerNodeMocks.redirect,
-  };
-});
 
 const submitSpy = vi.fn();
 type NavigationState = "idle" | "submitting" | "loading";
@@ -92,8 +58,6 @@ describe("StartRoute component", () => {
   beforeEach(() => {
     submitSpy.mockReset();
     navigationState.state = "idle";
-    routerNodeMocks.json.mockClear();
-    routerNodeMocks.redirect.mockClear();
   });
 
   it("submits with start intent when pressing はじめから", () => {
@@ -141,19 +105,17 @@ describe("start action", () => {
     mockResumeSession.mockReset();
     mockStartSession.mockResolvedValue(baseEnvelope);
     mockResumeSession.mockResolvedValue(baseEnvelope);
-    routerNodeMocks.json.mockClear();
-    routerNodeMocks.redirect.mockClear();
   });
 
   it("initializes a new session when intent is start", async () => {
-    const response = await action({ request: createRequest("start") } as LoaderFunctionArgs);
+    const response = await action({ request: createRequest("start") } as ActionFunctionArgs);
 
     expect(mockStartSession).toHaveBeenCalled();
     expect(response.headers.get("Location")).toBe("/game");
   });
 
   it("restores session when resume returns data", async () => {
-    const response = await action({ request: createRequest("resume") } as LoaderFunctionArgs);
+    const response = await action({ request: createRequest("resume") } as ActionFunctionArgs);
 
     expect(mockResumeSession).toHaveBeenCalled();
     expect(mockStartSession).not.toHaveBeenCalled();
@@ -163,7 +125,7 @@ describe("start action", () => {
   it("falls back to startSession when resume returns null", async () => {
     mockResumeSession.mockResolvedValueOnce(null);
 
-    const response = await action({ request: createRequest("resume") } as LoaderFunctionArgs);
+    const response = await action({ request: createRequest("resume") } as ActionFunctionArgs);
 
     expect(mockResumeSession).toHaveBeenCalled();
     expect(mockStartSession).toHaveBeenCalled();
@@ -171,13 +133,13 @@ describe("start action", () => {
   });
 
   it("redirects to /setting when intent is setting", async () => {
-    const response = await action({ request: createRequest("setting") } as LoaderFunctionArgs);
+    const response = await action({ request: createRequest("setting") } as ActionFunctionArgs);
 
     expect(response.headers.get("Location")).toBe("/setting");
   });
 
   it("returns 400 for unsupported intent", async () => {
-    const response = await action({ request: createRequest("unknown") } as LoaderFunctionArgs);
+    const response = await action({ request: createRequest("unknown") } as ActionFunctionArgs);
     expect(response.status).toBe(400);
   });
 });

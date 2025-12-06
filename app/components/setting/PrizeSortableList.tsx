@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import type { FC } from "react";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { PrizeList } from "~/common/types";
@@ -77,12 +84,19 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({ prizes, disabled
 
   const ids = useMemo(() => prizes.map((prize) => prize.id), [prizes]);
 
-  const handleDragEnd = (event: { active: { id: string }; over: { id: string } | null }) => {
-    if (!event.over || event.active.id === event.over.id) {
+  const toIdString = (identifier: UniqueIdentifier) => String(identifier);
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over) {
       return;
     }
-    const oldIndex = ids.indexOf(event.active.id);
-    const newIndex = ids.indexOf(event.over.id);
+    const activeId = toIdString(active.id);
+    const overId = toIdString(over.id);
+    if (activeId === overId) {
+      return;
+    }
+    const oldIndex = ids.indexOf(activeId);
+    const newIndex = ids.indexOf(overId);
     if (oldIndex === -1 || newIndex === -1) {
       return;
     }

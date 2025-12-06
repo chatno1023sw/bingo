@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import { json } from "@react-router/node";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@react-router/node";
-import { useFetcher, useLoaderData } from "react-router";
+import { type ActionFunctionArgs, type LoaderFunctionArgs, useFetcher, useLoaderData } from "react-router";
 import type { GameStateEnvelope } from "~/common/types";
 import { startSession, resumeSession, persistSessionState } from "~/common/services/sessionService";
 import { getHistoryView, type HistoryView } from "~/common/services/historyService";
@@ -45,7 +43,7 @@ export type ActionResult = LoaderData | { error: string };
 
 export const loader = async (_args: LoaderFunctionArgs) => {
   const session = await ensureSession();
-  return json(await buildLoaderData(session));
+  return buildLoaderData(session);
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -62,16 +60,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         gameState: nextGameState,
       };
       await persistSessionState(updatedEnvelope);
-      return json(await buildLoaderData(updatedEnvelope));
+      return buildLoaderData(updatedEnvelope);
     } catch (error) {
       if (error instanceof NoAvailableNumbersError) {
-        return json({ error: "no-available-numbers" }, { status: 409 });
+        return Response.json({ error: "no-available-numbers" }, { status: 409 });
       }
       throw error;
     }
   }
 
-  return json({ error: "unsupported-intent" }, { status: 400 });
+  return Response.json({ error: "unsupported-intent" }, { status: 400 });
 };
 
 const isLoaderPayload = (payload: unknown): payload is LoaderData => {
@@ -89,8 +87,14 @@ export default function GameRoute() {
   const fetcher = useFetcher<ActionResult>();
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const latestData = isLoaderPayload(fetcher.data) ? fetcher.data : loaderData;
-  const errorMessage = !isLoaderPayload(fetcher.data) ? fetcher.data?.error : null;
+  const latestData = useMemo<LoaderData>(() => {
+    if (fetcher.data && isLoaderPayload(fetcher.data)) {
+      return fetcher.data;
+    }
+    return loaderData;
+  }, [fetcher.data, loaderData]);
+
+  const errorMessage = fetcher.data && !isLoaderPayload(fetcher.data) ? fetcher.data.error : null;
   const isDrawing = fetcher.state !== "idle";
   const isButtonDisabled = isDrawing || latestData.availableNumbers.length === 0;
 
