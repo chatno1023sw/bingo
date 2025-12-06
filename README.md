@@ -42,7 +42,8 @@ Your application will be available at `http://localhost:5173`.
 
 ## テスト・コミット運用
 
-- 各タスク完了ごとに単独コミットを作成し、コミットメッセージへタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` の証跡パスを含めます。
+- 各タスク完了ごと、またはタスクに紐づかない変更であっても差分が発生した時点で単独コミットを作成し、コミットメッセージへタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` の証跡パスを含めます。
+- コミット前に必ず `npm run typecheck` を実行して TypeScript エラーが無いことを確認し、ログを `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` として保存して PR から参照します。
 - Chrome DevTools MCP をデフォルトの検証環境とし、Chrome DevTools で取得できない証跡（スクリーンショット等）は Playwright MCP を利用してください。その際は `apt install chromium-browser` で導入した Chromium ブラウザからスクリーンショットを取得します。
 - テストログ・スクリーンショット・動画などの結果ファイルは必ず `docs/result/<branch>/<task>/` に配置し、PR からリンクします。
 
@@ -69,6 +70,13 @@ Your application will be available at `http://localhost:5173`.
 1. `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートを複製し、`form_id`（start/game/setting 等）ごとに入力数・バリデーション複雑度を記録する。
 2. score が 3 以上の場合は react-hook-form を必須採用とし、UI の動作ログ／スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/` に保存、PR 説明に `evidence_path` を掲載する。
 3. score が 2 の場合は推奨としてバックログへ移行タスクを登録し、score が変化したら Checklist を更新する。Start など score <=1 のフォームでも判断ログを残す。
+
+### TSDoc / Interface ガイドライン
+
+- すべての公開関数・コンポーネント・フックには必ず TSDoc を記載し、表現は日本語能力試験 N1 レベルの語彙で簡潔かつ正確にまとめます。TSDoc 未整備のコードはレビュー対象外です。
+- アルゴリズムや副作用が複雑な箇所には、同じく N1 レベルの日本語で背景や意図を説明するコメントを残します。
+- すべての関数は引数を 2 つ以下に制限し、それ以上の情報が必要な場合は interface もしくは type で定義したパラメーターオブジェクトへ集約します。
+- interface / type 定義は `app/interface/<画面ディレクトリ>/`（例: `app/interface/start/`, `app/interface/game/`, `app/interface/setting/`, 共通は `app/interface/shared/`）にまとめ、実装側はこれらを import して利用します。
 
 ## Building for Production
 

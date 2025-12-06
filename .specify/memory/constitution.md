@@ -1,14 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 1.3.0 → 1.3.1
+- Version change: 1.3.1 → 1.4.0
 - Modified principles:
-  - Workflow & Review Process（タスク完了直後のコミット義務を明文化）
-- Added sections: none
+  - Test-First Offline Reliability（タスク単位での typecheck 義務を追記）
+  - Workflow & Review Process（全差分コミット義務と typecheck 証跡を明文化）
+- Added sections:
+  - N1 Documentation & Interface Discipline
 - Removed sections: none
 - Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md（コミット運用の既存ガイダンスと整合）
-  - ✅ .specify/templates/spec-template.md（追記不要を確認）
-  - ✅ .specify/templates/tasks-template.md（タスク単位コミット必須を継続）
+  - ✅ .specify/templates/plan-template.md（TSDoc / interface ガイドライン追記）
+  - ✅ .specify/templates/tasks-template.md（typecheck/TSDoc ルール追記）
+  - ✅ README.md（typecheck と TSDoc/Interface 運用を反映）
 - Follow-up TODOs: none
 -->
 # Bingo抽選アプリ Constitution
@@ -35,6 +37,7 @@ Rationale: 会場投影されるアプリの安定性を支えるため、ルー
 
 ### Test-First Offline Reliability
 - 各ユーザーストーリーは failure-first のテストシナリオを `docs/spec seed/requirements.md` に追記してから着手し、`npm run typecheck` と Chrome DevTools MCP が緑になるまでマージを禁止する。  
+- 実装・リファクタ・バグ修正などで差分が発生したらタスク単位ですぐに `npm run typecheck` を実行し、TypeScript エラー 0 件のログを `docs/result/<ブランチ名>/<タスクID>/YYYYMMDD-HHMM_typecheck.log` に保存してからコミットする。  
 - オフライン運用を前提に、ネットワークアクセスや外部 API 依存を組み込む場合は spec seed / spec by kiro の該当章に fallback 手順を先に記録する。  
 - UI やルーレット演出の検証結果（スクリーンショット・動画）は PR に添付し、再現手順を spec 文書へリンクする。  
 - Chrome DevTools MCP をデフォルトのテスト実行環境とし、Chrome DevTools で取得できない証跡（スクリーンショット、録画等）は Playwright MCP を利用する。その際のスクリーンショットは `apt install chromium-browser` で導入した Chromium ブラウザで取得する。  
@@ -53,6 +56,13 @@ Rationale: 景品情報には機微が含まれるため、情報の扱いと同
 - BGM・効果音・`@mui/icons-material` / `@dnd-kit/core` 等の外部アセットは `public/` に格納しライセンス表記・音量設計を requirements / spec by kiro に記録する。  
 Rationale: 会場で投影される演出を仕様と同一レベルで再現しなければ、利用者の期待値と乖離しイベント体験を損なう。
 
+### N1 Documentation & Interface Discipline
+- すべての公開関数・コンポーネント・フック・クラスには TSDoc を必ず記載し、語彙・文体は日本語能力試験 N1 レベルで統一する。TSDoc には目的・副作用・引数・返り値・関連する証跡パスを明記する。  
+- 複雑な制御フローや副作用を含む箇所には、同じく N1 レベルの日本語で背景と意図を説明するコメントを追加し、 reviewer が読み解く時間をゼロに近づける。  
+- すべての関数は引数を 2 つ以下に制限し、それ以上の情報が必要な場合は interface もしくは type で定義したパラメーターオブジェクトへ集約する。  
+- interface / type は `app/interface/<画面ディレクトリ>/`（共通ロジックは `app/interface/shared/`）に集約し、`start` / `game` / `setting` の各画面はここから import して契約を共有する。  
+Rationale: 年末イベントの現場で即時に仕様追従できるよう、高密度な日本語ドキュメントと統一された型構造を維持し、読み手の属人性を排除する。
+
 ## Operational Constraints
 
 - 技術スタックは React Router v7 + TypeScript + Vite + TailwindCSS を基盤とし、`react-custom-roulette`, `@mui/icons-material`, `@dnd-kit/core`, `mizchi/similarity` を標準ライブラリとして採用する。  
@@ -68,7 +78,7 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - `specs/` 配下の plan/spec/tasks は Constitution Check を満たすまで進行禁止とし、spec seed と spec by kiro の該当章を引用して差分を明示したうえで要件を固める。  
 - `docs/spec seed/requirements.md` をテストケースと制約の一次記録源とし、`docs/spec by kiro/.kiro/specs/bingo-game/*.md` にも同じ修正を速やかに反映する。  
 - 各 spec/plan/tasks の公開前に cipher MCP（byterover-cipher）へのメモリーを更新し、「Cipher MCP Entry: （エントリ ID）」を明示していない成果物はレビューやマージを禁止する。  
-- 各タスク完了時点で必ず単独コミットを作成し、コミット直後に push してから次のタスクへ進む。コミットメッセージにはタスク ID・参照 spec 節・対応テスト結果パス (`docs/result/<branch>/<task>/`) を記載し、マルチタスクを 1 コミットへまとめる行為を禁止する。  
+- 各タスク完了時点、またはタスクに紐づかない小さな変更であっても差分が生じたら必ず単独コミットを作成し、即座に push してから次の作業へ進む。コミットメッセージにはタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` に保存した typecheck / テスト証跡パスを記載し、複数タスクの混在コミットを禁止する。  
 - PR はブランチ命名規則 (`feature/domain-xx-*`) を守り、`npm run typecheck`, `npm run build`, Chrome DevTools MCP 確認結果、スクリーンショット、CSV 変更点、参照した spec seed / spec by kiro の章番号を必須チェック項目として列挙する。  
 - Chrome DevTools MCP / Playwright MCP で得た結果ファイルを `docs/result/<ブランチ名>/<タスクID>/` に集約し、PR 説明にも同パスをリンクする。  
 - ルートファイル追加や共有モジュール更新時は AGENTS.md の構造方針を引用し、SRP を破る場合は Complexity Tracking を記入して承認を得る。  
@@ -82,4 +92,4 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - ラストアメンド日は更新当日に記録し、初版の Ratified 日付は変更しない。  
 - コンプライアンスレビューは各マイルストーンおよび主要 PR ごとに実施し、plan/spec/tasks/requirements/README/AGENTS/spec seed/spec by kiro の整合性を確認する。違反が見つかった場合は是正計画と期限を明記し再レビューする。  
 
-**Version**: 1.3.1 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-12-06
+**Version**: 1.4.0 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-12-06

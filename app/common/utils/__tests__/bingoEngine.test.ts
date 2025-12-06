@@ -23,6 +23,14 @@ const createState = (history: DrawHistoryEntry[] = []): GameState => ({
   updatedAt: "2025-01-01T00:00:00.000Z",
 });
 
+const latestEntry = (history: DrawHistoryEntry[]): DrawHistoryEntry => {
+  const entry = history.at(-1);
+  if (!entry) {
+    throw new Error("抽選履歴が空でないことを期待しています");
+  }
+  return entry;
+};
+
 describe("getAvailableNumbers", () => {
   it("returns every number within the inclusive bingo range when history is empty", () => {
     const available = getAvailableNumbers([]);
@@ -65,7 +73,7 @@ describe("drawNextNumber", () => {
     const next = drawNextNumber(state, { seed: 7, timestamp });
 
     expect(next.drawHistory).toHaveLength(history.length + 1);
-    const entry = next.drawHistory.at(-1)!;
+    const entry = latestEntry(next.drawHistory);
     expect(entry.sequence).toBe(4);
     expect(entry.drawnAt).toBe(timestamp);
     expect(next.currentNumber).toBe(entry.number);
@@ -80,7 +88,7 @@ describe("drawNextNumber", () => {
 
     const next = drawNextNumber(state, { timestamp });
 
-    const entry = next.drawHistory.at(-1)!;
+    const entry = latestEntry(next.drawHistory);
     const expectedIndex = Math.floor(0.25 * (BINGO_MAX - BINGO_MIN + 1));
     expect(entry.number).toBe(BINGO_MIN + expectedIndex);
   });

@@ -79,10 +79,16 @@ function createLoaderData(overrides?: Partial<LoaderData>): LoaderData {
   };
 }
 
-const fetcherMock = {
+type FetcherMock = {
+  submit: ReturnType<typeof vi.fn>;
+  state: "idle";
+  data: unknown;
+};
+
+const fetcherMock: FetcherMock = {
   submit: vi.fn(),
-  state: "idle" as const,
-  data: null as any,
+  state: "idle",
+  data: null,
 };
 
 const loaderDataMock: LoaderData = createLoaderData();

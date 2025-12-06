@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import type { PrizeList } from "~/common/types";
 import { parsePrizesCsv, generatePrizesCsv } from "../csvParser";
 
-const sampleCsv = `id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,豪華賞品\np-2,1,二等,ギフトカード,,false,`;
+const sampleCsv = "id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,豪華賞品\np-2,1,二等,ギフトカード,,false,";
 
 describe("parsePrizesCsv", () => {
   it("parses valid CSV rows into PrizeList", () => {
@@ -21,7 +21,7 @@ describe("parsePrizesCsv", () => {
   });
 
   it("skips rows with missing required fields", () => {
-    const invalidCsv = `id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,\np-1,1,,, ,false,`;
+    const invalidCsv = "id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,\np-1,1,,, ,false,";
 
     const result = parsePrizesCsv(invalidCsv);
 
@@ -31,7 +31,7 @@ describe("parsePrizesCsv", () => {
   });
 
   it("rejects duplicate ids", () => {
-    const csv = `id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,\np-1,1,二等,ギフト券,,false,`;
+    const csv = "id,order,prizeName,itemName,imagePath,selected,memo\np-1,0,一等,Switch,,true,\np-1,1,二等,ギフト券,,false,";
 
     const result = parsePrizesCsv(csv);
 
@@ -40,7 +40,7 @@ describe("parsePrizesCsv", () => {
   });
 
   it("accepts numeric boolean and trims values", () => {
-    const csv = `id,order,prizeName,itemName,imagePath,selected,memo\np-3,5, 三等 , カタログギフト , ,1, `;
+    const csv = "id,order,prizeName,itemName,imagePath,selected,memo\np-3,5, 三等 , カタログギフト , ,1, ";
     const result = parsePrizesCsv(csv);
 
     expect(result.prizes[0]).toMatchObject({

@@ -78,10 +78,12 @@ export const clearVersionedStorage = (): void => {
   const keysToDelete: string[] = [];
   for (let i = 0; i < storage.length; i += 1) {
     const key = storage.key(i);
-    if (key && key.startsWith(STORAGE_PREFIX)) {
+    if (key?.startsWith(STORAGE_PREFIX)) {
       keysToDelete.push(key);
     }
   }
 
-  keysToDelete.forEach((key) => storage.removeItem(key));
+  for (const key of keysToDelete) {
+    storage.removeItem(key);
+  }
 };

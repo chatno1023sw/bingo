@@ -19,7 +19,7 @@ class MemoryStorage implements Storage {
   }
 
   getItem(key: string): string | null {
-    return this.store.has(key) ? this.store.get(key)! : null;
+    return this.store.get(key) ?? null;
   }
 
   key(index: number): string | null {
@@ -34,6 +34,14 @@ class MemoryStorage implements Storage {
     this.store.set(key, value);
   }
 }
+
+const ensureLocalStorage = (): Storage => {
+  const storage = globalThis.localStorage;
+  if (!storage) {
+    throw new Error("localStorage が利用できることを期待しています");
+  }
+  return storage;
+};
 
 describe("storage utility", () => {
   beforeEach(() => {
@@ -59,7 +67,7 @@ describe("storage utility", () => {
   });
 
   it("removes broken JSON and returns fallback", () => {
-    const storage = globalThis.localStorage!;
+    const storage = ensureLocalStorage();
     storage.setItem(storageKeys.gameState, "{ invalid");
     const result = readStorageJson(storageKeys.gameState, { drawHistory: [] });
     expect(result).toEqual({ drawHistory: [] });
@@ -75,12 +83,13 @@ describe("storage utility", () => {
   it("clears all versioned keys", () => {
     writeStorageJson(storageKeys.gameState, { currentNumber: 1 });
     writeStorageJson(storageKeys.prizes, []);
-    globalThis.localStorage!.setItem("custom", "keep");
+    const storage = ensureLocalStorage();
+    storage.setItem("custom", "keep");
 
     clearVersionedStorage();
 
-    expect(globalThis.localStorage!.getItem(storageKeys.gameState)).toBeNull();
-    expect(globalThis.localStorage!.getItem(storageKeys.prizes)).toBeNull();
-    expect(globalThis.localStorage!.getItem("custom")).toEqual("keep");
+    expect(storage.getItem(storageKeys.gameState)).toBeNull();
+    expect(storage.getItem(storageKeys.prizes)).toBeNull();
+    expect(storage.getItem("custom")).toEqual("keep");
   });
 });

@@ -15,7 +15,7 @@ class MemoryStorage implements Storage {
   }
 
   getItem(key: string): string | null {
-    return this.store.has(key) ? this.store.get(key)! : null;
+    return this.store.get(key) ?? null;
   }
 
   key(index: number): string | null {
@@ -64,6 +64,14 @@ const storeEnvelope = (payload: {
   localStorage.setItem(storageKeys.bgm, JSON.stringify(payload.bgm));
 };
 
+const parseStoredJson = <T>(key: string): T => {
+  const raw = localStorage.getItem(key);
+  if (raw === null) {
+    throw new Error(`localStorage に ${key} が保存されていることを期待しています`);
+  }
+  return JSON.parse(raw) as T;
+};
+
 describe("sessionService", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -105,16 +113,16 @@ describe("sessionService", () => {
       createdAt: baseDate.toISOString(),
       updatedAt: baseDate.toISOString(),
     });
-    expect(JSON.parse(localStorage.getItem(storageKeys.gameState)!)).toEqual(result.gameState);
+    expect(parseStoredJson<GameState>(storageKeys.gameState)).toEqual(result.gameState);
     expect(result.prizes).toEqual(
       storedPrizes.map((prize) => ({
         ...prize,
         selected: false,
       })),
     );
-    expect(JSON.parse(localStorage.getItem(storageKeys.prizes)!)).toEqual(result.prizes);
+    expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(result.prizes);
     expect(result.bgm).toEqual(storedBgm);
-    expect(JSON.parse(localStorage.getItem(storageKeys.bgm)!)).toEqual(storedBgm);
+    expect(parseStoredJson<BgmPreference>(storageKeys.bgm)).toEqual(storedBgm);
   });
 
   it("startSession respects resetPrizes=false by keeping existing selection", async () => {
@@ -124,7 +132,7 @@ describe("sessionService", () => {
     const result = await startSession({ resetPrizes: false });
 
     expect(result.prizes).toEqual(storedPrizes);
-    expect(JSON.parse(localStorage.getItem(storageKeys.prizes)!)).toEqual(storedPrizes);
+    expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(storedPrizes);
   });
 
   it("resumeSession returns null when there is no saved game state", async () => {

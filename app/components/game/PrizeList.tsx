@@ -1,9 +1,9 @@
 import type { FC } from "react";
-import type { PrizeList } from "~/common/types";
+import type { PrizeList as PrizeListData } from "~/common/types";
 import { PrizeListItem } from "~/components/game/PrizeListItem";
 
 export type PrizeListProps = {
-  prizes: PrizeList;
+  prizes: PrizeListData;
   disabled?: boolean;
   onToggle: (id: string, nextSelected: boolean) => void;
 };
