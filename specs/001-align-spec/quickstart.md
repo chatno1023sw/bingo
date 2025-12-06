@@ -29,7 +29,7 @@
 3. `react-custom-roulette` のスタイルは Game 画面専用モジュールに閉じ込め、ラベルやカラーは `docs/spec seed/design` のモック値に合わせる。
 
 ## 6. コミット & PR
-1. ドメイン単位で小さくコミットし、メッセージには参照した spec seed / spec by kiro の章番号を記す。
+1. ドメイン単位で小さくコミットし、すべてのコミットは github-mcp-server を通じて実行する。メッセージには参照した spec seed / spec by kiro の章番号を記す。
 2. PR には以下を必ず添付:
    - `npm run typecheck` 結果
    - `npx vitest run` 結果

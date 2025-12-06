@@ -42,8 +42,8 @@ Your application will be available at `http://localhost:5173`.
 
 ## テスト・コミット運用
 
-- 各タスク完了ごと、またはタスクに紐づかない変更であっても差分が発生した時点で単独コミットを作成し、コミットメッセージへタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` の証跡パスを含めます。
-- コミット前に必ず `npm run typecheck` を実行して TypeScript エラーが無いことを確認し、ログを `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` として保存して PR から参照します。
+- 各タスク完了ごと、またはタスクに紐づかない変更であっても差分が発生した時点で単独コミットを作成します。コミットは必ず github-mcp-server を介して実行し、コミットメッセージへタスク ID・参照 spec 節・`docs/result/<branch>/<task>/` の証跡パスを含めます。
+- github-mcp-server でコミットする前に必ず `npm run typecheck` を実行して TypeScript エラーが無いことを確認し、ログを `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` として保存して PR から参照します。
 - Chrome DevTools MCP をデフォルトの検証環境とし、Chrome DevTools で取得できない証跡（スクリーンショット等）は Playwright MCP を利用してください。その際は `apt install chromium-browser` で導入した Chromium ブラウザからスクリーンショットを取得します。
 - テストログ・スクリーンショット・動画などの結果ファイルは必ず `docs/result/<branch>/<task>/` に配置し、PR からリンクします。
 
@@ -56,7 +56,7 @@ Your application will be available at `http://localhost:5173`.
 ### EditorConfig の導入手順
 
 - VSCode: 拡張機能「EditorConfig for VS Code」をインストールし、保存時に `.editorconfig` の 2 スペース / LF / UTF-8 / 末尾改行・末尾スペース削除ルールが適用されることを確認する。
-- CLI: `npm run format:check` を実行して EditorConfig 違反（末尾スペースやインデントずれ）が無いか確認し、違反が見つかった場合は `npm run format` で修正後にコミットする。
+- CLI: `npm run format:check` を実行して EditorConfig 違反（末尾スペースやインデントずれ）が無いか確認し、違反が見つかった場合は `npm run format` で修正後に github-mcp-server を用いてコミットする。
 - 証跡: これらの操作ログ・スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.log|png` に保存し、PR 説明にリンクを記載する。
 
 ### Biome Lint / Format

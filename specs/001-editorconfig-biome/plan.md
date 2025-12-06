@@ -1,7 +1,7 @@
 # Implementation Plan: コードスタイル指針とフォーム運用
 
 **Branch**: `001-editorconfig-biome` | **Date**: 2025-11-17 | **Spec**: [specs/001-editorconfig-biome/spec.md](spec.md)  
-**Cipher MCP Entry**: TODO(CIPHER_ENTRY): byterover-cipher への記録後に ID と同期日を追記  
+**Cipher MCP Entry**: BLOCKED (2025-12-06 quota exceeded on byterover-cipher; update once service is available)  
 **Input**: Feature specification from `/specs/001-editorconfig-biome/spec.md`
 
 **Note**: This plan整備後、研究・設計成果物を `/specs/001-editorconfig-biome/` 配下に追記し、`docs/result/001-editorconfig-biome/<task>/` にテスト証跡を保存する。

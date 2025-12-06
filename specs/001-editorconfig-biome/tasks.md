@@ -2,158 +2,101 @@
 
 **Input**: Design documents from `/specs/001-editorconfig-biome/`
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/formatting.md, quickstart.md
-**Cipher MCP Entry**: `TODO` (byterover-cipher, 最終同期: TODO)
+**Cipher MCP Entry**: `[cipher-mcp-entry-id]` (byterover-cipher, 最終同期: [YYYY-MM-DD])
 
-**Tests**: Add dedicated test tasks only if the spec requests additional automation; this feature relies on Chrome DevTools MCP evidence + npm scripts.
+**Tests**: `npm run typecheck`, `npm run lint`, `npm run format`, Chrome DevTools MCP（主要証跡）, Playwright MCP（必要に応じたスクショ）
+
 **Organization**: Tasks are grouped by user story (US1–US3) with shared Setup/Foundational phases and a final polish phase.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Task can run in parallel (different files, no dependency conflicts)
-- **[Story]**: User story label (US1, US2, US3). Setup/Foundational/Polish tasks omit the label.
-- Include exact file paths in all descriptions.
-- 記載タスク/証跡は byterover-cipher にも同期し、ID を plan/spec/tasks へ反映すること。
-- 各タスク完了時に単独コミットと `docs/result/001-editorconfig-biome/<task>/YYYYMMDD-HHMM_<tool>.log|png` 証跡を残すこと。
-- Chrome DevTools MCP を主要テストに、必要に応じて Playwright MCP (Chromium) を併用すること。
+- **[Story]**: User story label (US1, US2, US3). Setup/Foundational/Polish phases omit the label.
+- Include exact file paths in every description.
+- すべてのタスク完了時に `npm run typecheck` を実行してログを `docs/result/001-editorconfig-biome/<task>/YYYYMMDD-HHMM_typecheck.log` へ保存すること。
+- 記載タスク/証跡は byterover-cipher にも同期し、ID を plan/spec/PR へ反映すること。
+- 変更有無に関わらず差分が生じた時点で単独で github-mcp-server を使ってコミットし、コミットメッセージへ `docs/result/<branch>/<task>/` の証跡パスを含めること。
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Establish evidence tracking + governance required by the implementation plan.
-
-- [ ] T001 Capture the feature summary in byterover-cipher and embed the entry ID + sync date into `specs/001-editorconfig-biome/plan.md` と `specs/001-editorconfig-biome/spec.md` のメタデータに追記する。
-- [X] T002 Author `docs/result/001-editorconfig-biome/README.md` with the Chrome DevTools MCP / Playwright MCP evidence naming rules (`YYYYMMDD-HHMM_<tool>.log|png`) and storage expectations.
-
----
+- [X] T001 Capture cipher MCP summary and embed entry ID/date into `specs/001-editorconfig-biome/plan.md` と `specs/001-editorconfig-biome/spec.md` のメタデータを更新する。（2025-12-06 時点では byterover-cipher quota exceeded のため BLOCKED 記述で代替、ID 取得後に再更新）
+- [ ] T002 Update `docs/result/001-editorconfig-biome/README.md` に typecheck ログ (`YYYYMMDD-HHMM_typecheck.log`) を含む証跡命名規則と Chrome DevTools MCP / Playwright MCP 併用手順を追加する。
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared documentation updates that every user story depends on.
+- [ ] T003 Synchronize `docs/spec seed/requirements.md` の共通テスト章へ、`npm run typecheck` 必須・ログ保存手順・`docs/result/<branch>/<task>/` 格納ルールを追記する。
+- [ ] T004 Extend `README.md` と `AGENTS.md` に TSDoc（N1）記載義務、インターフェース集約ルール、typecheck 実行＆証跡保存フローを章立てで明文化する。
+- [ ] T005 Create `app/interface/start/`, `app/interface/game/`, `app/interface/setting/`, `app/interface/shared/` ディレクトリを追加し、`index.ts` に共通型エクスポート骨子（TSDoc 付き TODO）を配置して import 経路を示す。
 
-- [X] T003 Update `docs/spec seed/requirements.md` の共通テスト/証跡章に `docs/result/001-editorconfig-biome/<task>/` への保存義務と Chrome DevTools MCP + Playwright MCP の利用手順を追加する。
-- [X] T004 Extend `README.md` with a "Code Quality Workflow" overview that links to `docs/result/001-editorconfig-biome/README.md` and enumerates prerequisite tools before the story-specific sections.
+## Phase 3: User Story 1 - 編集者はどの IDE でも同一フォーマットを得られる (Priority: P1)
 
----
-
-## Phase 3: User Story 1 - 編集者はどの IDE でも同一フォーマットを得られる (Priority: P1) 🎯 MVP
-
-**Goal**: Provide a repository-wide EditorConfig policy so every IDE/CLI enforces identical formatting.
-
-**Independent Test**: VSCode で TypeScript ファイルを保存し `.editorconfig` の 2 スペース/LF 設定が有効、CLI で `npm run format:check` を実行して違反ファイルが検知されることを Chrome DevTools MCP で確認する。
+**Goal**: `.editorconfig` により IDE/CLI の整形ルールを共通化する。
+**Independent Test**: VSCode で保存→git diff、`npm run format:check` の失敗スクリーンショット、typecheck ログを `docs/result/001-editorconfig-biome/T00x/` に保存する。
 
 ### Implementation for User Story 1
 
-- [X] T005 [US1] Create `.editorconfig` at the repository root defining 2-space indentation, UTF-8, LF, trailing whitespace trim, and per-pattern overrides for `*.ts`, `*.tsx`, `*.json`, `*.md` per `specs/001-editorconfig-biome/research.md`.
-- [X] T006 [P] [US1] Document EditorConfig installation (VSCode extension + CLI verification via `npm run format:check`) inside the Coding Standards section of `README.md`, referencing `.editorconfig` and evidence storage.
-- [X] T007 [P] [US1] Describe the EditorConfig policy, multi-IDE guidance, and git diff evidence steps within `docs/spec seed/requirements.md` (sections 1.3 / FR-001 / FR-002) pointing to `docs/result/001-editorconfig-biome/<task>/`.
-
----
+- [ ] T006 [US1] Create `.editorconfig`（リポジトリ直下）で TypeScript/TSX/JSON/MD の 2 スペース・LF・UTF-8・末尾スペース除去・最終行改行ルールを定義する。
+- [ ] T007 [P] [US1] Update `README.md` と `AGENTS.md` の Coding Standards 節へ EditorConfig 使い方（VSCode 拡張、CLI 検証、typecheck 実行手順）を追記する。
+- [ ] T008 [P] [US1] Document EditorConfig ポリシーと git diff 証跡取得方法を `docs/spec seed/requirements.md`（1.3/FR-001/FR-002）へ追記し、関連証跡パスを記載する。
 
 ## Phase 4: User Story 2 - Biome による lint/format を共通基準にできる (Priority: P1)
 
-**Goal**: Configure Biome as the single lint/format tool (Biom e RuleSet) with npm scripts + CI enforcement.
-
-**Independent Test**: `npm run lint` と `npm run format` を実行し、Biome が設定ファイルを読み込み exit code により違反を通知することを Chrome DevTools MCP で証跡化する。
+**Goal**: Biome を唯一の lint/format ツールとして設定し、npm scripts と契約を整合させる。
+**Independent Test**: `npm run lint` / `npm run format` / `npm run format:check` 実行ログ、typecheck ログ、Chrome DevTools MCP 証跡を `docs/result/001-editorconfig-biome/T00x/` に保存する。
 
 ### Implementation for User Story 2
 
-- [X] T008 [US2] Add the Biome CLI dev dependency (e.g., `@biomejs/cli`) plus matching entries in `package.json` と `package-lock.json` so lint/format scripts can invoke Biome.
-- [X] T009 [US2] Create `biome.json` at the repository root extending the React/TypeScript/style presets, enforcing 2-space indentation, import sorting, and overrides defined in the BiomeRuleSet.
-- [X] T010 [US2] Replace the `package.json` scripts (`lint`, `format`, `format:check`) with Biome CLI commands that return non-zero exit codes on violations and mention the required log capture under `docs/result/001-editorconfig-biome/<task>/`.
-- [X] T011 [P] [US2] Expand `README.md` (Coding Standards > Biome) with command usage, expected failure output, and biome-*.log upload steps referencing `docs/result/001-editorconfig-biome/<task>/`.
-- [X] T012 [P] [US2] Update `docs/spec seed/requirements.md` FR-003〜FR-005 to outline the BiomeRuleSet contents, CI/pre-commit enforcement, and EvidenceArtifact linkage.
-- [X] T013 [P] [US2] Sync `specs/001-editorconfig-biome/contracts/formatting.md` so the lint/format/format:check rows reference the finalized npm script names and log filenames.
-
----
+- [ ] T009 [US2] Add `@biomejs/cli` 依存を `package.json` / `package-lock.json` に追加し、`npm install` 後の差分を確認する。
+- [ ] T010 [US2] Create `biome.json` で React/TypeScript/style プリセット・2 スペース整形・import sort ルールを設定し、Tailwind ディレクティブ解析を有効化する。
+- [ ] T011 [US2] Update `package.json` scripts (`lint`, `format`, `format:check`) を Biome CLI 呼び出しに置換し、`npm run typecheck` 前に実行するワークフローを README へ記述する。
+- [ ] T012 [P] [US2] Expand `README.md` Coding Standards > Biome 節にコマンド使用方法、失敗例、`docs/result/<branch>/<task>/YYYYMMDD-HHMM_biome-*.log` 保存フローを追記する。
+- [ ] T013 [P] [US2] Update `docs/spec seed/requirements.md` FR-003〜FR-005 へ Biome ルールセット、CI/pre-commit 連携、typecheck との順序を明記する。
+- [ ] T014 [P] [US2] Sync `specs/001-editorconfig-biome/contracts/formatting.md` のコマンド行と証跡ファイル名を最新 npm script・typecheck ルールに合わせて更新する。
 
 ## Phase 5: User Story 3 - フォーム実装者は react-hook-form を基準に選択できる (Priority: P2)
 
-**Goal**: Publish a react-hook-form adoption checklist (FormAdoptionChecklist entity) and dependencies so form owners can classify start/game/setting forms.
-
-**Independent Test**: チェックリストを参照して対象フォームの入力数/バリデーション条件を評価し、`docs/result/001-editorconfig-biome/<task>/` に証跡を保存できること。
+**Goal**: react-hook-form 適用判断と checklist、依存パッケージ、ドキュメント整備を提供する。
+**Independent Test**: Checklist 記入例、react-hook-form 実装サンプル、typecheck ログ、Chrome DevTools MCP のフォーム確認結果を `docs/result/001-editorconfig-biome/T00x/` に配置する。
 
 ### Implementation for User Story 3
 
-- [X] T014 [US3] Add `react-hook-form` と `@types/react-hook-form` への依存を `package.json` および `package-lock.json` に追加して実装がすぐに import できる状態にする。
-- [X] T015 [US3] Document the FormAdoptionChecklist scoring matrix, thresholds (必須/推奨/任意), and EvidenceArtifact requirements for start/game/setting forms inside `docs/spec seed/requirements.md` (chapters 2, 4, 5).
-- [X] T016 [P] [US3] Create `docs/spec seed/requirements/form-adoption-checklist.md` containing the reusable checklist template with fields (`form_id`, `input_fields_count`, `validation_complexity`, `cross_field_dependencies`, `async_submission`, `score`, `recommendation`, `evidence_path`).
-- [X] T017 [P] [US3] Add a react-hook-form adoption workflow subsection to `README.md` that links to the checklist file and instructs teams to store review artifacts under `docs/result/001-editorconfig-biome/<task>/`.
-- [X] T018 [P] [US3] Update `specs/001-editorconfig-biome/quickstart.md` steps to reflect the dependency installation and checklist-driven evaluation before implementing a form.
-
----
+- [ ] T015 [US3] Add `react-hook-form` 依存（必要なら `@types/react-hook-form`）を `package.json` / `package-lock.json` へ追加し、`npm run typecheck` が通ることを確認する。
+- [ ] T016 [P] [US3] Update `docs/spec seed/requirements.md`（章 2/4/5）へ FormAdoptionChecklist スコアリング基準・evidence_path の書式・typecheck ログの添付要件を追記する。
+- [ ] T017 [P] [US3] Create `docs/spec seed/requirements/form-adoption-checklist.md` テンプレートを整備し、各フィールドに N1 TSDoc 形式の説明を付ける。
+- [ ] T018 [P] [US3] Extend `README.md` に react-hook-form 採用ワークフロー（Checklist, interface ディレクトリ活用, typecheck 必須, EvidenceArtifact 連携）を記載する。
+- [ ] T019 [P] [US3] Update `specs/001-editorconfig-biome/quickstart.md` で依存インストール手順と Checklist 駆動のレビュー・証跡保存方法を刷新する。
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final governance + documentation alignment across all stories.
-
-- [X] T019 Create `.github/pull_request_template.md` with checkboxes for EditorConfig sync, Biome lint/format logs, and FormAdoptionChecklist evidence links per SC-004.
-- [X] T020 [P] Summarize the finalized EditorConfigPolicy / BiomeRuleSet / FormAdoptionChecklist decisions and reference the captured evidence links inside `specs/001-editorconfig-biome/research.md`.
+- [ ] T020 Refresh `.github/pull_request_template.md` に EditorConfig/Biome/react-hook-form/typecheck ログのチェックボックスを追加する。
+- [ ] T021 Summarize最終決定を `specs/001-editorconfig-biome/research.md` に追記し、TSDoc/Interface/Typecheck ルールと証跡リンクを整理する。
 
 ---
 
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
-- Phase 1 (Setup) → Phase 2 (Foundational) → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 6 (Polish).
-- Setup + Foundational establish governance/evidence requirements and must finish before touching story deliverables.
+- Phase 1 (Setup) → Phase 2 (Foundational) → User Stories (Phase 3–5) → Phase 6 (Polish)
+- Foundationalタスクが完了するまで US1–US3 へ着手しない。
 
 ### User Story Dependencies
-- **US1 (EditorConfig, MVP)**: Starts after Phase 2; no downstream dependencies.
-- **US2 (Biome)**: Depends on US1 because Biome uses the same formatting expectations and README sections.
-- **US3 (react-hook-form)**: Depends on US2 for the shared README/dependency sections but is otherwise independent once Foundational work is done.
+- **US1 (EditorConfig)**: 先行して `.editorconfig` を確立（US2/US3 のドキュメントがこれを参照）。
+- **US2 (Biome)**: US1 のスタイル基準を引き継ぐ。US3 のドキュメントにも Biome 手順が引用されるため US2 完了後に US3 を推奨。
+- **US3 (react-hook-form)**: typecheck/TSDoc/Interface ルールが整った前提で進行。
 
 ### Within Each User Story
-- Implement configuration files (e.g., `.editorconfig`, `biome.json`) before documentation updates so references stay accurate.
-- Documentation tasks touching different files (`README.md`, `docs/spec seed/requirements.md`, contracts) can proceed in parallel once configuration exists.
-- Capture Chrome DevTools MCP logs after each implementation deliverable before closing the task.
+- Tests（Chrome DevTools MCP 証跡 + `npm run typecheck`）→設定ファイル→README/docs→contracts/quickstart の順に実施し、一貫性を保つ。
+- interface/type 追加や README 変更は `app/interface/*` と docs の両方へ反映する。
 
 ### Parallel Opportunities
-- Setup tasks are sequential, but most Foundational and story documentation tasks flagged with [P] can run concurrently because they touch distinct files.
-- After US1 completes `.editorconfig`, README/docs updates (T006, T007) can run in parallel.
-- Within US2, documentation sync tasks (T011–T013) can proceed simultaneously after `biome.json` + scripts exist.
-- US3 documentation updates (T015–T018) largely target different files and can be parallelized after dependencies are added.
-
----
-
-## Parallel Execution Examples
-
-### User Story 1 – EditorConfig Policy
-```
-Parallel Stream A: T006 (README.md guidance)
-Parallel Stream B: T007 (docs/spec seed/requirements.md updates)
-Prerequisite: T005 must be merged first.
-```
-
-### User Story 2 – Biome Standardization
-```
-Parallel Stream A: T011 (README Biome section)
-Parallel Stream B: T012 (requirements FR updates)
-Parallel Stream C: T013 (contracts/formatting.md sync)
-Prerequisites: T008–T010 complete with working biome.json.
-```
-
-### User Story 3 – react-hook-form Adoption
-```
-Parallel Stream A: T015 (requirements chapters 2/4/5)
-Parallel Stream B: T016 (checklist template file)
-Parallel Stream C: T017–T018 (README + quickstart updates)
-Prerequisite: T014 dependency installation finished.
-```
-
----
+- T007/T008（US1 文書更新）は `.editorconfig` 作成完了後に並列で実施可能。
+- US2 の T012〜T014 は `biome.json` と scripts 更新（T010–T011）完了後に並行処理できる。
+- US3 の T016〜T019 は依存インストール（T015）完了後、それぞれ異なるファイルを触るため並列可。
 
 ## Implementation Strategy
 
-### MVP First (User Story 1)
-1. Complete Phase 1–2 to lock evidence governance.
-2. Deliver US1 (T005–T007) to provide `.editorconfig` + documentation.
-3. Capture Chrome DevTools MCP evidence for the MVP and pause for validation if needed.
-
-### Incremental Delivery
-1. After MVP, implement US2 (T008–T013) to introduce Biome scripts/configuration.
-2. Next, deliver US3 (T014–T018) to roll out the react-hook-form checklist and dependencies.
-3. Finish with Phase 6 polish tasks (T019–T020) to align governance artifacts and PR templates.
-
-### Parallel Team Strategy
-- One contributor can own US1 (configuration) while another prepares README/docs once `.editorconfig` is ready.
-- US2 can be split between configuration (T008–T010) and documentation/contracts (T011–T013).
-- US3 allows concurrent work on dependency updates, checklist authoring, and quickstart/docs sync, enabling larger teams to progress without blocking each other.
+1. 完全なガバナンス整備（Phase 1–2）で typecheck・TSDoc・interface ルールを定義する。
+2. MVP（US1）で `.editorconfig` を確立し、Chrome DevTools MCP で証跡を取る。
+3. US2 で Biome を唯一の lint/format として定着させ、契約/README を同期。
+4. US3 で react-hook-form の判断基準とドキュメントを整備し、フォーム開発をガイド。
+5. Polish フェーズで PR テンプレートと research を更新し、全証跡リンクを網羅する。

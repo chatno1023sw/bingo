@@ -53,4 +53,4 @@
 
 1. 新規フォームや既存フォーム変更時に本テンプレートをコピーし、最新スコアを記録する。
 2. 記入後は `docs/result/001-editorconfig-biome/<task-id>/` へ保存し、PR 説明に evidence_path を列挙する。
-3. react-hook-form を導入／移行した場合は Checklist を `Reviewed` 状態に更新し、`notes` へコミット ID を添付する。
+3. react-hook-form を導入／移行した場合は Checklist を `Reviewed` 状態に更新し、`notes` へ github-mcp-server で作成したコミット ID を添付する。

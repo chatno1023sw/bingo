@@ -11,7 +11,7 @@
 **Test Evidence Rules**  
 - Chrome DevTools MCP をデフォルトの検証環境として設定し、Chrome DevTools で取得できない証跡は Playwright MCP（`apt install chromium-browser` で導入した Chromium）を利用する。  
 - すべてのログ・スクリーンショット・動画を `docs/result/<ブランチ名>/<タスクID>/` 配下に保存する方針を本仕様に記述する。  
-- 各ユーザーストーリーの完了条件に、上記フォルダーの証跡パスとコミット ID を紐付ける。
+- 各ユーザーストーリーの完了条件に、上記フォルダーの証跡パスと github-mcp-server で作成したコミット ID を紐付ける。
 
 ## Clarifications
 
@@ -46,7 +46,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 差分詳細パネル、 **When** 任意のセクションを選択する、 **Then** 関連するブランチ名とタスク ID、最新コミット ID、結果保存先 (`docs/result/<branch>/<task>/`) が表示される。  
+1. **Given** 差分詳細パネル、 **When** 任意のセクションを選択する、 **Then** 関連するブランチ名とタスク ID、最新コミット ID（github-mcp-server で取得）、結果保存先 (`docs/result/<branch>/<task>/`) が表示される。  
 2. **Given** 差分詳細パネル、 **When** 差分理由が登録済み、 **Then** 理由メモとリンクが表示され、リンク切れ時は警告が出る。
 
 ---

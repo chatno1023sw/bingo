@@ -45,7 +45,7 @@
 | フォーム制御 | 入力フィールドが 3 以上、バリデーションが複数、非同期送信がある場合は `react-hook-form` を採用し、FormAdoptionChecklist の score >=3 で必須、=2 で推奨、<=1 で任意とする。評価結果は `docs/result/001-editorconfig-biome/<task>/` に証跡保存する。 |
 | データ管理 | マスターデータ（景品情報など）は CSV ファイルで管理する。ゲーム進行状態はブラウザローカル（例：localStorage）で管理する。 |
 | 重複コード検出 | `npm run similarity` で `mizchi/similarity`（similarity-ts）を実行し、`app` と `docs` 配下の重複コードを検出する。バイナリは `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force` で構築するか、`SIMILARITY_BIN` 環境変数に外部パスを指定する。 |
-| 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
+| 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP（github-mcp-server）：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
 
 ---
 
@@ -301,7 +301,7 @@ Checklist の評価は `docs/spec seed/requirements/form-adoption-checklist.md` 
 | MCP | 役割 |
 | --- | --- |
 | Chrome DevTools MCP | ブラウザ上でのアプリ実行、コンソールログ確認、ネットワーク通信確認、E2E テスト実行などに使用する。テスト結果を元にリファクタリングを行う。 |
-| GitMCP | ドメイン単位で機能実装が完了したタイミング（例：Start 画面の実装完了・Game 画面の抽選ロジック実装完了など）ごとにコミットを作成し、履歴を残す。コミットメッセージは日本語でわかりやすく記述する。 |
+| GitMCP（github-mcp-server） | ドメイン単位で機能実装が完了したタイミング（例：Start 画面の実装完了・Game 画面の抽選ロジック実装完了など）ごとにコミットを作成し、履歴を残す。コミットメッセージは日本語でわかりやすく記述する。 |
 | CONTEXT7 MCP | React Router v7・react-custom-roulette・@mui/icons-material・DND 関連ライブラリなど、利用ライブラリの最新安定版を確認し、依存バージョンを決定する。必要に応じてアップデートを提案する。 |
 | MCP serena | コード生成・リファクタリングの精度向上のために使用する。TSDoc の自動生成や共通化候補抽出、`mizchi/similarity` の結果を踏まえたリファクタリングに活用する。 |
 

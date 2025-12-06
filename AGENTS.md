@@ -21,7 +21,7 @@
 Spec では「TDD + Chrome DevTools MCP」が必須です。各機能着手時に `docs/spec seed/requirements.md` へテストシナリオを追記するか、対象モジュール直下にコメントとして記述し、`npm run typecheck` と MCP 上の動作確認を完了してから実装を進めます。`bingoEngine` や `csvParser` などユーティリティはテストシナリオ→実装→スクリーンショット共有の順で進め、重大な手順は `docs/spec seed/requirements.md` の該当セクションに補記してください。
 
 ## コミットとプルリクエストガイドライン
-Git ログは `add: ...` や `update: ...` など動詞プレフィックスで揃っています。`docs/spec seed/requirements.md` で定義されたドメイン単位 (例: `feature/domain-02-utils`) ごとにブランチを切り、タスク完了ごとに小さくコミットします。PR には概要、関連ドメイン/タスク番号、Chrome DevTools MCP 検証結果、`npm run typecheck` と `npm run build` の通過状況、UI 変更時のスクリーンショット、CSV や環境変数の変更内容を必ず含めてください。
+Git ログは `add: ...` や `update: ...` など動詞プレフィックスで揃っています。`docs/spec seed/requirements.md` で定義されたドメイン単位 (例: `feature/domain-02-utils`) ごとにブランチを切り、タスク完了ごとに小さくコミットします。すべてのコミットは github-mcp-server を通じて実行し、PR には概要、関連ドメイン/タスク番号、Chrome DevTools MCP 検証結果、`npm run typecheck` と `npm run build` の通過状況、UI 変更時のスクリーンショット、CSV や環境変数の変更内容を必ず含めてください。
 
 ## セキュリティと設定の注意
 運用形態は「ローカル環境完結 + オフライン要件あり」(要件 1.3) です。外部 API を導入する際はオフライン fallback を用意し、ネットワーク依存が発生した場合は `requirements.md` に理由と緩和策を追記します。景品 CSV は個人情報を含む可能性があるため `.gitignore` 済みのパスを利用し、共有時はダミーデータに置き換えてください。BGM やサウンドを追加する場合は `public/` に配置し、ライセンス表記を `requirements.md` の付録や README に追記して再配布可否を明示します。

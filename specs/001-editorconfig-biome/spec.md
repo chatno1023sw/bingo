@@ -3,7 +3,7 @@
 **Feature Branch**: `001-editorconfig-biome`  
 **Created**: 2025-11-17  
 **Status**: Draft  
-**Cipher MCP Entry**: TODO(CIPHER_ENTRY): byterover-cipher に記録後に ID と同期日を追記すること  
+**Cipher MCP Entry**: BLOCKED (2025-12-06 quota exceeded on byterover-cipher; add ID/date once service recovers)  
 **Input**: User description: "react-hook-formを使えば処理がよりセマンティックにまたは簡潔になる場合は使ってください。EditorConfig for VSCodeで書式を統一するファイルを生成してください。実装時はbiomeのlinterやformatに準拠した実装をしてください（そのために設定ファイルを追加してください）"
 
 > 憲章に従い、cipher MCP のメモリーが更新されていない仕様はレビューできません。必ず最新 ID を記載してください。
@@ -11,7 +11,7 @@
 **Test Evidence Rules**  
 - Chrome DevTools MCP をデフォルトの検証環境として設定し、Chrome DevTools で取得できない証跡は Playwright MCP（`apt install chromium-browser` で導入した Chromium）を利用する。  
 - すべてのログ・スクリーンショット・動画を `docs/result/<ブランチ名>/<タスクID>/` 配下に保存する方針を本仕様に記述する。  
-- 各ユーザーストーリーの完了条件に、上記フォルダーの証跡パスとコミット ID を紐付ける。
+- 各ユーザーストーリーの完了条件に、上記フォルダーの証跡パスと github-mcp-server で作成したコミット ID を紐付ける。
 
 ## User Scenarios & Testing *(mandatory)*
 
