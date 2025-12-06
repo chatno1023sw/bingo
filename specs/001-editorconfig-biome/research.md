@@ -24,3 +24,8 @@
 - **Rationale**: 新ルールへの導線を確保し、EditorConfig インストール・Biome コマンド・hook-form ガイドを明示するため。  
 - **Implementation Notes**: README に lint/format 手順、docs/spec seed requirements にフォームチェック表、AGENTS/requirements への参照追加。  
 - **Alternatives Considered**: 仕様ファイル更新のみ → 実装者が気づかないリスク。
+
+## Decision 6: EditorConfig/Biome/FormAdoption 総括
+- **Rationale**: 実装後のルールを 1 箇所にまとめ、README・requirements・contracts・PR テンプレートへ整合を取るため。
+- **Implementation Notes**: `.editorconfig` / `biome.json` / `docs/spec seed/requirements/form-adoption-checklist.md` を公開し、`docs/result/001-editorconfig-biome/README.md` に証跡命名規則を記述、README へ Code Quality + react-hook-form フローを追加した。`docs/spec seed/requirements.md` では FR-001〜FR-005 と FormAdoptionChecklist スコアリング表を整備し、Start/Game/Setting 各章へ評価指針と evidence_path 記載を追加。PR テンプレートにチェックボックスを設け、Chrome DevTools MCP / Playwright MCP / Biome ログのリンクを必須化した。
+- **Evidence**: `docs/result/001-editorconfig-biome/README.md`（命名ルール）、`docs/spec seed/requirements/form-adoption-checklist.md`（テンプレート）、`.github/pull_request_template.md`（チェックリスト）。

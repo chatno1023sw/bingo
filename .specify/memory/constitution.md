@@ -1,14 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.1 → 1.3.0
+- Version change: 1.3.0 → 1.3.1
 - Modified principles:
-  - Test-First Offline Reliability → Test-First Offline Reliability（Chrome DevTools/Playwright/結果保存ルール追加）
+  - Workflow & Review Process（タスク完了直後のコミット義務を明文化）
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md
-  - ✅ .specify/templates/spec-template.md
-  - ✅ .specify/templates/tasks-template.md
+  - ✅ .specify/templates/plan-template.md（コミット運用の既存ガイダンスと整合）
+  - ✅ .specify/templates/spec-template.md（追記不要を確認）
+  - ✅ .specify/templates/tasks-template.md（タスク単位コミット必須を継続）
 - Follow-up TODOs: none
 -->
 # Bingo抽選アプリ Constitution
@@ -68,11 +68,11 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - `specs/` 配下の plan/spec/tasks は Constitution Check を満たすまで進行禁止とし、spec seed と spec by kiro の該当章を引用して差分を明示したうえで要件を固める。  
 - `docs/spec seed/requirements.md` をテストケースと制約の一次記録源とし、`docs/spec by kiro/.kiro/specs/bingo-game/*.md` にも同じ修正を速やかに反映する。  
 - 各 spec/plan/tasks の公開前に cipher MCP（byterover-cipher）へのメモリーを更新し、「Cipher MCP Entry: （エントリ ID）」を明示していない成果物はレビューやマージを禁止する。  
-- 各タスク完了時点で単独コミットを作成し、コミットメッセージにタスク ID・参照 spec 節・対応テスト結果パス (`docs/result/<branch>/<task>/`) を記載する。  
+- 各タスク完了時点で必ず単独コミットを作成し、コミット直後に push してから次のタスクへ進む。コミットメッセージにはタスク ID・参照 spec 節・対応テスト結果パス (`docs/result/<branch>/<task>/`) を記載し、マルチタスクを 1 コミットへまとめる行為を禁止する。  
 - PR はブランチ命名規則 (`feature/domain-xx-*`) を守り、`npm run typecheck`, `npm run build`, Chrome DevTools MCP 確認結果、スクリーンショット、CSV 変更点、参照した spec seed / spec by kiro の章番号を必須チェック項目として列挙する。  
 - Chrome DevTools MCP / Playwright MCP で得た結果ファイルを `docs/result/<ブランチ名>/<タスクID>/` に集約し、PR 説明にも同パスをリンクする。  
 - ルートファイル追加や共有モジュール更新時は AGENTS.md の構造方針を引用し、SRP を破る場合は Complexity Tracking を記入して承認を得る。  
-- コードレビューでは本憲章、Operational Constraints、Workflow 手順、spec seed / spec by kiro への反映状況をチェックリスト化し、逸脱時は両ドキュメントと README を同時修正する。
+- コードレビューでは本憲章、Operational Constraints、Workflow 手順、spec seed / spec by kiro への反映状況をチェックリスト化し、逸脱時は両ドキュメントと README を同時修正する。  
 
 ## Governance
 
@@ -80,6 +80,6 @@ Rationale: 会場で投影される演出を仕様と同一レベルで再現し
 - 改訂を提案する場合は、影響する原則・セクション・テンプレート、spec seed / spec by kiro の更新計画、および `npm run typecheck` / `npm run build` の最新結果を添付する。  
 - バージョン管理はセマンティックバージョニングに従う。原則の追加・大幅改稿は MINOR、互換性のない再定義や削除は MAJOR、文言調整・明確化は PATCH。  
 - ラストアメンド日は更新当日に記録し、初版の Ratified 日付は変更しない。  
-- コンプライアンスレビューは各マイルストーンおよび主要 PR ごとに実施し、plan/spec/tasks/requirements/README/AGENTS/spec seed/spec by kiro の整合性を確認する。違反が見つかった場合は是正計画と期限を明記し再レビューする。
+- コンプライアンスレビューは各マイルストーンおよび主要 PR ごとに実施し、plan/spec/tasks/requirements/README/AGENTS/spec seed/spec by kiro の整合性を確認する。違反が見つかった場合は是正計画と期限を明記し再レビューする。  
 
-**Version**: 1.3.0 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-11-17
+**Version**: 1.3.1 | **Ratified**: 2025-11-16 | **Last Amended**: 2025-12-06

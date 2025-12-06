@@ -7,6 +7,9 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
+    "lint": "biome lint --error-on-warnings --files-ignore-unknown=true .",
+    "format": "biome format --write --files-ignore-unknown=true .",
+    "format:check": "biome check --write=false --files-ignore-unknown=true .",
     "test": "vitest run --passWithNoTests",
     "similarity": "node ./scripts/run-similarity.mjs"
   },
@@ -20,6 +23,7 @@
     "react": "^19.1.1",
     "react-custom-roulette": "^1.4.1",
     "react-dom": "^19.1.1",
+    "react-hook-form": "^7.68.0",
     "react-router": "^7.9.2"
   },
   "devDependencies": {

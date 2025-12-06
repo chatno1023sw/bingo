@@ -1,8 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "files": {
-    "ignore": ["node_modules", "dist", "coverage", "*.min.js", "target", "test/__fixtures__", "pnpm-lock.yaml"]
-  },
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "root": false,
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,

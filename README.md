@@ -46,6 +46,30 @@ Your application will be available at `http://localhost:5173`.
 - Chrome DevTools MCP をデフォルトの検証環境とし、Chrome DevTools で取得できない証跡（スクリーンショット等）は Playwright MCP を利用してください。その際は `apt install chromium-browser` で導入した Chromium ブラウザからスクリーンショットを取得します。
 - テストログ・スクリーンショット・動画などの結果ファイルは必ず `docs/result/<branch>/<task>/` に配置し、PR からリンクします。
 
+## Code Quality Workflow
+
+1. `.editorconfig` と `biome.json` をリポジトリ直下に配置し、VSCode の EditorConfig 拡張を有効化する。CLI では `npm run format:check` で差分を検出する。
+2. Lint/Format は Biome CLI を唯一の基準とし、`npm run lint` / `npm run format` / `npm run format:check` を実行する。各コマンドのログは `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-*.log` へ保存する。
+3. Chrome DevTools MCP / Playwright MCP のログおよびスクリーンショット命名ルールは `docs/result/001-editorconfig-biome/README.md` を参照し、PR のチェックリストに証跡パスを必ず記載する。
+
+### EditorConfig の導入手順
+
+- VSCode: 拡張機能「EditorConfig for VS Code」をインストールし、保存時に `.editorconfig` の 2 スペース / LF / UTF-8 / 末尾改行・末尾スペース削除ルールが適用されることを確認する。
+- CLI: `npm run format:check` を実行して EditorConfig 違反（末尾スペースやインデントずれ）が無いか確認し、違反が見つかった場合は `npm run format` で修正後にコミットする。
+- 証跡: これらの操作ログ・スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.log|png` に保存し、PR 説明にリンクを記載する。
+
+### Biome Lint / Format
+
+- `npm run lint`: `biome lint --error-on-warnings --files-ignore-unknown=true .` を実行し、静的解析違反がある場合は exit code ≠0 で失敗する。実行ログは `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-lint.log` に保存する。
+- `npm run format`: `biome format --write --files-ignore-unknown=true .` を実行し、自動整形後の差分のみが git に残ることを確認する。修正結果のスクリーンショットも取得する。
+- `npm run format:check`: `biome check --write=false --files-ignore-unknown=true .` により未整形ファイルを検知し、exit code ≠0 で失敗する。検出ログは `..._biome-format-check.log` として保存し、PR で提示する。
+
+### react-hook-form 採用フロー
+
+1. `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートを複製し、`form_id`（start/game/setting 等）ごとに入力数・バリデーション複雑度を記録する。
+2. score が 3 以上の場合は react-hook-form を必須採用とし、UI の動作ログ／スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/` に保存、PR 説明に `evidence_path` を掲載する。
+3. score が 2 の場合は推奨としてバックログへ移行タスクを登録し、score が変化したら Checklist を更新する。Start など score <=1 のフォームでも判断ログを残す。
+
 ## Building for Production
 
 Create a production build:

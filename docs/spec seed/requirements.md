@@ -25,6 +25,14 @@
 
 ---
 
+### 1.1 テスト証跡・ログ運用
+
+- すべてのテストログ／スクリーンショットは `docs/result/001-editorconfig-biome/<task-id>/` に保存し、ファイル名を `YYYYMMDD-HHMM_<tool>.log` または `.png` の形式に揃える。`<tool>` は `chromedevtools` / `playwright` / `biome-lint` など実行した MCP や CLI を明示する。
+- Chrome DevTools MCP を主要検証ツールとし、ブラウザ操作や Console ログを取得したら即時に前述のパスへアップロードする。UI 操作が自動化が必要な場合は Playwright MCP (Chromium) を併用し、取得したスクリーンショット／動画を同一タスク配下へ格納する。
+- `npm run lint` / `npm run format` / `npm run format:check` の結果ログも証跡として保存し、PR では各タスク ID ごとの証跡パスを記載する。証跡運用の詳細手順は `docs/result/001-editorconfig-biome/README.md` を参照すること。
+
+---
+
 ## 2. 技術スタックと外部ライブラリ
 
 | 区分 | 要件 |
@@ -34,6 +42,7 @@
 | 抽選演出 | `react-custom-roulette` を使用して、抽選中のアニメーションと当選番号決定を行う。 |
 | UI アイコン | `@mui/icons-material` を使用する（例：BGM のオン／オフアイコンなど）。 |
 | DnD | 賞品並び替えには `DNDContext`（例：`@dnd-kit/core`）を使用する。 |
+| フォーム制御 | 入力フィールドが 3 以上、バリデーションが複数、非同期送信がある場合は `react-hook-form` を採用し、FormAdoptionChecklist の score >=3 で必須、=2 で推奨、<=1 で任意とする。評価結果は `docs/result/001-editorconfig-biome/<task>/` に証跡保存する。 |
 | データ管理 | マスターデータ（景品情報など）は CSV ファイルで管理する。ゲーム進行状態はブラウザローカル（例：localStorage）で管理する。 |
 | 重複コード検出 | `npm run similarity` で `mizchi/similarity`（similarity-ts）を実行し、`app` と `docs` 配下の重複コードを検出する。バイナリは `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force` で構築するか、`SIMILARITY_BIN` 環境変数に外部パスを指定する。 |
 | 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
@@ -73,6 +82,12 @@
 | BGM オン／オフ | 右上に BGM トグルアイコンを表示する。`@mui/icons-material` の音量系アイコンを利用し、オン／オフ状態を視覚的に区別する。 |
 | BGM 設定の保存 | BGM のオン／オフ状態はブラウザローカルに保存し、アプリ再訪問時にも状態を復元する。 |
 
+#### Start 画面 - FormAdoptionChecklist
+
+- 入力要素はボタン＋BGM トグルのみでクロスフィールド依存も無いため、Checklist の score は 1 以下（`recommendation=optional`）。
+- `FormAdoptionChecklist` に `form_id=start`, `input_fields_count=1`, `validation_complexity=none`, `async_submission=false` を記録し、評価ログを `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などで保存する。
+- react-hook-form を導入する必要は現時点で無いが、フィールドが 3 つ以上に増えた場合は再評価し、score が 2 以上なら移行タスクを起票する。
+
 #### Start 画面 - Chrome DevTools MCP テストシナリオ
 
 1. **SF-START-001: 「はじめから」で localStorage を初期化**  
@@ -107,6 +122,12 @@
 | 右ペイン：今回の景品一覧 | 現在の新年会で使用する景品を一覧表示する。各行には少なくとも「賞名」「商品名または画像サムネイル」「当選済みかのステータス」を表示する。 |
 | 景品の取消線表示 | 当選済みの景品は行全体またはテキストに取消線を表示し、一目で配布済みとわかるようにする。 |
 | 景品の当選管理 | 右ペインの各行に「当選」／「戻す」ボタンやトグルを設け、進行役が手動で当選状態を切り替えられるようにする。当選状態はゲーム状態としてブラウザローカルに保存する。 |
+
+#### Game 画面 - FormAdoptionChecklist
+
+- Game 画面で入力を伴う UI は抽選ボタンと景品管理パネルのトグル群。景品管理は `input_fields_count=3+`, `cross_field_dependencies=true`（サマリー更新有り）で score=2（推奨）。
+- 抽選ボタンは単体動作のため別フォームとして score=1（任意）を記録。複数フィールドをまとめるユースケースが増えた場合は react-hook-form へ移行。
+- 各評価結果は `form_id=game-prize-controls` などで checklist に追記し、ログを `docs/result/001-editorconfig-biome/<task-id>/game-checklist.json` に保存する。
 
 #### Game 画面 - Chrome DevTools MCP テストシナリオ
 
@@ -156,6 +177,12 @@
 | 一括削除ボタン | 現在表示している景品を一括削除するボタン。誤操作防止のため確認ダイアログを表示する。 |
 | 選出済みかの扱い | 原則として「ゲーム側で決まった当選状態の参照欄」とする。必要に応じてリセット機能（すべて未選出にする等）を提供する。 |
 | デザイン | `docs/design` 配下にあるデザイン画像のレイアウト・カラー・余白・タイポグラフィに合わせて実装する（言語化が難しい部分は画像優先とする）。 |
+
+#### Setting 画面 - FormAdoptionChecklist
+
+- `form_id=setting-prize-editor`。入力要素が 6+（テキスト、ファイル選択、DnD、チェックボックス等）、`validation_complexity=advanced`、`async_submission=true`（CSV import）で score>=3 のため react-hook-form を必須採用とする。
+- Checklist には `cross_field_dependencies=true`（CSV 取り込み→一覧表示→Game 反映）のワークフローを記録し、UI 操作の証跡を `docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json` ＋ Chrome DevTools MCP スクリーンショットで保存する。
+- 既存フォームからの移行タスクを作成する際は Checklist の `evidence_path` に `docs/result/...` を記録し、PR テンプレートでもリンクする。
 
 #### Setting 画面 - Chrome DevTools MCP / Playwright MCP テストシナリオ
 
@@ -220,6 +247,16 @@
 | 保存内容 | ・既に抽選されたビンゴ番号一覧・直近 10 件の当選番号（履歴表示用）・景品ごとの `selected` 状態・BGM オン／オフ設定 |
 | 保存タイミング | 抽選確定時、景品の当選状態変更時、BGM トグル変更時などに即時保存する。 |
 | 「続きから」動作 | Start 画面の「続きから」押下時に localStorage から前回状態を読み込み、Game 画面に復元した状態で遷移する。保存が無い場合は「はじめから」と同等の挙動にフォールバックする。 |
+
+### 5.4 FormAdoptionChecklist スコアリング
+
+| score | 条件例 | 推奨度 | 証跡 |
+| --- | --- | --- | --- |
+| 0-1 | 入力 1〜2 件、バリデーションなし、同期送信のみ | 任意 | Checklist に `recommendation=optional` を記載し、評価ログを `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などに保存する。 |
+| 2 | 入力 3 件以上、単純なバリデーション or カウンター連動 | 推奨 | `recommendation=recommended`。Game 画面などで将来の移行を検討し、証跡リンクを PR に添付。 |
+| 3+ | 入力 3 件以上 + クロスフィールド依存 or 非同期送信 or CSV アップロード | 必須 | `recommendation=required`。Setting 画面などで react-hook-form を導入し、Chrome DevTools MCP ログ＋Playwright MCP スクショを `docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json` に保存。 |
+
+Checklist の評価は `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートに従い、Start/Game/Setting で最新スコアを記録する。
 
 ---
 
@@ -308,3 +345,35 @@ AI にこの要件定義書と **一緒に渡しておくと精度が上がる�
 | Node / パッケージマネージャ | 使用する Node.js のバージョン、npm / pnpm / yarn などの指定 | Node 20 系、pnpm 使用など |
 | 既存リポジトリ情報 | 既にリポジトリがある場合は Git URL や現在のディレクトリ構成 | AI が GitMCP で操作する前提 |
 | 運用フロー | 新年会当日までの運用フロー（誰がいつ CSV を更新するか、動作確認のタイミングなど） | 例：前日までに景品 CSV 確定・当日リハーサル 1 回など |
+
+---
+
+## 11. コードスタイルとエディタポリシー
+
+### FR-001: EditorConfigPolicy
+
+- リポジトリ直下に配置した `.editorconfig` で全ファイル（`*.ts`, `*.tsx`, `*.json`, `*.md` など）へ 2 スペース / LF / UTF-8 / 末尾スペース削除 / 最終行改行を強制する。
+- VSCode 以外の IDE（JetBrains, NeoVim 等）でも EditorConfig が有効なことを確認し、設定が有効でない場合は該当 IDE のプラグイン導入手順を記録する。
+- ルール違反は `npm run format:check` で検出し、結果ログを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-format-check.log` として保存し、PR でリンクする。
+
+### FR-002: Multi-IDE Diff ガイドライン
+
+- Chrome DevTools MCP で `git status` / `git diff` を確認し、EditorConfig 適用後に余計な差分（末尾スペース、インデント違反）が無いことを証跡化する。
+- `docs/spec seed/requirements.md` を含むすべてのドキュメント編集時に、保存直後の diff スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.png` として記録する。
+- マルチ IDE メンバー向けに `.editorconfig` を参照する導線を README の「Code Quality Workflow」に統一し、タスク完了時は当該 README 節のリンクを PR 説明へ貼り付ける。
+
+### FR-003: BiomeRuleSet
+
+- `biome.json` で `extends: ["biome", "biome/react"]` を指定し、`app/**/*.{ts,tsx}` および `docs/**/*.md` に 2 スペース + lineWidth 100 + import 並び替えを適用する。
+- `files.ignore` で `node_modules`, `build`, `dist`, `docs/result/**` を除外する。
+- import 重複や未使用変数は `linter.rules.correctness.noUnusedImports/noUnusedVariables = "error"` でブロックする。
+
+### FR-004: Biome コマンドと CI
+
+- `npm run lint`（`biome lint --error-on-warnings`）を PR 前に必ず実行し、exit code 0 で完了したログを `docs/result/001-editorconfig-biome/<task-id>/..._biome-lint.log` に保存する。
+- `npm run format` / `npm run format:check` を pre-commit / CI で実行し、未整形ファイルがある場合は push を拒否する。CI ログにも証跡リンクを出力する。
+
+### FR-005: EvidenceArtifact 連携
+
+- Biome コマンドの成功/失敗ログとスクリーンショットを EvidenceArtifact として `docs/result/001-editorconfig-biome/<task-id>/` に保存し、PR テンプレートのチェック項目で確認する。
+- フォーマット違反修正後は `git status` のスクリーンショットを添付し、余計な差分が無いことを reviewers が確認できるようにする。

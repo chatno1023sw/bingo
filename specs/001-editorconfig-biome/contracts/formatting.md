@@ -4,9 +4,9 @@
 
 | Operation | Command | Expected Result | Evidence |
 |-----------|---------|-----------------|----------|
-| Run lint  | `npm run lint` | Biome が全 `app/**/*.ts(x)` / `docs/**/*.md` を検証し、違反時に exit code 1 で詳細を出力 | `docs/result/001-editorconfig-biome/TASK-ID/YYYYMMDD-HHMM_biome-lint.log` |
-| Run format | `npm run format` | Biome フォーマッタが対象ファイルを整形し、実行後 `git status` にフォーマット差分のみが残る | `.../biome-format.log` |
-| Format check | `npm run format:check` | 整形不要: exit 0、整形必要: exit 1 +ファイル一覧 | `.../biome-format-check.log` |
+| Run lint  | `npm run lint` (`biome lint --error-on-warnings --files-ignore-unknown=true .`) | Biome が全 `app/**/*.ts(x)` / `docs/**/*.md` を検証し、違反時に exit code 1 で詳細を出力 | `docs/result/001-editorconfig-biome/TASK-ID/YYYYMMDD-HHMM_biome-lint.log` |
+| Run format | `npm run format` (`biome format --write --files-ignore-unknown=true .`) | Biome フォーマッタが対象ファイルを整形し、実行後 `git status` にフォーマット差分のみが残る | `docs/result/001-editorconfig-biome/TASK-ID/YYYYMMDD-HHMM_biome-format.log` |
+| Format check | `npm run format:check` (`biome check --write=false --files-ignore-unknown=true .`) | 整形不要: exit 0、整形必要: exit 1 + ファイル一覧および差分を表示 | `docs/result/001-editorconfig-biome/TASK-ID/YYYYMMDD-HHMM_biome-format-check.log` |
 
 ## Form Adoption Checklist Contract
 
