@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
@@ -21,6 +21,8 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { SidePanel } from "~/components/game/SidePanel";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
+
+const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
 const ensureSession = async (): Promise<GameStateEnvelope> => {
   const resumed = await resumeSession();
@@ -93,6 +95,10 @@ export default function GameRoute() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const navigate = useNavigate();
   const { preference, isReady: isBgmReady, toggle: toggleBgm, error: bgmError } = useBgmPreference();
+  const [displayNumber, setDisplayNumber] = useState<number | null>(loaderData.gameState.currentNumber);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const animationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const latestData = useMemo<LoaderData>(() => {
     if (fetcher.data && isLoaderPayload(fetcher.data)) {
@@ -102,18 +108,53 @@ export default function GameRoute() {
   }, [fetcher.data, loaderData]);
 
   const errorMessage = fetcher.data && !isLoaderPayload(fetcher.data) ? fetcher.data.error : null;
-  const isDrawing = fetcher.state !== "idle";
-  const isButtonDisabled = isDrawing || latestData.availableNumbers.length === 0;
+  const isFetcherPending = fetcher.state !== "idle";
+  const isButtonDisabled = isFetcherPending || isAnimating || latestData.availableNumbers.length === 0;
 
-  const bgmDisabled = !isBgmReady || isDrawing;
+  const bgmDisabled = !isBgmReady || isFetcherPending;
+
+  useEffect(() => {
+    if (isAnimating) {
+      return;
+    }
+    setDisplayNumber(latestData.gameState.currentNumber);
+  }, [isAnimating, latestData.gameState.currentNumber]);
+
+  useEffect(() => {
+    return () => {
+      if (animationIntervalRef.current) {
+        clearInterval(animationIntervalRef.current);
+      }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleDraw = () => {
-    fetcher.submit(
-      { intent: "draw" },
-      {
-        method: "post",
-      },
-    );
+    if (isAnimating || isFetcherPending || latestData.availableNumbers.length === 0) {
+      return;
+    }
+    const pool =
+      latestData.availableNumbers.length > 0 ? latestData.availableNumbers : NUMBER_POOL;
+    setIsAnimating(true);
+    animationIntervalRef.current = setInterval(() => {
+      const random = pool[Math.floor(Math.random() * pool.length)];
+      setDisplayNumber(random);
+    }, 120);
+    animationTimeoutRef.current = setTimeout(() => {
+      if (animationIntervalRef.current) {
+        clearInterval(animationIntervalRef.current);
+        animationIntervalRef.current = null;
+      }
+      setIsAnimating(false);
+      fetcher.submit(
+        { intent: "draw" },
+        {
+          method: "post",
+        },
+      );
+    }, 3000);
   };
 
   const handleBackToStart = () => {
@@ -121,12 +162,16 @@ export default function GameRoute() {
   };
 
   const drawButtonLabel =
-    latestData.availableNumbers.length === 0 ? "抽選は完了しました" : "抽選を開始！";
+    latestData.availableNumbers.length === 0
+      ? "抽選は完了しました"
+      : isAnimating || isFetcherPending
+        ? "抽選中..."
+        : "抽選を開始！";
 
   return (
     <PrizeProvider initialPrizes={latestData.prizes}>
-      <main className="min-h-screen bg-white px-4 py-8 text-slate-900">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 rounded-[32px] border border-slate-400 bg-white px-6 py-6 shadow-[0_4px_20px_rgba(15,23,42,0.08)]">
+      <main className="h-screen overflow-hidden bg-white text-slate-900">
+        <div className="flex h-full w-full flex-col border border-slate-400 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.08)]">
           <header className="flex items-center justify-end gap-4">
             <BgmToggle enabled={preference.enabled} onToggle={() => toggleBgm()} disabled={bgmDisabled} />
             <button
@@ -145,14 +190,14 @@ export default function GameRoute() {
             <HistoryPanel
               recent={latestData.historyView.recent}
               onOpenModal={() => setHistoryOpen(true)}
-              className="flex-[0_0_280px]"
+              className="flex-[0_0_420px]"
             />
 
-            <section className="flex flex-1 flex-col items-center justify-center gap-6">
-              <CurrentNumber value={latestData.gameState.currentNumber} isDrawing={isDrawing} />
+            <section className="flex flex-1 flex-col items-center justify-center gap-8">
+              <CurrentNumber value={displayNumber} isDrawing={isAnimating || isFetcherPending} />
               <button
                 type="button"
-                className="w-64 rounded-full bg-[#0F6A86] px-6 py-3 text-lg font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-80 rounded-full bg-[#0F6A86] px-8 py-4 text-xl font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
@@ -164,7 +209,7 @@ export default function GameRoute() {
               <p className="text-xs text-slate-500">残り {latestData.availableNumbers.length} / 75</p>
             </section>
 
-            <SidePanel className="flex-[0_0_280px]" />
+            <SidePanel className="flex-[0_0_420px]" />
           </div>
         </div>
         <HistoryModal

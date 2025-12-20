@@ -11,22 +11,25 @@ export type HistoryPanelProps = {
  * 左ペインの直近履歴表示。
  */
 export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, onOpenModal, className = "" }) => {
-  const slots = 16;
-  const entries = Array.from({ length: slots }, (_, index) => recent[index] ?? null);
-
   return (
     <section
       className={`flex h-full flex-col rounded-3xl border border-slate-400 bg-white p-4 text-slate-900 ${className}`}
     >
-      <div className="grid flex-1 grid-cols-4 gap-3">
-        {entries.map((entry, index) => (
-          <div
-            key={`${entry?.sequence ?? `placeholder-${index}`}`}
-            className="flex aspect-square items-center justify-center rounded border border-slate-400 text-xl font-semibold text-slate-800"
-          >
-            {entry ? entry.number : "--"}
-          </div>
-        ))}
+      <div className="flex-1 overflow-y-auto pr-2">
+        <div className="grid grid-cols-3 gap-4">
+          {recent.length === 0 ? (
+            <div className="col-span-3 text-center text-sm text-slate-500">まだ抽選結果がありません</div>
+          ) : (
+            recent.map((entry) => (
+              <div
+                key={entry.sequence}
+                className="flex aspect-square min-h-[120px] items-center justify-center rounded border border-slate-500 text-3xl font-semibold"
+              >
+                {entry.number}
+              </div>
+            ))
+          )}
+        </div>
       </div>
       <button
         type="button"

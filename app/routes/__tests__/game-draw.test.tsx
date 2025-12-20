@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, beforeAll, afterAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { act } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import type { GameStateEnvelope, DrawHistoryEntry, PrizeList } from "~/common/types";
 import GameRoute, { action, loader, type LoaderData } from "~/routes/game";
@@ -89,6 +90,14 @@ const navigateSpy = vi.fn();
 
 const loaderDataMock: LoaderData = createLoaderData();
 
+beforeAll(() => {
+  vi.useFakeTimers();
+});
+
+afterAll(() => {
+  vi.useRealTimers();
+});
+
 const resetPrizeManager = () => {
   prizeManagerMock.prizes = [];
   prizeManagerMock.isLoading = false;
@@ -158,6 +167,9 @@ describe("GameRoute component", () => {
     render(<GameRoute />);
 
     fireEvent.click(screen.getByRole("button", { name: /抽選を開始/ }));
+    act(() => {
+      vi.runAllTimers();
+    });
 
     expect(fetcherMock.submit).toHaveBeenCalledWith(
       { intent: "draw" },
