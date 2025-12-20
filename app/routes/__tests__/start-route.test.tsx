@@ -60,10 +60,24 @@ describe("StartRoute component", () => {
     navigationState.state = "idle";
   });
 
-  it("submits with start intent when pressing はじめから", () => {
+  it("renders BGM toggle button", async () => {
     render(<StartRoute />);
 
-    fireEvent.click(screen.getByRole("button", { name: "はじめから" }));
+    expect(await screen.findByRole("button", { name: "BGM をオフにする" })).toBeInTheDocument();
+  });
+
+  it("disables BGM toggle while submitting", async () => {
+    navigationState.state = "submitting";
+
+    render(<StartRoute />);
+
+    expect(await screen.findByRole("button", { name: "BGM をオフにする" })).toBeDisabled();
+  });
+
+  it("submits with start intent when pressing はじめから", async () => {
+    render(<StartRoute />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "はじめから" }));
 
     expect(submitSpy).toHaveBeenCalledWith(
       { intent: "start" },
@@ -71,15 +85,13 @@ describe("StartRoute component", () => {
     );
   });
 
-  it("opens resume dialog and dispatches resume intent after confirmation", () => {
+  it("opens resume dialog and dispatches resume intent after confirmation", async () => {
     render(<StartRoute />);
 
-    fireEvent.click(screen.getByRole("button", { name: "続きから" }));
-    expect(
-      screen.getByText("前回の状態を復元しますか？"),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "続きから" }));
+    expect(await screen.findByText("前回の状態を復元しますか？")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "復元する" }));
+    fireEvent.click(await screen.findByRole("button", { name: "復元する" }));
 
     expect(submitSpy).toHaveBeenCalledWith(
       { intent: "resume" },
@@ -87,10 +99,10 @@ describe("StartRoute component", () => {
     );
   });
 
-  it("navigates to setting when pressing 設定", () => {
+  it("navigates to setting when pressing 設定", async () => {
     render(<StartRoute />);
 
-    fireEvent.click(screen.getByRole("button", { name: "設定" }));
+    fireEvent.click(await screen.findByRole("button", { name: "設定" }));
 
     expect(submitSpy).toHaveBeenCalledWith(
       { intent: "setting" },

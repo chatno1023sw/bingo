@@ -9,6 +9,9 @@ export type StartMenuProps = {
 
 /**
  * Start 画面のメインメニュー。
+ *
+ * - ボタンは縦並びにし、モックと同じ視線移動で操作できるようにします。
+ * - 余白・角丸は design/image.png を参考に最小構成へ揃えています。
  */
 export const StartMenu: FC<StartMenuProps> = ({
   onStart,
@@ -17,19 +20,13 @@ export const StartMenu: FC<StartMenuProps> = ({
   isSubmitting = false,
 }) => {
   return (
-    <section className="flex flex-col items-center space-y-8 rounded-3xl bg-white/80 px-10 py-12 shadow-xl backdrop-blur">
-      <div className="text-center">
-        <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">司会者メニュー</p>
-        <h1 className="mt-2 text-4xl font-bold text-slate-900">Bingo Night 2025</h1>
-        <p className="mt-4 max-w-md text-sm text-slate-600">
-          新年会の抽選をここからスタートしましょう。「続きから」は保存済みの状態を復元します。
-        </p>
-      </div>
+    <section className="flex flex-col items-center justify-center gap-8">
+      <h1 className="text-3xl font-semibold tracking-wide text-slate-900">BINGOゲーム</h1>
 
-      <div className="grid w-full gap-4 md:grid-cols-3">
+      <div className="flex w-48 flex-col gap-4">
         <button
           type="button"
-          className="rounded-2xl border border-transparent bg-gradient-to-br from-indigo-500 to-blue-500 px-6 py-4 text-lg font-semibold text-white transition hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-[#0F6A86] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d5870] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onStart}
           disabled={isSubmitting}
         >
@@ -37,7 +34,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         </button>
         <button
           type="button"
-          className="rounded-2xl border border-indigo-200 bg-white px-6 py-4 text-lg font-semibold text-indigo-600 shadow-sm transition hover:border-indigo-400 hover:text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-[#114d63] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d3e50] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onResumeRequest}
           disabled={isSubmitting}
         >
@@ -45,7 +42,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         </button>
         <button
           type="button"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-4 text-lg font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-[#114d63] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d3e50] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onNavigateSetting}
           disabled={isSubmitting}
         >
