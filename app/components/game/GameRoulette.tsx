@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Wheel } from "react-custom-roulette";
+
+type WheelComponentType = (typeof import("react-custom-roulette"))["Wheel"];
 
 export type GameRouletteProps = {
   numbers: number[];
@@ -14,6 +15,22 @@ export type GameRouletteProps = {
  */
 export const GameRoulette = ({ numbers, currentNumber, spinning }: GameRouletteProps) => {
   const [mustSpin, setMustSpin] = useState(false);
+  const [WheelComponent, setWheelComponent] = useState<WheelComponentType | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    let mounted = true;
+    import("react-custom-roulette").then((module) => {
+      if (mounted) {
+        setWheelComponent(() => module.Wheel);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (spinning) {
@@ -43,19 +60,26 @@ export const GameRoulette = ({ numbers, currentNumber, spinning }: GameRouletteP
 
   return (
     <div className="rounded-3xl border border-indigo-500/30 bg-slate-900/70 p-6 shadow-2xl">
-      <Wheel
-        mustStartSpinning={mustSpin}
-        prizeNumber={prizeIndex}
-        data={data}
-        spinDuration={0.8}
-        outerBorderColor="#818CF8"
-        outerBorderWidth={8}
-        radiusLineColor="#312E81"
-        textDistance={80}
-        onStopSpinning={() => {
-          setMustSpin(false);
-        }}
-      />
+      {WheelComponent ? (
+        <WheelComponent
+          mustStartSpinning={mustSpin}
+          prizeNumber={prizeIndex}
+          data={data}
+          spinDuration={0.8}
+          outerBorderColor="#818CF8"
+          outerBorderWidth={8}
+          radiusLineColor="#312E81"
+          textDistance={80}
+          onStopSpinning={() => {
+            setMustSpin(false);
+          }}
+        />
+      ) : (
+        <div className="flex h-[360px] flex-col items-center justify-center gap-3 text-indigo-100">
+          <span className="text-lg font-semibold">ルーレットコンポーネントを準備中...</span>
+          <span className="text-sm text-indigo-200/80">ブラウザ読み込み後に抽選演出を表示します</span>
+        </div>
+      )}
     </div>
   );
 };
