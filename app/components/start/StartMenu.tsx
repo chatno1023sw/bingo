@@ -20,8 +20,8 @@ export const StartMenu: FC<StartMenuProps> = ({
   isSubmitting = false,
 }) => {
   return (
-    <section className="flex flex-col items-center justify-center gap-8">
-      <h1 className="text-3xl font-semibold tracking-wide text-slate-900">BINGOゲーム</h1>
+    <section className="flex flex-col items-center justify-center gap-15">
+      <h1 className="text-5xl font-semibold tracking-wide text-slate-900">BINGOゲーム</h1>
 
       <div className="flex w-48 flex-col gap-4">
         <button
