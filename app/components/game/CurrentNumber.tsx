@@ -6,18 +6,19 @@ export type CurrentNumberProps = {
 };
 
 /**
- * 中央の番号表示パネル。
+ * 中央表示のシンプルな数字パネル。
  */
 export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
   const display = value == null ? "--" : value.toString().padStart(2, "0");
 
   return (
-    <div className="mt-6 rounded-3xl border border-indigo-300/40 bg-gradient-to-br from-slate-900 to-indigo-900 px-8 py-6 text-center shadow-xl">
-      <p className="text-sm font-semibold uppercase tracking-wide text-indigo-200">現在の当選番号</p>
-      <p className="mt-2 text-7xl font-extrabold text-white">{display}</p>
-      <p className="mt-3 text-sm text-slate-300">
-        {isDrawing ? "抽選中..." : value == null ? "抽選を開始してください" : "おめでとうございます！"}
-      </p>
+    <div className="flex flex-col items-center gap-4 text-slate-900">
+      <div
+        className={`flex h-56 w-56 items-center justify-center rounded border border-slate-500 bg-white text-6xl font-bold transition ${isDrawing ? "opacity-50" : "opacity-100"}`}
+      >
+        {display}
+      </div>
+      <p className="text-xs text-slate-500">{isDrawing ? "抽選中..." : "抽選結果を中央に表示します"}</p>
     </div>
   );
 };

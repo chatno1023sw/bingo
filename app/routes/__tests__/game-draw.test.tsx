@@ -26,6 +26,21 @@ vi.mock("~/common/hooks/usePrizeManager", () => ({
   usePrizeManager: () => prizeManagerMock,
 }));
 
+const bgmPreferenceMock = vi.hoisted(() => ({
+  preference: {
+    enabled: true,
+    volume: 0.6,
+    updatedAt: "2025-01-01T00:00:00.000Z",
+  },
+  isReady: true,
+  toggle: vi.fn(),
+  error: null as string | null,
+}));
+
+vi.mock("~/common/hooks/useBgmPreference", () => ({
+  useBgmPreference: () => bgmPreferenceMock,
+}));
+
 const createEnvelope = (): GameStateEnvelope => ({
   gameState: {
     currentNumber: 12,
@@ -70,6 +85,8 @@ const fetcherMock: FetcherMock = {
   data: null,
 };
 
+const navigateSpy = vi.fn();
+
 const loaderDataMock: LoaderData = createLoaderData();
 
 const resetPrizeManager = () => {
@@ -88,6 +105,7 @@ vi.mock("react-router", async () => {
     ...actual,
     useLoaderData: () => loaderDataMock,
     useFetcher: () => fetcherMock,
+    useNavigate: () => navigateSpy,
   };
 });
 
@@ -125,20 +143,21 @@ describe("GameRoute component", () => {
     loaderDataMock.availableNumbers = [1, 2, 3];
     loaderDataMock.gameState = createEnvelope().gameState;
     resetPrizeManager();
+    navigateSpy.mockReset();
+    bgmPreferenceMock.toggle.mockReset();
   });
 
   it("renders current number and history entries", () => {
     render(<GameRoute />);
 
-    expect(screen.getByText("現在の当選番号")).toBeInTheDocument();
-    expect(screen.getByText("直近の当選番号")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "過去の番号を確認" })).toBeInTheDocument();
     expect(screen.getAllByText("12").length).toBeGreaterThan(0);
   });
 
   it("submits draw intent when pressing 抽選開始", () => {
     render(<GameRoute />);
 
-    fireEvent.click(screen.getByRole("button", { name: "抽選開始" }));
+    fireEvent.click(screen.getByRole("button", { name: /抽選を開始/ }));
 
     expect(fetcherMock.submit).toHaveBeenCalledWith(
       { intent: "draw" },
@@ -149,7 +168,7 @@ describe("GameRoute component", () => {
   it("opens modal when clicking history button", () => {
     render(<GameRoute />);
 
-    fireEvent.click(screen.getByRole("button", { name: "これまでの当選番号を見る" }));
+    fireEvent.click(screen.getByRole("button", { name: "過去の番号を確認" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });

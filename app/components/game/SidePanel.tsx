@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import { PrizeList } from "~/components/game/PrizeList";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 
-export const SidePanel = () => {
+export type SidePanelProps = {
+  className?: string;
+};
+
+export const SidePanel = ({ className = "" }: SidePanelProps) => {
   const { prizes, isLoading, isMutating, error, togglePrize, refresh } = usePrizeManager();
 
   const summary = useMemo(() => {
@@ -15,43 +19,41 @@ export const SidePanel = () => {
   }, [prizes]);
 
   return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-      <div className="flex items-center justify-between">
+    <section
+      className={`flex h-full flex-col rounded-3xl border border-slate-400 bg-white p-4 text-slate-900 ${className}`}
+    >
+      <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">景品の当選管理</h2>
-          <p className="text-sm text-slate-400">当選ステータスを手動で更新できます</p>
+          <h2 className="text-base font-semibold">景品一覧</h2>
+          <p className="text-xs text-slate-500">
+            当選済み {summary.selected} / {summary.total}
+          </p>
+          <p className="text-xs text-slate-400">残り {summary.remaining} 件</p>
         </div>
         <button
           type="button"
-          className="rounded-2xl border border-slate-600 px-4 py-2 text-xs text-slate-300 hover:border-slate-400"
+          className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
           onClick={() => refresh().catch(() => {})}
           disabled={isLoading}
         >
           再読み込み
         </button>
-      </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
-        <div className="rounded-2xl bg-slate-800/60 p-3">
-          <p className="text-slate-400">総数</p>
-          <p className="text-2xl font-semibold text-white">{summary.total}</p>
-        </div>
-        <div className="rounded-2xl bg-emerald-900/20 p-3">
-          <p className="text-emerald-200">当選済み</p>
-          <p className="text-2xl font-semibold text-emerald-200">{summary.selected}</p>
-        </div>
-        <div className="rounded-2xl bg-indigo-900/20 p-3">
-          <p className="text-indigo-200">残り</p>
-          <p className="text-2xl font-semibold text-indigo-200">{summary.remaining}</p>
-        </div>
-      </div>
-      <div className="mt-4">
+      </header>
+      <div className="mt-4 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
           <p className="text-sm text-slate-500">景品情報を読み込み中です...</p>
         ) : (
           <PrizeList prizes={prizes} disabled={isMutating} onToggle={togglePrize} />
         )}
       </div>
-      {error && <p className="mt-4 text-xs text-rose-300">{error}</p>}
+      <button
+        type="button"
+        className="mt-4 w-full rounded-full bg-[#0F6A86] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:opacity-40"
+        disabled
+      >
+        景品ルーレット
+      </button>
+      {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
     </section>
   );
 };

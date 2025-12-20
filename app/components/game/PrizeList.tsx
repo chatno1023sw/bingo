@@ -14,7 +14,7 @@ export const PrizeList: FC<PrizeListProps> = ({ prizes, disabled = false, onTogg
   }
 
   return (
-    <ul className="mt-4 space-y-3">
+    <ul className="space-y-3">
       {prizes.map((prize) => (
         <PrizeListItem
           key={prize.id}
