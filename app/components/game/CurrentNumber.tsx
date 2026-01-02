@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { cn } from "~/lib/utils";
 
 export type CurrentNumberProps = {
   value: number | null;
@@ -14,7 +15,10 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
   return (
     <div className="flex flex-col items-center gap-6 text-slate-900">
       <div
-        className={`flex h-[28rem] w-[28rem] items-center justify-center rounded border border-slate-500 bg-white text-[15rem] font-bold transition ${isDrawing ? "opacity-50" : "opacity-100"}`}
+        className={cn(
+          "flex h-[28rem] w-[28rem] items-center justify-center rounded border border-slate-500 bg-white text-[15rem] font-bold transition",
+          isDrawing ? "opacity-50" : "opacity-100",
+        )}
       >
         {display}
       </div>

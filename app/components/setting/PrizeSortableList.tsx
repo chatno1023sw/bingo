@@ -5,6 +5,7 @@ import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Prize, PrizeList } from "~/common/types";
+import { cn } from "~/lib/utils";
 
 export type PrizeSortableListProps = {
   prizes: PrizeList;
@@ -73,9 +74,10 @@ const SortableItem: FC<{
     <li
       ref={setNodeRef}
       style={style}
-      className={`relative w-full max-w-[300px] rounded-3xl bg-white p-6 shadow-[0_12px_24px_rgba(15,23,42,0.16)] transition-transform duration-200 ease-out ${
-        isDragging ? "bg-slate-50" : "bg-white"
-      }`}
+      className={cn(
+        "relative w-full max-w-75 rounded-3xl bg-white p-6 shadow-[0_12px_24px_rgba(15,23,42,0.16)] transition-transform duration-200 ease-out",
+        isDragging ? "bg-slate-50" : "bg-white",
+      )}
       {...attributes}
       {...listeners}
     >
@@ -224,7 +226,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
       <SortableContext items={ids} strategy={rectSortingStrategy}>
         <div className="w-full flex justify-center">
           <ul
-            className="w-[1300px] mx-auto flex flex-wrap justify-start gap-4"
+            className="w-325 mx-auto flex flex-wrap justify-start gap-4"
             data-testid="setting-prize-list"
             id="setting-prize-list"
           >

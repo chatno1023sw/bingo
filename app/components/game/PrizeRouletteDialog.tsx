@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FC } from "react";
 import { createPortal } from "react-dom";
 import type { Prize } from "~/common/types";
+import { cn } from "~/lib/utils";
 
 export type PrizeRouletteDialogProps = {
   open: boolean;
@@ -52,7 +53,10 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
         }
         let next = selectable[Math.floor(Math.random() * selectable.length)].index;
         if (next === prev) {
-          next = selectable[(Math.floor(Math.random() * (selectable.length - 1)) + 1) % selectable.length].index;
+          next =
+            selectable[
+              (Math.floor(Math.random() * (selectable.length - 1)) + 1) % selectable.length
+            ].index;
         }
         return next;
       });
@@ -109,7 +113,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
           ×
         </button>
         <h2 className="text-xl font-bold text-slate-900">景品ルーレット</h2>
-        <div className="mt-6 grid grid-cols-5 gap-[5px]">
+        <div className="mt-6 grid grid-cols-5 gap-1.25">
           {entries.map((prize, index) => {
             const isActive = index === activeIndex;
             const isWinner = isFlashing && index === winnerIndex;
@@ -117,11 +121,12 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
             return (
               <div
                 key={prize.id}
-                className={`flex items-center justify-center roulette-card aspect-square text-xs ${
-                  isDisabled ? "roulette-card--disabled" : ""
-                } ${isActive && !isDisabled ? "roulette-card--active" : ""} ${
-                  isWinner && !isDisabled ? "roulette-card--winner" : ""
-                }`}
+                className={cn(
+                  "flex items-center justify-center roulette-card aspect-square text-xs",
+                  isDisabled && "roulette-card--disabled",
+                  isActive && !isDisabled && "roulette-card--active",
+                  isWinner && !isDisabled && "roulette-card--winner",
+                )}
               >
                 {prize.prizeName || "賞名未設定"}
               </div>
