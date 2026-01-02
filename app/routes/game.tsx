@@ -14,6 +14,7 @@ import { SidePanel } from "~/components/game/SidePanel";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { getHistoryView } from "~/common/services/historyService";
+import { ResetDialog } from "~/components/game/ResetDialog";
 
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
@@ -43,8 +44,10 @@ export default function GameRoute() {
   const [session, setSession] = useState<LoaderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [drawError, setDrawError] = useState<string | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
   const navigate = useNavigate();
   const {
     preference,
@@ -58,8 +61,9 @@ export default function GameRoute() {
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const availableNumbers = session?.availableNumbers ?? [];
-  const bgmDisabled = !isBgmReady || isMutating;
-  const isButtonDisabled = isMutating || isAnimating || availableNumbers.length === 0;
+  const bgmDisabled = !isBgmReady || isMutating || isResetting;
+  const isButtonDisabled =
+    isMutating || isResetting || isAnimating || availableNumbers.length === 0;
   const currentNumber = session?.gameState.currentNumber ?? null;
 
   useEffect(() => {
@@ -132,8 +136,21 @@ export default function GameRoute() {
     }
   };
 
+  const handleReset = async () => {
+    setIsResetting(true);
+    try {
+      const nextSession = await startSession();
+      const nextData = await buildLoaderData(nextSession);
+      setSession(nextData);
+      setDrawError(null);
+      setResetOpen(false);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const handleDraw = () => {
-    if (isAnimating || isMutating || availableNumbers.length === 0) {
+    if (isAnimating || isMutating || isResetting || availableNumbers.length === 0) {
       return;
     }
     const pool = availableNumbers.length > 0 ? availableNumbers : NUMBER_POOL;
@@ -198,6 +215,14 @@ export default function GameRoute() {
             />
             <button
               type="button"
+              className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setResetOpen(true)}
+              disabled={isLoading || isResetting}
+            >
+              リセット
+            </button>
+            <button
+              type="button"
               className="rounded-full border border-slate-300 px-3 py-1 text-xl text-slate-600 transition hover:bg-slate-50"
               aria-label="Start 画面に戻る"
               onClick={handleBackToStart}
@@ -231,6 +256,12 @@ export default function GameRoute() {
           </div>
         </div>
       </main>
+      <ResetDialog
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        onConfirm={handleReset}
+        disabled={isResetting}
+      />
     </PrizeProvider>
   );
 }

@@ -19,6 +19,20 @@ export type PrizeSortableListProps = {
   onUpdate?: (id: string, patch: Partial<Prize>) => void;
 };
 
+const PRIZE_NAME_OPTIONS = [
+  "1等",
+  "2等",
+  "3等",
+  "4等",
+  "5等",
+  "6等",
+  "7等",
+  "8等",
+  "9等",
+  "10等",
+  "特別賞",
+];
+
 const SortableItem: FC<{
   id: string;
   name: string;
@@ -62,11 +76,21 @@ const SortableItem: FC<{
     setLocalDetail(detail);
   }, [detail]);
 
+  const prizeNameOptions = useMemo(() => {
+    if (!localName) {
+      return PRIZE_NAME_OPTIONS;
+    }
+    if (PRIZE_NAME_OPTIONS.includes(localName)) {
+      return PRIZE_NAME_OPTIONS;
+    }
+    return [localName, ...PRIZE_NAME_OPTIONS];
+  }, [localName]);
+
   return (
     <li
       ref={setNodeRef}
       style={style}
-      className={`grid grid-cols-[110px,150px,1fr,110px,32px] items-center gap-3 px-3 py-2 text-[11px] ${
+      className={`grid grid-cols-[110px,160px,1fr,110px,32px] items-center gap-3 px-3 py-2 text-[11px] ${
         isDragging ? "bg-slate-50" : "bg-white"
       }`}
     >
@@ -79,22 +103,25 @@ const SortableItem: FC<{
         >
           ::
         </button>
-        <input
+        <select
           className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-[11px] text-slate-700"
           value={localName}
-          onChange={(event) => setLocalName(event.target.value)}
-          onBlur={() => {
-            if (!onUpdate) {
-              return;
-            }
-            const nextValue = localName.trim();
-            if (nextValue !== name) {
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            setLocalName(nextValue);
+            if (onUpdate && nextValue !== name) {
               onUpdate({ prizeName: nextValue });
             }
           }}
-          placeholder="賞名を入力"
           disabled={disabled}
-        />
+        >
+          <option value="">賞名を選択</option>
+          {prizeNameOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex items-center gap-2">
         <div className="flex h-9 w-12 items-center justify-center rounded border border-slate-300 bg-slate-100">
@@ -143,8 +170,8 @@ const SortableItem: FC<{
         }}
         disabled={disabled}
       >
-        <option value="unselected">未抽選</option>
-        <option value="selected">抽選済み</option>
+        <option value="unselected">未選出</option>
+        <option value="selected">選出済み</option>
       </select>
       <div className="flex items-center justify-end">
         <button
@@ -236,11 +263,11 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
     return (
       <div className="overflow-x-auto">
         <div className="min-w-[720px] border-x border-slate-300">
-          <div className="grid grid-cols-[110px,150px,1fr,110px,32px] items-center gap-3 border-b border-slate-300 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+          <div className="grid grid-cols-[110px,160px,1fr,110px,32px] items-center gap-3 border-b border-slate-300 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500">
             <span>賞名</span>
             <span>画像</span>
             <span>賞品名</span>
-            <span>当選済みか</span>
+            <span>選出済みか</span>
             <span className="sr-only">操作</span>
           </div>
           <p className="px-4 py-6 text-sm text-slate-500">景品が登録されていません。</p>
@@ -254,11 +281,11 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <div className="overflow-x-auto">
           <div className="min-w-[720px] border-x border-slate-300">
-            <div className="grid grid-cols-[110px,150px,1fr,110px,32px] items-center gap-3 border-b border-slate-300 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+            <div className="grid grid-cols-[110px,160px,1fr,110px,32px] items-center gap-3 border-b border-slate-300 bg-white px-3 py-2 text-[11px] font-semibold text-slate-500">
               <span>賞名</span>
               <span>画像</span>
               <span>賞品名</span>
-              <span>当選済みか</span>
+              <span>選出済みか</span>
               <span className="sr-only">操作</span>
             </div>
             <ul
