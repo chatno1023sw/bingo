@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { CsvImportResult, PrizeList } from "~/common/types";
+import Papa from "papaparse";
 import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { CsvControls } from "~/components/setting/CsvControls";
 import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
 import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
+import { UploadImagesDialog } from "~/components/setting/UploadImagesDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
 
 const SettingContent = () => {
@@ -22,6 +24,9 @@ const SettingContent = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<FileList | null>(null);
 
   const summaryFrom = (
     sourceName: string,
@@ -59,6 +64,59 @@ const SettingContent = () => {
     setExportText(csv);
   };
 
+  const handleCsvImportClick = () => {
+    const input = document.getElementById("csv-import-simple");
+    if (input instanceof HTMLInputElement) {
+      input.click();
+    }
+  };
+
+  const normalizeSelected = (value: string | undefined): boolean => {
+    if (!value) {
+      return false;
+    }
+    const normalized = value.trim().toLowerCase();
+    return (
+      normalized === "true" ||
+      normalized === "1" ||
+      normalized === "yes" ||
+      normalized === "selected" ||
+      value.trim() === "選出"
+    );
+  };
+
+  const handleCsvImport = async (file: File) => {
+    const text = await file.text();
+    type CsvRow = { 賞名?: string; 商品名?: string; 選出?: string };
+    const result = Papa.parse<CsvRow>(text, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    if (result.errors.length > 0) {
+      setLocalError("csv-import-error");
+      return;
+    }
+    const parsed = result.data
+      .map((row, index) => ({
+        id:
+          globalThis.crypto?.randomUUID?.() ??
+          `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
+        order: prizes.length + index,
+        prizeName: row.賞名?.trim() ?? "",
+        itemName: row.商品名?.trim() ?? "",
+        imagePath: null,
+        selected: normalizeSelected(row.選出),
+        memo: null,
+      }))
+      .filter((row) => row.prizeName || row.itemName);
+    if (parsed.length === 0) {
+      setLocalError("csv-import-empty");
+      return;
+    }
+    await applyPrizes([...prizes, ...parsed]);
+    setLocalError(null);
+  };
+
   const handleDeleteAll = async () => {
     setIsDeleting(true);
     try {
@@ -82,6 +140,67 @@ const SettingContent = () => {
       setResetOpen(false);
     } finally {
       setIsResetting(false);
+    }
+  };
+
+  const handleUploadImages = async () => {
+    const files = pendingUploads;
+    if (!files || files.length === 0) {
+      setUploadOpen(false);
+      setPendingUploads(null);
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const mappings = await Promise.all(
+        Array.from(files).map((file) => {
+          return new Promise<{ name: string; dataUrl: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result !== "string") {
+                reject(new Error("invalid-image"));
+                return;
+              }
+              resolve({ name: file.name, dataUrl: reader.result });
+            };
+            reader.onerror = () => reject(new Error("read-error"));
+            reader.readAsDataURL(file);
+          });
+        }),
+      );
+      const normalizeName = (value: string) =>
+        value
+          .trim()
+          .toLowerCase()
+          .replace(/\.[^/.]+$/, "");
+      const grouped = mappings.reduce<Record<string, { name: string; dataUrl: string }[]>>(
+        (acc, entry) => {
+          const key = normalizeName(entry.name);
+          acc[key] = acc[key] ? [...acc[key], entry] : [entry];
+          return acc;
+        },
+        {},
+      );
+      const next = prizes.map((prize) => {
+        const itemKey = normalizeName(prize.itemName);
+        const matched = Object.entries(grouped).find(([key]) => key.includes(itemKey));
+        if (!matched) {
+          return prize;
+        }
+        const images = matched[1];
+        if (images.length === 0) {
+          return prize;
+        }
+        return {
+          ...prize,
+          imagePath: images[0].dataUrl,
+        };
+      });
+      await applyPrizes(next);
+      setUploadOpen(false);
+      setPendingUploads(null);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -149,6 +268,22 @@ const SettingContent = () => {
           <button
             type="button"
             className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            onClick={handleCsvImportClick}
+            disabled={isMutating}
+          >
+            CSV追加
+          </button>
+          <button
+            type="button"
+            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            onClick={() => setUploadOpen(true)}
+            disabled={isMutating || prizes.length === 0}
+          >
+            画像追加
+          </button>
+          <button
+            type="button"
+            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
             onClick={() => setResetOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
@@ -173,6 +308,18 @@ const SettingContent = () => {
       </header>
 
       <div className="sr-only">
+        <input
+          id="csv-import-simple"
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) {
+              void handleCsvImport(file);
+            }
+            event.currentTarget.value = "";
+          }}
+        />
         <CsvControls
           disabled={isMutating}
           onFileImport={handleFileImport}
@@ -208,6 +355,13 @@ const SettingContent = () => {
         onClose={() => setResetOpen(false)}
         onConfirm={handleResetSelections}
         disabled={isResetting}
+      />
+      <UploadImagesDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onConfirm={handleUploadImages}
+        onFilesSelected={setPendingUploads}
+        disabled={isUploading}
       />
     </section>
   );
