@@ -47,9 +47,14 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 
     intervalRef.current = setInterval(() => {
       setActiveIndex((prev) => {
-        const current = selectable.findIndex((entry) => entry.index === prev);
-        const nextIndex = (current + 1) % selectable.length;
-        return selectable[nextIndex].index;
+        if (selectable.length === 1) {
+          return selectable[0].index;
+        }
+        let next = selectable[Math.floor(Math.random() * selectable.length)].index;
+        if (next === prev) {
+          next = selectable[(Math.floor(Math.random() * (selectable.length - 1)) + 1) % selectable.length].index;
+        }
+        return next;
       });
     }, 120);
 
