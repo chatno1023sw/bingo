@@ -10,6 +10,7 @@ import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
 import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
 import { UploadImagesDialog } from "~/components/setting/UploadImagesDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
+import { Button } from "~/components/common/Button";
 
 const SettingContent = () => {
   const navigate = useNavigate();
@@ -257,54 +258,54 @@ const SettingContent = () => {
     <section className="space-y-3">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <button
+          <Button
             type="button"
             className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
             onClick={handleAddCard}
             disabled={isMutating}
           >
             カード追加
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
             onClick={handleCsvImportClick}
             disabled={isMutating}
           >
             CSV追加
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
             onClick={() => setUploadOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
             画像追加
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
             onClick={() => setResetOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
             全未選出
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="rounded border border-rose-500 px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-none transition hover:bg-rose-50 disabled:opacity-50"
             onClick={() => setDeleteOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
             カード全削除
-          </button>
+          </Button>
         </div>
-        <button
+        <Button
           type="button"
           className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800"
           onClick={() => navigate("/start")}
         >
           戻る
-        </button>
+        </Button>
       </header>
 
       <div className="sr-only">

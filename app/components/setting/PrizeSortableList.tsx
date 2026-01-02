@@ -6,6 +6,7 @@ import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@d
 import { CSS } from "@dnd-kit/utilities";
 import type { Prize, PrizeList } from "~/common/types";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/common/Button";
 
 export type PrizeSortableListProps = {
   prizes: PrizeList;
@@ -81,7 +82,7 @@ const SortableItem: FC<{
       {...attributes}
       {...listeners}
     >
-      <button
+      <Button
         type="button"
         className="absolute right-4 top-3 text-xl text-slate-900"
         aria-label="削除"
@@ -89,8 +90,8 @@ const SortableItem: FC<{
         disabled={disabled || !onRemove}
       >
         ×
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-slate-900 bg-white text-lg font-semibold text-slate-800"
         onClick={handleImageClick}
@@ -105,7 +106,7 @@ const SortableItem: FC<{
         ) : (
           "クリックで画像を追加"
         )}
-      </button>
+      </Button>
       <input
         ref={fileInputRef}
         id={inputId}

@@ -3,6 +3,7 @@ import { PrizeList } from "~/components/game/PrizeList";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
 import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
+import { Button } from "~/components/common/Button";
 
 export type SidePanelProps = {
   className?: string;
@@ -55,14 +56,14 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           </span>
         </div>
 
-        <button
+        <Button
           type="button"
           className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
           onClick={() => setShowPrizeNameOnly((prev) => !prev)}
           disabled={isLoading}
         >
           表示切替
-        </button>
+        </Button>
       </header>
       <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
@@ -76,14 +77,14 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           />
         )}
       </div>
-      <button
+      <Button
         type="button"
         className="mt-4 w-full rounded-full bg-[#0F6A86] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:opacity-40"
         onClick={handleRouletteStart}
         disabled={isLoading || prizes.length === 0}
       >
         景品ルーレット
-      </button>
+      </Button>
       {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
       <PrizeRouletteDialog
         open={rouletteOpen}

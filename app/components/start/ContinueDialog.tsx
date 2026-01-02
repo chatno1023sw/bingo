@@ -1,5 +1,6 @@
 import type { FC, ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Button } from "~/components/common/Button";
 
 export type ContinueDialogProps = {
   open: boolean;
@@ -33,22 +34,22 @@ export const ContinueDialog: FC<ContinueDialogProps> = ({
         <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
         <p className="mt-3 text-sm text-slate-600">{description}</p>
         <div className="mt-8 flex flex-col gap-3 md:flex-row">
-          <button
+          <Button
             type="button"
             className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 transition hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-200"
             onClick={onCancel}
             disabled={isSubmitting}
           >
             キャンセル
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="flex-1 rounded-2xl border border-transparent bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onConfirm}
             disabled={isSubmitting}
           >
             復元する
-          </button>
+          </Button>
         </div>
       </div>
     </div>

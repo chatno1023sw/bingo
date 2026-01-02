@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { createPortal } from "react-dom";
 import type { Prize } from "~/common/types";
+import { Button } from "~/components/common/Button";
 
 export type PrizeResultDialogProps = {
   open: boolean;
@@ -29,14 +30,14 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
   const dialog = (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
       <div className="relative w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl">
-        <button
+        <Button
           type="button"
           className="absolute right-4 top-4 rounded-full border border-slate-200 px-2 py-1 text-sm text-slate-500 transition hover:bg-slate-50"
           onClick={onClose}
           aria-label="閉じる"
         >
           ×
-        </button>
+        </Button>
         <h2 className="text-xl font-bold text-slate-900">当選結果</h2>
         <div className="mt-6 space-y-4">
           <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-slate-300 bg-slate-50">

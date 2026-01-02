@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { Prize } from "~/common/types";
 import { cn } from "~/lib/utils";
 import { Image } from "lucide-react";
+import { Button } from "~/components/common/Button";
 
 export type PrizeListItemProps = {
   prize: Prize;
@@ -48,7 +49,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
           </p>
         )}
       </div>
-      <button
+      <Button
         type="button"
         className={cn(
           "rounded-full px-4 py-1 text-xs font-semibold transition",
@@ -58,7 +59,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         disabled={disabled}
       >
         {prize.selected ? "戻す" : "除外"}
-      </button>
+      </Button>
     </li>
   );
 };

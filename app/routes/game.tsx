@@ -12,6 +12,7 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { SidePanel } from "~/components/game/SidePanel";
 import { BgmToggle } from "~/components/common/BgmToggle";
+import { Button } from "~/components/common/Button";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { getHistoryView } from "~/common/services/historyService";
 import { ResetDialog } from "~/components/game/ResetDialog";
@@ -192,13 +193,13 @@ export default function GameRoute() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-slate-900">
         <p className="text-sm text-rose-500">データの読み込みに失敗しました。</p>
-        <button
+        <Button
           type="button"
           className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-50"
           onClick={() => navigate("/start")}
         >
           Start 画面に戻る
-        </button>
+        </Button>
       </main>
     );
   }
@@ -213,22 +214,22 @@ export default function GameRoute() {
               onToggle={() => toggleBgm()}
               disabled={bgmDisabled}
             />
-            <button
+            <Button
               type="button"
               className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => setResetOpen(true)}
               disabled={isLoading || isResetting}
             >
               リセット
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               className="rounded-full border border-slate-300 px-3 py-1 text-xl text-slate-600 transition hover:bg-slate-50"
               aria-label="Start 画面に戻る"
               onClick={handleBackToStart}
             >
               {/* todo: あとでlucide reactにしたい */}×
-            </button>
+            </Button>
           </header>
           {bgmError ? (
             <p className="text-right text-xs text-rose-500">BGM 設定の保存に失敗しました</p>
@@ -238,14 +239,14 @@ export default function GameRoute() {
 
             <section className="flex flex-1 flex-col items-center justify-center gap-8">
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
-              <button
+              <Button
                 type="button"
                 className="w-80 rounded-full bg-[#0F6A86] px-8 py-4 text-xl font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
                 {drawButtonLabel}
-              </button>
+              </Button>
               {drawError === "no-available-numbers" && (
                 <p className="text-sm text-rose-500">すべての番号が抽選済みです。</p>
               )}

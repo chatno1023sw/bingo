@@ -1,5 +1,6 @@
 import type { FC, ChangeEvent } from "react";
 import type { CsvImportResult } from "~/common/types";
+import { Button } from "~/components/common/Button";
 
 export type CsvControlsProps = {
   disabled?: boolean;
@@ -50,14 +51,14 @@ export const CsvControls: FC<CsvControlsProps> = ({
           />
         </div>
         <div className="flex items-end gap-2">
-          <button
+          <Button
             type="button"
             className="rounded bg-sky-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-50"
             onClick={onExport}
             disabled={disabled}
           >
             CSV エクスポート
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -69,14 +70,14 @@ export const CsvControls: FC<CsvControlsProps> = ({
           value={manualCsv}
           onChange={(event) => onManualCsvChange(event.target.value)}
         />
-        <button
+        <Button
           type="button"
           className="rounded border border-sky-700 px-3 py-2 text-xs font-semibold text-sky-800 shadow-sm transition hover:bg-sky-50 disabled:opacity-50"
           onClick={onManualImport}
           disabled={disabled}
         >
           貼り付け内容を取り込む
-        </button>
+        </Button>
       </div>
 
       {summary && (

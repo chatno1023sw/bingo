@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { Button } from "~/components/common/Button";
 
 export type BulkActionsProps = {
   total: number;
@@ -31,14 +32,14 @@ export const BulkActions: FC<BulkActionsProps> = ({
           <p className="text-2xl font-semibold text-indigo-200">{remaining}</p>
         </div>
       </div>
-      <button
+      <Button
         type="button"
         className="mt-4 w-full rounded-2xl border border-rose-500/60 px-4 py-2 font-semibold text-rose-200"
         onClick={onDeleteAll}
         disabled={disabled || total === 0}
       >
         すべて削除
-      </button>
+      </Button>
     </div>
   );
 };
