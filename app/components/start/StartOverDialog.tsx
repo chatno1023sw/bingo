@@ -1,30 +1,29 @@
 import type { FC, ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-export type UploadImagesDialogProps = {
+export type StartOverDialogProps = {
   open: boolean;
   title?: string;
   description?: ReactNode;
   onClose: () => void;
   onConfirm: () => void;
-  onFilesSelected: (files: FileList | null) => void;
   disabled?: boolean;
 };
 
 /**
- * 賞品名に紐づく画像を追加する確認ダイアログ。
+ * 「はじめから」押下時の確認ダイアログです。
  *
- * - OK 押下時に選択済みのファイル群を `onConfirm` で渡します。
- * - `open` が false の場合は描画せず、ポータル生成も行いません。
- * - Chrome DevTools MCP では「画像追加」押下後にモーダルが表示されることを確認します。
+ * - 入力制約: `open` が false の場合は描画せず、`onClose`/`onConfirm` は必須です。
+ * - 副作用: `createPortal` により `document.body` へ描画します。
+ * - 戻り値: ダイアログの React 要素、または `null` を返します。
+ * - Chrome DevTools MCP では「はじめから」押下時にダイアログが開き、OK で遷移することを確認します。
  */
-export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
+export const StartOverDialog: FC<StartOverDialogProps> = ({
   open,
-  title = "賞品名に紐づけて写真を複数追加できます。",
-  description,
+  title = "最初から始めますか？",
+  description = "過去の履歴は削除されるけど、本当に最初から初めてもいい？",
   onClose,
   onConfirm,
-  onFilesSelected,
   disabled = false,
 }) => {
   if (!open) {
@@ -47,16 +46,7 @@ export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
           ×
         </button>
         <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-        {description ? <p className="mt-3 text-sm text-slate-600">{description}</p> : null}
-        <div className="mt-6">
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(event) => onFilesSelected(event.target.files)}
-            disabled={disabled}
-          />
-        </div>
+        <p className="mt-3 text-sm text-slate-600">{description}</p>
         <div className="mt-8 flex flex-col gap-3 md:flex-row">
           <button
             type="button"
@@ -68,7 +58,7 @@ export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
           </button>
           <button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-slate-800 px-4 py-3 font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-2xl border border-transparent bg-[#0F6A86] px-4 py-3 font-semibold text-white transition hover:bg-[#0d5870] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onConfirm}
             disabled={disabled}
           >

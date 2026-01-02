@@ -87,3 +87,32 @@ export const persistSessionState = async (payload: {
   writeStorageJson(storageKeys.prizes, payload.prizes);
   writeStorageJson(storageKeys.bgm, payload.bgm);
 };
+
+/**
+ * 抽選履歴が保存済みかを判定します。
+ *
+ * - 入力制約: 引数は受け取りません。
+ * - 副作用: localStorage から GameState を読み取ります。
+ * - 戻り値: 抽選履歴が 1 件以上なら true、それ以外は false です。
+ * - Chrome DevTools MCP では Start 画面の「はじめから」押下時に確認ダイアログが開くことを確認します。
+ */
+export const hasStoredDrawHistory = (): boolean => {
+  const storedGameState = readStorageJson<GameState | null>(storageKeys.gameState, null);
+  if (!storedGameState) {
+    return false;
+  }
+  return storedGameState.drawHistory.length > 0;
+};
+
+/**
+ * 保存済みのゲーム状態が存在するかを判定します。
+ *
+ * - 入力制約: 引数は受け取りません。
+ * - 副作用: localStorage から GameState を読み取ります。
+ * - 戻り値: GameState が存在する場合は true、それ以外は false です。
+ * - Chrome DevTools MCP では Start 画面で「続きから」が表示される条件を確認します。
+ */
+export const hasStoredGameState = (): boolean => {
+  const storedGameState = readStorageJson<GameState | null>(storageKeys.gameState, null);
+  return storedGameState !== null;
+};

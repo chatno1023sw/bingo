@@ -5,6 +5,7 @@ export type StartMenuProps = {
   onResumeRequest: () => void;
   onNavigateSetting: () => void;
   isSubmitting?: boolean;
+  canResume?: boolean;
 };
 
 /**
@@ -18,6 +19,7 @@ export const StartMenu: FC<StartMenuProps> = ({
   onResumeRequest,
   onNavigateSetting,
   isSubmitting = false,
+  canResume = true,
 }) => {
   return (
     <section className="flex flex-col items-center justify-center gap-15">
@@ -32,14 +34,16 @@ export const StartMenu: FC<StartMenuProps> = ({
         >
           はじめから
         </button>
-        <button
-          type="button"
-          className="rounded-full bg-[#114d63] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d3e50] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onResumeRequest}
-          disabled={isSubmitting}
-        >
-          続きから
-        </button>
+        {canResume ? (
+          <button
+            type="button"
+            className="rounded-full bg-[#114d63] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d3e50] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onResumeRequest}
+            disabled={isSubmitting}
+          >
+            続きから
+          </button>
+        ) : null}
         <button
           type="button"
           className="rounded-full bg-[#114d63] px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d3e50] focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50"

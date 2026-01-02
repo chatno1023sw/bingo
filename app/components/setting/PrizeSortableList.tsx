@@ -136,7 +136,7 @@ const SortableItem: FC<{
           />
         </label>
         <label className="flex items-center gap-3 font-semibold">
-          <span className="w-20">商品名</span>
+          <span className="w-20">賞品名</span>
           <input
             className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
             value={localDetail}
@@ -150,7 +150,7 @@ const SortableItem: FC<{
                 onUpdate({ itemName: nextValue });
               }
             }}
-            placeholder="商品名を入力"
+            placeholder="賞品名を入力"
             disabled={disabled}
           />
         </label>

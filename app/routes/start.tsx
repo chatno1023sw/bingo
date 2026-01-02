@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { startSession, resumeSession } from "~/common/services/sessionService";
+import {
+  startSession,
+  resumeSession,
+  hasStoredDrawHistory,
+  hasStoredGameState,
+} from "~/common/services/sessionService";
 import { StartMenu } from "~/components/start/StartMenu";
-import { ContinueDialog } from "~/components/start/ContinueDialog";
+import { StartOverDialog } from "~/components/start/StartOverDialog";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 
@@ -13,8 +18,9 @@ import { useBgmPreference } from "~/common/hooks/useBgmPreference";
  * - 画面遷移の前に localStorage を更新し、ブラウザ完結のフローで開始状態を整えます。
  */
 export default function StartRoute() {
-  const [continueDialogOpen, setContinueDialogOpen] = useState(false);
+  const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canResume, setCanResume] = useState(false);
   const navigate = useNavigate();
   const {
     preference,
@@ -33,6 +39,17 @@ export default function StartRoute() {
     } catch {
       setIsSubmitting(false);
     }
+  };
+
+  const handleStartRequest = () => {
+    if (isSubmitting) {
+      return;
+    }
+    if (hasStoredDrawHistory()) {
+      setStartOverDialogOpen(true);
+      return;
+    }
+    void handleStart();
   };
 
   const handleResumeConfirm = async () => {
@@ -54,6 +71,10 @@ export default function StartRoute() {
     navigate("/setting");
   };
 
+  useEffect(() => {
+    setCanResume(hasStoredGameState());
+  }, []);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10 text-slate-900">
       <div className="absolute right-8 top-8">
@@ -70,17 +91,21 @@ export default function StartRoute() {
       ) : null}
       <div className="flex min-h-[360px] items-center justify-center">
         <StartMenu
-          onStart={handleStart}
-          onResumeRequest={() => setContinueDialogOpen(true)}
+          onStart={handleStartRequest}
+          onResumeRequest={() => void handleResumeConfirm()}
           onNavigateSetting={handleSetting}
           isSubmitting={isSubmitting}
+          canResume={canResume}
         />
       </div>
-      <ContinueDialog
-        open={continueDialogOpen}
-        onConfirm={handleResumeConfirm}
-        onCancel={() => setContinueDialogOpen(false)}
-        isSubmitting={isSubmitting}
+      <StartOverDialog
+        open={startOverDialogOpen}
+        onClose={() => setStartOverDialogOpen(false)}
+        onConfirm={() => {
+          setStartOverDialogOpen(false);
+          void handleStart();
+        }}
+        disabled={isSubmitting}
       />
     </main>
   );

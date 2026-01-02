@@ -1,18 +1,24 @@
 import type { FC } from "react";
 import type { Prize } from "~/common/types";
 import { cn } from "~/lib/utils";
+import { Image } from "lucide-react";
 
 export type PrizeListItemProps = {
   prize: Prize;
   disabled?: boolean;
   onToggle: (id: string, nextSelected: boolean) => void;
+  showPrizeNameOnly: boolean;
 };
 
-export const PrizeListItem: FC<PrizeListItemProps> = ({ prize, disabled = false, onToggle }) => {
+export const PrizeListItem: FC<PrizeListItemProps> = ({
+  prize,
+  disabled = false,
+  onToggle,
+  showPrizeNameOnly,
+}) => {
   const handleToggle = () => {
     onToggle(prize.id, !prize.selected);
   };
-
   return (
     <li
       className={cn(
@@ -20,46 +26,27 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({ prize, disabled = false,
         prize.selected ? "border-slate-300 bg-slate-100 opacity-70" : "border-slate-300 bg-white",
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-slate-300 bg-slate-50 text-slate-500">
-        <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
-          <rect
-            x="3"
-            y="4"
-            width="18"
-            height="16"
-            rx="2"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <circle cx="9" cy="10" r="1.5" fill="currentColor" />
-          <path
-            d="m4 18 4.5-4 4 3 3.5-3 4 4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
+      <Image className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
       <div className="flex-1">
-        <p
-          className={cn(
-            "font-semibold",
-            prize.selected ? "text-slate-500 line-through" : "text-slate-900",
-          )}
-        >
-          {prize.prizeName}
-        </p>
-        <p
-          className={cn(
-            "text-xs",
-            prize.selected ? "text-slate-400 line-through" : "text-slate-500",
-          )}
-        >
-          {prize.itemName}
-        </p>
+        {showPrizeNameOnly ? (
+          <p
+            className={cn(
+              "text-3xl font-semibold",
+              prize.selected ? "text-slate-400 line-through" : "text-slate-500",
+            )}
+          >
+            {prize.prizeName}
+          </p>
+        ) : (
+          <p
+            className={cn(
+              "text-3xl font-semibold",
+              prize.selected ? "text-slate-400 line-through" : "text-slate-500",
+            )}
+          >
+            {prize.itemName}
+          </p>
+        )}
       </div>
       <button
         type="button"
