@@ -252,12 +252,6 @@
 ### ドメイン6: Start画面（TDD）
 **ブランチ**: `feature/domain-06-start-screen`
 
-**Chrome DevTools MCP failure-first シナリオ（Start 画面）**
-
-1. **SF-START-001**: `localStorage.clear()` → Start で「はじめから」押下 → Game 画面遷移後に `bingo.v1.gameState` が空履歴・`currentNumber=null` で保存されることをコンソールで確認。壊れた JSON を手動投入して失敗を再現してから修正する。  
-2. **SF-START-002**: Game で 2 回抽選＆景品当選→Start→「続きから」→ `bingo.v1.gameState.drawHistory.length===2`・当選済み景品が `selected=true` のまま復元されることを確認。`updatedAt` が変化しないことも比較。  
-3. **SF-START-003**: `bingo.v1.gameState` / `bingo.v1.prizes` を削除した状態で「続きから」→ 新規ゲームとして初期化され、Start に戻ると「保存データが無い」旨の案内が表示される。BGM トグルは `bingo.v1.bgm` の状態を維持する。
-
 - [ ] 6.1 ブランチ作成
   - コマンド: `git checkout -b feature/domain-06-start-screen`
 

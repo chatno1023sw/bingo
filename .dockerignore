@@ -2,9 +2,3 @@
 build
 node_modules
 README.md
-.git
-.dockerignore
-Dockerfile*
-*.log*
-.env*
-coverage/
