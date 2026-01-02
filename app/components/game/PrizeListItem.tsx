@@ -1,8 +1,8 @@
+import { Image } from "lucide-react";
 import type { FC } from "react";
 import type { Prize } from "~/common/types";
-import { cn } from "~/lib/utils";
-import { Image } from "lucide-react";
 import { Button } from "~/components/common/Button";
+import { cn } from "~/lib/utils";
 
 export type PrizeListItemProps = {
   prize: Prize;

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type FC } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Prize } from "~/common/types";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/common/Button";
+import { cn } from "~/lib/utils";
 
 export type PrizeRouletteDialogProps = {
   open: boolean;

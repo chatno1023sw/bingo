@@ -1,22 +1,22 @@
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { PrizeProvider } from "~/common/contexts/PrizeContext";
+import { useBgmPreference } from "~/common/hooks/useBgmPreference";
+import { getHistoryView } from "~/common/services/historyService";
+import { persistSessionState, resumeSession, startSession } from "~/common/services/sessionService";
 import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
-import { startSession, resumeSession, persistSessionState } from "~/common/services/sessionService";
 import {
   drawNextNumber,
   getAvailableNumbers,
   NoAvailableNumbersError,
 } from "~/common/utils/bingoEngine";
-import { CurrentNumber } from "~/components/game/CurrentNumber";
-import { HistoryPanel } from "~/components/game/HistoryPanel";
-import { PrizeProvider } from "~/common/contexts/PrizeContext";
-import { SidePanel } from "~/components/game/SidePanel";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { Button } from "~/components/common/Button";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
-import { getHistoryView } from "~/common/services/historyService";
+import { CurrentNumber } from "~/components/game/CurrentNumber";
+import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
-import { Loader2 } from "lucide-react";
+import { SidePanel } from "~/components/game/SidePanel";
 
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 

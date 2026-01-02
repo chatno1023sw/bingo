@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { PrizeList } from "~/components/game/PrizeList";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
-import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
-import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 import { Button } from "~/components/common/Button";
+import { PrizeList } from "~/components/game/PrizeList";
+import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
+import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
 
 export type SidePanelProps = {
   className?: string;
