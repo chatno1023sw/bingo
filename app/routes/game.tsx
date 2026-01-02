@@ -16,6 +16,7 @@ import { Button } from "~/components/common/Button";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { getHistoryView } from "~/common/services/historyService";
 import { ResetDialog } from "~/components/game/ResetDialog";
+import { Loader2 } from "lucide-react";
 
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
@@ -178,7 +179,7 @@ export default function GameRoute() {
     availableNumbers.length === 0
       ? "抽選は完了しました"
       : isAnimating || isMutating
-        ? "抽選中..."
+        ? "抽選中"
         : "抽選を開始！";
 
   if (isLoading) {
@@ -241,10 +242,11 @@ export default function GameRoute() {
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
                 type="button"
-                className="w-80 rounded-full bg-[#0F6A86] px-8 py-4 text-xl font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-80 rounded-full bg-[#0F6A86] px-8 py-4 text-xl font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
+                {(isAnimating || isMutating) && <Loader2 className={"animate-spin"} />}
                 {drawButtonLabel}
               </Button>
               {drawError === "no-available-numbers" && (

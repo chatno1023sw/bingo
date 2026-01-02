@@ -22,9 +22,6 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
       >
         {display}
       </div>
-      <p className="text-sm text-slate-500">
-        {isDrawing ? "抽選中..." : "抽選結果を中央に表示します"}
-      </p>
     </div>
   );
 };

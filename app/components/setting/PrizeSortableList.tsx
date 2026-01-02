@@ -101,7 +101,7 @@ const SortableItem: FC<{
           <img
             src={localImage}
             alt={`${name || "景品"} 画像`}
-            className="h-full w-full rounded object-cover"
+            className="h-full w-full rounded object-cover object-center"
           />
         ) : (
           "クリックで画像を追加"

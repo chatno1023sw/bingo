@@ -60,7 +60,6 @@ export default function StartRoute() {
         await startSession();
       }
       setIsSubmitting(false);
-      setContinueDialogOpen(false);
       navigate("/game");
     } catch {
       setIsSubmitting(false);

@@ -19,7 +19,7 @@ declare module "papaparse" {
     };
   };
 
-  export type ParseConfig<T> = {
+  export type ParseConfig<_T> = {
     header?: boolean;
     skipEmptyLines?: boolean;
   };
