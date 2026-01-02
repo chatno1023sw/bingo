@@ -62,7 +62,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           再読み込み
         </button>
       </header>
-      <div className="mt-4 flex-1 overflow-y-auto pr-1">
+      <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
           <p className="text-sm text-slate-500">景品情報を読み込み中です...</p>
         ) : (

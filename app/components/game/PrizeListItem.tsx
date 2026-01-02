@@ -57,7 +57,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({ prize, disabled = false,
         onClick={handleToggle}
         disabled={disabled}
       >
-        {prize.selected ? "戻す" : "当選"}
+        {prize.selected ? "戻す" : "除外"}
       </button>
     </li>
   );

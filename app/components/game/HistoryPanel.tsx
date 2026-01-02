@@ -24,7 +24,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
             recent.map((entry) => (
               <div
                 key={entry.sequence}
-                className="flex aspect-square min-h-[120px] items-center justify-center rounded border border-slate-500 text-3xl font-semibold"
+                className="flex aspect-square min-h-[120px] items-center justify-center rounded border border-slate-500 text-6xl font-semibold"
               >
                 {entry.number}
               </div>
