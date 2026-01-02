@@ -114,8 +114,8 @@ const SortableItem: FC<{
         disabled={disabled}
       />
       <div className="mt-5 space-y-3 text-sm text-slate-900">
-        <div className="grid grid-cols-[80px,1fr] items-center gap-3">
-          <span className="font-semibold">賞名</span>
+        <label className="flex items-center gap-3 font-semibold">
+          <span className="w-20">賞名</span>
           <input
             className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
             value={localName}
@@ -132,9 +132,9 @@ const SortableItem: FC<{
             placeholder="賞名を入力"
             disabled={disabled}
           />
-        </div>
-        <div className="grid grid-cols-[80px,1fr] items-center gap-3">
-          <span className="font-semibold">商品名</span>
+        </label>
+        <label className="flex items-center gap-3 font-semibold">
+          <span className="w-20">商品名</span>
           <input
             className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
             value={localDetail}
@@ -151,9 +151,9 @@ const SortableItem: FC<{
             placeholder="商品名を入力"
             disabled={disabled}
           />
-        </div>
-        <div className="grid grid-cols-[80px,1fr] items-center gap-3">
-          <span className="font-semibold">選出済みか</span>
+        </label>
+        <label className="flex items-center gap-3 font-semibold">
+          <span className="w-20">選出</span>
           <select
             className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
             value={selected ? "selected" : "unselected"}
@@ -166,9 +166,9 @@ const SortableItem: FC<{
             disabled={disabled}
           >
             <option value="unselected">未選出</option>
-            <option value="selected">選出済み</option>
+            <option value="selected">選出</option>
           </select>
-        </div>
+        </label>
       </div>
     </li>
   );
@@ -222,26 +222,27 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
-        <ul
-          className="mx-auto flex w-full flex-wrap justify-start gap-4"
-          style={{ maxWidth: "80vw" }}
-          data-testid="setting-prize-list"
-          id="setting-prize-list"
-        >
-          {prizes.map((prize, index) => (
-            <SortableItem
-              key={prize.id}
-              id={prize.id}
-              name={prize.prizeName}
-              detail={prize.itemName}
-              imagePath={prize.imagePath}
-              selected={prize.selected}
-              disabled={disabled}
-              onRemove={() => onRemove?.(prize.id)}
-              onUpdate={(patch) => onUpdate?.(prize.id, patch)}
-            />
-          ))}
-        </ul>
+        <div className="w-full flex justify-center">
+          <ul
+            className="w-[1300px] mx-auto flex flex-wrap justify-start gap-4"
+            data-testid="setting-prize-list"
+            id="setting-prize-list"
+          >
+            {prizes.map((prize, index) => (
+              <SortableItem
+                key={prize.id}
+                id={prize.id}
+                name={prize.prizeName}
+                detail={prize.itemName}
+                imagePath={prize.imagePath}
+                selected={prize.selected}
+                disabled={disabled}
+                onRemove={() => onRemove?.(prize.id)}
+                onUpdate={(patch) => onUpdate?.(prize.id, patch)}
+              />
+            ))}
+          </ul>
+        </div>
       </SortableContext>
     </DndContext>
   );
