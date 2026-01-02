@@ -53,27 +53,23 @@ const SettingContent = () => {
     setExportText(csv);
   };
 
-  const handleDeleteAll = async () => {
-    await applyPrizes([]);
-    setSummary(null);
-  };
-
-  const handleAddEmpty = async () => {
+  const buildEmptyPrize = (order: number) => {
     const nextId =
       globalThis.crypto?.randomUUID?.() ??
       `prize-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const next = [
-      ...prizes,
-      {
-        id: nextId,
-        order: prizes.length,
-        prizeName: "",
-        itemName: "",
-        imagePath: null,
-        selected: false,
-        memo: null,
-      },
-    ];
+    return {
+      id: nextId,
+      order,
+      prizeName: "",
+      itemName: "",
+      imagePath: null,
+      selected: false,
+      memo: null,
+    };
+  };
+
+  const handleAddCard = async () => {
+    const next = [...prizes, buildEmptyPrize(prizes.length)];
     await applyPrizes(next);
   };
 
@@ -109,50 +105,14 @@ const SettingContent = () => {
   return (
     <section className="space-y-3">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="sr-only">景品マスタ管理</h1>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
-            onClick={() => {
-              const input = document.getElementById("csv-import");
-              if (input instanceof HTMLInputElement) {
-                input.click();
-              }
-            }}
+            onClick={handleAddCard}
             disabled={isMutating}
           >
-            一括追加
-          </button>
-          <button
-            type="button"
-            className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
-            onClick={handleAddEmpty}
-            disabled={isMutating}
-          >
-            追加
-          </button>
-          <button
-            type="button"
-            className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
-            onClick={handleDeleteAll}
-            disabled={isMutating || prizes.length === 0}
-            aria-label="すべて削除"
-          >
-            一括削除
-          </button>
-          <button
-            type="button"
-            className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
-            onClick={() => {
-              const list = document.getElementById("setting-prize-list");
-              if (list) {
-                list.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
-            }}
-            disabled={isMutating || isLoading}
-          >
-            賞品ソート
+            カード追加
           </button>
         </div>
         <button
@@ -178,19 +138,17 @@ const SettingContent = () => {
         />
       </div>
 
-      <div className="border border-slate-300 bg-white">
-        {isLoading ? (
-          <p className="px-4 py-6 text-sm text-slate-500">読み込み中...</p>
-        ) : (
-          <PrizeSortableList
-            prizes={prizes}
-            onReorder={handleReorder}
-            onRemove={handleRemove}
-            onUpdate={handleUpdate}
-            disabled={isMutating}
-          />
-        )}
-      </div>
+      {isLoading ? (
+        <p className="px-4 py-6 text-sm text-slate-500">読み込み中...</p>
+      ) : (
+        <PrizeSortableList
+          prizes={prizes}
+          onReorder={handleReorder}
+          onRemove={handleRemove}
+          onUpdate={handleUpdate}
+          disabled={isMutating}
+        />
+      )}
     </section>
   );
 };
@@ -198,7 +156,7 @@ const SettingContent = () => {
 export default function SettingRoute() {
   return (
     <main className="min-h-screen bg-white p-2 text-slate-900">
-      <div className="w-full border border-slate-300 bg-white p-3">
+      <div className="w-full bg-white p-3">
         <PrizeProvider>
           <SettingContent />
         </PrizeProvider>
