@@ -12,7 +12,7 @@ export type UploadImagesDialogProps = {
 };
 
 /**
- * 商品名に紐づく画像を追加する確認ダイアログ。
+ * 賞品名に紐づく画像を追加する確認ダイアログ。
  *
  * - OK 押下時に選択済みのファイル群を `onConfirm` で渡します。
  * - `open` が false の場合は描画せず、ポータル生成も行いません。
@@ -20,7 +20,7 @@ export type UploadImagesDialogProps = {
  */
 export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
   open,
-  title = "商品名に紐づけて写真を複数追加できます。",
+  title = "賞品名に紐づけて写真を複数追加できます。",
   description,
   onClose,
   onConfirm,

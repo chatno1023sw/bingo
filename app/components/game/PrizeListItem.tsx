@@ -26,12 +26,12 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         prize.selected ? "border-slate-300 bg-slate-100 opacity-70" : "border-slate-300 bg-white",
       )}
     >
-      <Image className="h-9 w-9" strokeWidth={1.5} aria-hidden="true" />
+      <Image className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
       <div className="flex-1">
         {showPrizeNameOnly ? (
           <p
             className={cn(
-              "text-lg font-semibold",
+              "text-3xl font-semibold",
               prize.selected ? "text-slate-400 line-through" : "text-slate-500",
             )}
           >
@@ -40,7 +40,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         ) : (
           <p
             className={cn(
-              "text-lg font-semibold",
+              "text-3xl font-semibold",
               prize.selected ? "text-slate-400 line-through" : "text-slate-500",
             )}
           >

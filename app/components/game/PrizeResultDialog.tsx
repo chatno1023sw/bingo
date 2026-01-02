@@ -11,7 +11,7 @@ export type PrizeResultDialogProps = {
 /**
  * 景品ルーレットの結果表示ダイアログ。
  *
- * - 当選した景品の画像・賞名・商品名を表示します。
+ * - 当選した景品の画像・賞名・賞品名を表示します。
  * - `open` が false の場合は描画せず、ポータル生成も行いません。
  * - Chrome DevTools MCP では結果ダイアログが自動表示されることを確認します。
  */
@@ -55,7 +55,7 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
               <span className="font-semibold">賞名</span>：{prize.prizeName || "未設定"}
             </p>
             <p>
-              <span className="font-semibold">商品名</span>：{prize.itemName || "未設定"}
+              <span className="font-semibold">賞品名</span>：{prize.itemName || "未設定"}
             </p>
           </div>
         </div>

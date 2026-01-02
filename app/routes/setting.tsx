@@ -87,7 +87,7 @@ const SettingContent = () => {
 
   const handleCsvImport = async (file: File) => {
     const text = await file.text();
-    type CsvRow = { 賞名?: string; 商品名?: string; 選出?: string };
+    type CsvRow = { 賞名?: string; 賞品名?: string; 選出?: string };
     const result = Papa.parse<CsvRow>(text, {
       header: true,
       skipEmptyLines: true,
@@ -103,7 +103,7 @@ const SettingContent = () => {
           `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
         order: prizes.length + index,
         prizeName: row.賞名?.trim() ?? "",
-        itemName: row.商品名?.trim() ?? "",
+        itemName: row.賞品名?.trim() ?? "",
         imagePath: null,
         selected: normalizeSelected(row.選出),
         memo: null,
