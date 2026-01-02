@@ -6,9 +6,9 @@ import type { PrizeList } from "./prize";
  * sequence は 1 起点で連番を採番する。
  */
 export type DrawHistoryEntry = {
-	number: number;
-	sequence: number;
-	drawnAt: string;
+  number: number;
+  sequence: number;
+  drawnAt: string;
 };
 
 /**
@@ -16,20 +16,20 @@ export type DrawHistoryEntry = {
  * currentNumber が null のときは未確定を表す。
  */
 export type GameState = {
-	currentNumber: number | null;
-	drawHistory: DrawHistoryEntry[];
-	isDrawing: boolean;
-	createdAt: string;
-	updatedAt: string;
+  currentNumber: number | null;
+  drawHistory: DrawHistoryEntry[];
+  isDrawing: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 /**
  * loader などで gameState/prizes/bgm をまとめて返す際のラッパー。
  */
 export type GameStateEnvelope = {
-	gameState: GameState;
-	prizes: PrizeList;
-	bgm: BgmPreference;
+  gameState: GameState;
+  prizes: PrizeList;
+  bgm: BgmPreference;
 };
 
 /**
