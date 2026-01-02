@@ -9,10 +9,11 @@ export type SidePanelProps = {
 };
 
 export const SidePanel = ({ className = "" }: SidePanelProps) => {
-  const { prizes, isLoading, isMutating, error, togglePrize, refresh } = usePrizeManager();
+  const { prizes, isLoading, isMutating, error, togglePrize } = usePrizeManager();
   const [rouletteOpen, setRouletteOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
   const [resultPrize, setResultPrize] = useState<(typeof prizes)[number] | null>(null);
+  const [showPrizeNameOnly, setShowPrizeNameOnly] = useState(true);
 
   const summary = useMemo(() => {
     const selected = prizes.filter((prize) => prize.selected).length;
@@ -46,27 +47,33 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       className={`flex h-full flex-col rounded-3xl border border-slate-400 bg-white p-4 text-slate-900 ${className}`}
     >
       <header className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-5">
           <h2 className="text-base font-semibold">景品一覧</h2>
-          <p className="text-xs text-slate-500">
+
+          <span className="text-xs text-slate-500">
             当選済み {summary.selected} / {summary.total}
-          </p>
-          <p className="text-xs text-slate-400">残り {summary.remaining} 件</p>
+          </span>
         </div>
+
         <button
           type="button"
           className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-          onClick={() => refresh().catch(() => {})}
+          onClick={() => setShowPrizeNameOnly((prev) => !prev)}
           disabled={isLoading}
         >
-          再読み込み
+          表示切替
         </button>
       </header>
       <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
           <p className="text-sm text-slate-500">景品情報を読み込み中です...</p>
         ) : (
-          <PrizeList prizes={prizes} disabled={isMutating} onToggle={togglePrize} />
+          <PrizeList
+            prizes={prizes}
+            disabled={isMutating}
+            onToggle={togglePrize}
+            showPrizeNameOnly={showPrizeNameOnly}
+          />
         )}
       </div>
       <button

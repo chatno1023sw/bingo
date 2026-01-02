@@ -6,9 +6,15 @@ export type PrizeListProps = {
   prizes: PrizeListData;
   disabled?: boolean;
   onToggle: (id: string, nextSelected: boolean) => void;
+  showPrizeNameOnly: boolean;
 };
 
-export const PrizeList: FC<PrizeListProps> = ({ prizes, disabled = false, onToggle }) => {
+export const PrizeList: FC<PrizeListProps> = ({
+  prizes,
+  disabled = false,
+  onToggle,
+  showPrizeNameOnly,
+}) => {
   if (prizes.length === 0) {
     return <p className="text-sm text-slate-500">景品が登録されていません。</p>;
   }
@@ -16,7 +22,13 @@ export const PrizeList: FC<PrizeListProps> = ({ prizes, disabled = false, onTogg
   return (
     <ul className="space-y-3">
       {prizes.map((prize) => (
-        <PrizeListItem key={prize.id} prize={prize} disabled={disabled} onToggle={onToggle} />
+        <PrizeListItem
+          key={prize.id}
+          prize={prize}
+          disabled={disabled}
+          onToggle={onToggle}
+          showPrizeNameOnly={showPrizeNameOnly}
+        />
       ))}
     </ul>
   );
