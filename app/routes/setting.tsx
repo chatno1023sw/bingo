@@ -8,6 +8,7 @@ import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { CsvControls } from "~/components/setting/CsvControls";
 import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
 import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
+import { UploadImagesDialog } from "~/components/setting/UploadImagesDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
 
 const SettingContent = () => {
@@ -23,6 +24,9 @@ const SettingContent = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<FileList | null>(null);
 
   const summaryFrom = (
     sourceName: string,
@@ -138,6 +142,67 @@ const SettingContent = () => {
     }
   };
 
+  const handleUploadImages = async () => {
+    const files = pendingUploads;
+    if (!files || files.length === 0) {
+      setUploadOpen(false);
+      setPendingUploads(null);
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const mappings = await Promise.all(
+        Array.from(files).map((file) => {
+          return new Promise<{ name: string; dataUrl: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result !== "string") {
+                reject(new Error("invalid-image"));
+                return;
+              }
+              resolve({ name: file.name, dataUrl: reader.result });
+            };
+            reader.onerror = () => reject(new Error("read-error"));
+            reader.readAsDataURL(file);
+          });
+        }),
+      );
+      const normalizeName = (value: string) =>
+        value
+          .trim()
+          .toLowerCase()
+          .replace(/\.[^/.]+$/, "");
+      const grouped = mappings.reduce<Record<string, { name: string; dataUrl: string }[]>>(
+        (acc, entry) => {
+          const key = normalizeName(entry.name);
+          acc[key] = acc[key] ? [...acc[key], entry] : [entry];
+          return acc;
+        },
+        {},
+      );
+      const next = prizes.map((prize) => {
+        const itemKey = normalizeName(prize.itemName);
+        const matched = Object.entries(grouped).find(([key]) => key.includes(itemKey));
+        if (!matched) {
+          return prize;
+        }
+        const images = matched[1];
+        if (images.length === 0) {
+          return prize;
+        }
+        return {
+          ...prize,
+          imagePath: images[0].dataUrl,
+        };
+      });
+      await applyPrizes(next);
+      setUploadOpen(false);
+      setPendingUploads(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const buildEmptyPrize = (order: number) => {
     const nextId =
       globalThis.crypto?.randomUUID?.() ??
@@ -206,6 +271,14 @@ const SettingContent = () => {
             disabled={isMutating}
           >
             CSV追加
+          </button>
+          <button
+            type="button"
+            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            onClick={() => setUploadOpen(true)}
+            disabled={isMutating || prizes.length === 0}
+          >
+            画像追加
           </button>
           <button
             type="button"
@@ -281,6 +354,13 @@ const SettingContent = () => {
         onClose={() => setResetOpen(false)}
         onConfirm={handleResetSelections}
         disabled={isResetting}
+      />
+      <UploadImagesDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onConfirm={handleUploadImages}
+        onFilesSelected={setPendingUploads}
+        disabled={isUploading}
       />
     </section>
   );
