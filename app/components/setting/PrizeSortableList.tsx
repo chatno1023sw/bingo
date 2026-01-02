@@ -223,7 +223,8 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
         <ul
-          className="flex flex-wrap gap-4"
+          className="mx-auto flex w-full flex-wrap justify-start gap-4"
+          style={{ maxWidth: "80vw" }}
           data-testid="setting-prize-list"
           id="setting-prize-list"
         >

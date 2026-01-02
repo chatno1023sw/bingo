@@ -104,6 +104,7 @@ export const PrizeProvider = ({ initialPrizes, children }: PrizeProviderProps) =
 
   const applyPrizes = useCallback(async (next: PrizeList) => {
     setIsMutating(true);
+    setPrizes(normalizeInitialPrizes(next));
     try {
       await savePrizesService(next);
       const list = await getPrizes();
