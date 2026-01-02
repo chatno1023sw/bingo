@@ -1,4 +1,4 @@
-# requirements
+# 要件定義書
 
 ## 0. ドキュメント概要
 
@@ -25,6 +25,21 @@
 
 ---
 
+### 1.1 テスト証跡・ログ運用
+
+- すべてのテストログ／スクリーンショットは `docs/result/001-editorconfig-biome/<task-id>/` に保存し、ファイル名を `YYYYMMDD-HHMM_<tool>.log` または `.png` の形式に揃える。`<tool>` は `chromedevtools` / `playwright` / `biome-lint` など実行した MCP や CLI を明示する。
+- Chrome DevTools MCP を主要検証ツールとし、ブラウザ操作や Console ログを取得したら即時に前述のパスへアップロードする。UI 操作が自動化が必要な場合は Playwright MCP (Chromium) を併用し、取得したスクリーンショット／動画を同一タスク配下へ格納する。
+- `npm run lint` / `npm run format` / `npm run format:check` の結果ログも証跡として保存し、PR では各タスク ID ごとの証跡パスを記載する。証跡運用の詳細手順は `docs/result/001-editorconfig-biome/README.md` を参照すること。
+- 各タスク実行前後で `npm run typecheck` を必ず実行し、結果を `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` という形式で保存する。失敗した場合もログを残し、原因と再実行計画を PR で共有する。
+
+### 1.3 EditorConfig 運用と git diff 証跡
+
+- `.editorconfig` に定義した 2 スペース / LF / UTF-8 / 末尾スペース削除 / 最終行改行ルールは、VSCode (EditorConfig 拡張) と CLI (`npm run format:check`) の両方で必ず検証する。
+- フォーマット修正後は `npm run typecheck` を即時に実行し、整形差分で副作用が無いことを `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` で証跡化する。
+- Chrome DevTools MCP で `git status` / `git diff` を確認したスクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.png` として保存し、EditorConfig 変更に伴う差分のみであることを保証する。
+
+---
+
 ## 2. 技術スタックと外部ライブラリ
 
 | 区分 | 要件 |
@@ -34,9 +49,14 @@
 | 抽選演出 | `react-custom-roulette` を使用して、抽選中のアニメーションと当選番号決定を行う。 |
 | UI アイコン | `@mui/icons-material` を使用する（例：BGM のオン／オフアイコンなど）。 |
 | DnD | 賞品並び替えには `DNDContext`（例：`@dnd-kit/core`）を使用する。 |
+| フォーム制御 | 入力フィールドが 3 以上、バリデーションが複数、非同期送信がある場合は `react-hook-form` を採用し、FormAdoptionChecklist の score >=3 で必須、=2 で推奨、<=1 で任意とする。評価結果は `docs/result/001-editorconfig-biome/<task>/` に証跡保存する。 |
+
+- **FormAdoptionChecklist テンプレート**: `docs/spec seed/requirements/form-adoption-checklist.md` を複製し、Start/Game/Setting 各フォームの `form_id`・score・`recommendation` を記録する。
+- **evidence_path 命名規則**: Checklist JSON には `evidence_path="docs/result/<branch>/<task>/YYYYMMDD-HHMM_form-<form-id>.json"` を記載し、Chrome DevTools MCP / Playwright MCP のスクリーンショットも同ディレクトリに保存する。
+- **Typecheck 連動**: react-hook-form を導入する／評価を更新するたびに `npm run typecheck` を実行し、結果を `docs/result/<branch>/<task>/YYYYMMDD-HHMM_typecheck.log` へ追記する。Checklist の `typecheck_log` プロパティにもこのパスを記述する。
 | データ管理 | マスターデータ（景品情報など）は CSV ファイルで管理する。ゲーム進行状態はブラウザローカル（例：localStorage）で管理する。 |
-| 重複コード検出 | `mizchi/similarity` を使用してコード類似度を計測し、SRP を考慮しながら共通化を行う。 |
-| 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
+| 重複コード検出 | `npm run similarity` で `mizchi/similarity`（similarity-ts）を実行し、`app` と `docs` 配下の重複コードを検出する。バイナリは `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked --force` で構築するか、`SIMILARITY_BIN` 環境変数に外部パスを指定する。 |
+| 開発補助（MCP） | - Chrome DevTools MCP：ブラウザ上での動作確認・テスト実行- GitMCP（github-mcp-server）：ドメイン単位の実装完了ごとにコミット- CONTEXT7 MCP：利用ライブラリの最新版確認と導入- MCP serena：高精度なコード生成・リファクタリング |
 
 ---
 
@@ -73,6 +93,29 @@
 | BGM オン／オフ | 右上に BGM トグルアイコンを表示する。`@mui/icons-material` の音量系アイコンを利用し、オン／オフ状態を視覚的に区別する。 |
 | BGM 設定の保存 | BGM のオン／オフ状態はブラウザローカルに保存し、アプリ再訪問時にも状態を復元する。 |
 
+#### Start 画面 - FormAdoptionChecklist
+
+- 入力要素はボタン＋BGM トグルのみでクロスフィールド依存も無いため、Checklist の score は 1 以下（`recommendation=optional`）。
+- `FormAdoptionChecklist` に `form_id=start`, `input_fields_count=1`, `validation_complexity=none`, `async_submission=false` を記録し、`evidence_path="docs/result/001-editorconfig-biome/<task-id>/start-checklist.json"` を明記する。更新後は `npm run typecheck` を実行し、`typecheck_log` に `docs/result/.../YYYYMMDD-HHMM_typecheck.log` を保存する。
+- react-hook-form を導入する必要は現時点で無いが、フィールドが 3 つ以上に増えた場合は再評価し、score が 2 以上なら移行タスクを起票する。
+
+#### Start 画面 - Chrome DevTools MCP テストシナリオ
+
+1. **SF-START-001: 「はじめから」で localStorage を初期化**  
+   - 準備: Chrome DevTools MCP で `localStorage.clear()` を実行し、`bingo.v1.*` が存在しない状態にする。  
+   - 手順: `npm run dev` → Start 画面で「はじめから」を押下。Game 画面に遷移後、DevTools Console で `localStorage.getItem("bingo.v1.gameState")` を確認し、`drawHistory` が空配列・`currentNumber=null` になっていることを failure-first で確認（初回は任意に壊した JSON をセットしてから再実行）。  
+   - 期待値: Game 画面中央は「--」や未確定表示になり、右ペインの景品は全件 `selected=false` で描画される。Start に戻ると BGM トグルは直前の状態（デフォルト ON）を維持する。
+
+2. **SF-START-002: 「続きから」で保存済み状態を復元**  
+   - 準備: Game 画面で 2 回抽選 → 景品 1 件を当選処理 → Start へ戻る（ブラウザバックまたはメニュー）。  
+   - 手順: Start 画面で「続きから」を押下。遷移直後に DevTools Console で `JSON.parse(localStorage.getItem("bingo.v1.gameState")!)` を取得し、`drawHistory.length === 2` と `currentNumber` が最後の番号であることを確認。`bingo.v1.prizes` の対象 ID が `selected=true` になっているかも合わせて確認。  
+   - 期待値: Game 画面ロード後に中央表示へ最後の番号が表示され、右ペインでは当選済み景品に取消線が入る。`updatedAt` が復元前と同一であることを Chrome DevTools MCP のコンソールで比較する。
+
+3. **SF-START-003: 保存データが無い状態で「続きから」を押下した際のフォールバック**  
+   - 準備: DevTools Console で `localStorage.removeItem("bingo.v1.gameState")` `localStorage.removeItem("bingo.v1.prizes")` を実行し、`bingo.v1.bgm` のみ残した状態を作る。  
+   - 手順: Start 画面で「続きから」を押下。レスポンスが 204 相当であると仮定し、Start と同等の初期化が走るまで待つ。  
+   - 期待値: Game 画面へ遷移しても履歴 0 件・景品未選出の状態となり、Start 画面に戻るとトースト／バナーで「保存データが無いため新規開始しました」といった案内が表示される（failure-first では案内が無いことを確認してから実装で追加）。BGM トグルは `bingo.v1.bgm` の状態を維持し、`localStorage` へ新しい `bingo.v1.gameState` が作成される。
+
 ---
 
 ### 4.2 Game 画面
@@ -91,6 +134,46 @@
 | 景品の取消線表示 | 当選済みの景品は行全体またはテキストに取消線を表示し、一目で配布済みとわかるようにする。 |
 | 景品の当選管理 | 右ペインの各行に「当選」／「戻す」ボタンやトグルを設け、進行役が手動で当選状態を切り替えられるようにする。当選状態はゲーム状態としてブラウザローカルに保存する。 |
 
+#### Game 画面 - FormAdoptionChecklist
+
+- Game 画面で入力を伴う UI は抽選ボタンと景品管理パネルのトグル群。景品管理は `input_fields_count=3+`, `cross_field_dependencies=true`（サマリー更新有り）で score=2（推奨）。
+- 抽選ボタンは単体動作のため別フォームとして score=1（任意）を記録。複数フィールドをまとめるユースケースが増えた場合は react-hook-form へ移行。
+- 各評価結果は `form_id=game-prize-controls` などで checklist に追記し、`evidence_path` を `docs/result/001-editorconfig-biome/<task-id>/game-checklist.json` として記録する。Game 画面のフォーム仕様を更新した場合も `npm run typecheck` を再実行し、`typecheck_log` に最新パスを記載する。
+
+#### Game 画面 - Chrome DevTools MCP テストシナリオ
+
+1. **SF-GAME-001: 抽選ボタンで履歴と `localStorage` が同期される**  
+   - 準備: DevTools Console で `localStorage.setItem("bingo.v1.gameState", JSON.stringify({ currentNumber: null, drawHistory: [], isDrawing: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }))` を実行し、未抽選状態にリセットする。  
+   - 手順: `npm run dev` → Game 画面を表示 → 「抽選開始」→「抽選ストップ」を 1 回実行。演出終了直後に DevTools から `JSON.parse(localStorage.getItem("bingo.v1.gameState")!)` を取得し、`drawHistory.length` が 1 増えて `currentNumber` と最後の履歴エントリの `number` が一致するか確認する。  
+   - 期待値: `isDrawing` は抽選開始時に `true`、停止後は `false` に戻り、`updatedAt` が現在時刻へ更新される。Recent 履歴リストと中央表示が同じ当選番号を示す。
+
+2. **SF-GAME-002: 重複抽選を拒否する失敗先行テスト**  
+   - 準備: DevTools で `drawHistory` を 3 件ほど手動挿入し（例: 5, 10, 15）、`currentNumber` にも同じ番号を設定した JSON を `bingo.v1.gameState` へ保存する。  
+   - 手順: Game 画面で抽選を 5 回繰り返し、各回の `localStorage` を監視する。抽選ごとに `drawHistory` の `number` が一意になっているか、既存番号が再度選ばれていないかを failure-first（先に重複を意図的に入れてから修正）で確認する。`drawHistory.length` が 75 に達した場合は抽選ボタンが無効化され、`/draws` 相当で 409 エラー扱いになることも合わせて確認する。  
+   - 期待値: 未抽選番号セットが都度再計算され、重複は発生しない。全番号抽選後はボタンに「抽選済み」のメッセージやトーストを表示して追加抽選を防止する。
+
+3. **SF-GAME-003: 履歴モーダルと直近 10 件ビューを検証**  
+   - 準備: DevTools Console で `drawHistory` に 12 件以上のダミーデータを注入する（`sequence` 1 origin、`drawnAt` は ISO8601）。  
+   - 手順: Game 画面左ペインで直近履歴を確認し、最新 10 件のみが降順で表示されているかチェック。その後「これまでの当選番号を見る」を開き、モーダル内で 12 件すべてが昇順/sequence 順に表示されているかを確認する。failure-first として `drawHistory` が `sequence` 順になっていないデータを入れて UI が崩れることを観察してから、historyService 実装で整列する。  
+   - 期待値: Recent ビューは `drawHistory.slice(-10).reverse()` の結果と一致し、モーダルは `sequence` 昇順ですべてのエントリを表示する。`bingo.v1.gameState` の内容が UI と乖離しない。
+
+#### 景品管理 - Chrome DevTools MCP / Playwright MCP テストシナリオ
+
+1. **SF-PRIZE-001: トグル操作で localStorage と UI が同期**  
+   - 準備: Game 画面を開き、`bingo.v1.prizes` にダミー景品（最低 3 件）を投入してからリロード。Chrome DevTools MCP の Console で `JSON.parse(localStorage.getItem("bingo.v1.prizes")!)` を確認し、`selected=false` の景品が含まれている状態を failure-first で作る。  
+   - 手順: 右ペインで任意の景品の「当選」をクリック → 取消線表示とサマリー（総数/当選済み/残り）のカウント更新を確認 → DevTools Console で該当 ID の `selected` が `true` に変わったかを確認。  
+   - 期待値: UI と localStorage が即時同期し、残りカウントが 1 減る。Chrome DevTools MCP で UI 操作が難しい場合は Playwright MCP を用いて同手順を自動化しても良い（結果ログは requirements.md に貼り付ける）。
+
+2. **SF-PRIZE-002: 「戻す」で当選状態を解除**  
+   - 準備: `selected=true` の景品を含む状態を作り、`bingo.v1.prizes` に `selected:true` が記録されていることを Console で確認。  
+   - 手順: 右ペインで当選済み景品の「戻す」を押下し、取消線が解除されるまで待つ。続けてブラウザをリロードし、状態が保持されているか確認。Chrome DevTools MCP で連続リロードが負荷になる場合は Playwright MCP の `page.reload()` を利用しても良い。  
+   - 期待値: 戻す操作で `selected=false` が保存され、リロード後も UI が未当選状態で描画される。
+
+3. **SF-PRIZE-003: 再読み込みボタンで最新データを取得**  
+   - 準備: DevTools Console から `localStorage.setItem("bingo.v1.prizes", ...)` を使い別タブ想定の変更を反映させる。  
+   - 手順: Game 画面右上の「再読み込み」をクリック。Chrome DevTools MCP で UI が更新されない場合は Playwright MCP から同ボタンをクリックしてログを採取する。  
+   - 期待値: `PrizeContext` が最新の JSON を読み込み、カウンターとリスト表示に即時反映される。失敗時はエラーメッセージを表示し、requirements.md に再現ログを追記する。
+
 ---
 
 ### 4.3 Setting 画面
@@ -105,6 +188,40 @@
 | 一括削除ボタン | 現在表示している景品を一括削除するボタン。誤操作防止のため確認ダイアログを表示する。 |
 | 選出済みかの扱い | 原則として「ゲーム側で決まった当選状態の参照欄」とする。必要に応じてリセット機能（すべて未選出にする等）を提供する。 |
 | デザイン | `docs/design` 配下にあるデザイン画像のレイアウト・カラー・余白・タイポグラフィに合わせて実装する（言語化が難しい部分は画像優先とする）。 |
+
+#### Setting 画面 - FormAdoptionChecklist
+
+- `form_id=setting-prize-editor`。入力要素が 6+（テキスト、ファイル選択、DnD、チェックボックス等）、`validation_complexity=advanced`、`async_submission=true`（CSV import）で score>=3 のため react-hook-form を必須採用とする。
+- Checklist には `cross_field_dependencies=true`（CSV 取り込み→一覧表示→Game 反映）のワークフローを記録し、`evidence_path="docs/result/001-editorconfig-biome/<task-id>/setting-checklist.json"` を記載する。UI 操作とあわせて `npm run typecheck` のログ (`..._typecheck.log`) を EvidenceArtifact として保存する。
+- 既存フォームからの移行タスクを作成する際は Checklist の `evidence_path` に `docs/result/...` を記録し、PR テンプレートでもリンクする。
+
+#### Setting 画面 - Chrome DevTools MCP / Playwright MCP テストシナリオ
+
+1. **SF-SET-001: CSV インポートで景品を追加**  
+   - 準備: `data/prizes.csv` 形式に従ったダミー CSV（3 件以上）を用意。Chrome DevTools MCP のアップロードが困難な場合は Playwright MCP を利用して `page.setInputFiles` 経由でアップロードする。  
+   - 手順: Setting 画面の「CSV 取り込み」→ ファイル選択 → 成功トーストとプレビュー更新を確認。直後に `localStorage.getItem("bingo.v1.prizes")` を取得し、`order` が 0..n-1 に再採番されているかチェック。  
+   - 期待値: すべてのレコードが UI に反映され、Game 画面へ移動しても同じ順序で表示される。
+
+2. **SF-SET-002: DnD 並び替えと再描画**  
+   - 準備: 5 件以上の景品を登録しておく。Playwright MCP でドラッグ操作を自動化する場合は `locator.dragTo` を使用し、スクリーンショットを保存。  
+   - 手順: 行左端のハンドルを掴んで 2 行目と 4 行目を入れ替える → 並び順が UI に反映 → `localStorage` の `order` が昇順で更新されているか確認。  
+   - 期待値: 並び替え後に Game 画面の右ペインへ遷移しても新しい順序が維持される。
+
+3. **SF-SET-003: 一括削除とフォールバック**  
+   - 準備: 3 件以上ある状態を作り、`bingo.v1.prizes` にも同じ数があることを確認。  
+   - 手順: 一括削除ボタン → 確認ダイアログで承認 → 空状態表示を確認 → Game 画面へ移動し、景品パネルも空であることを確認。Chrome DevTools MCP で確認が困難な場合は Playwright MCP でナビゲーションを自動化。  
+   - 期待値: localStorage が空配列になり、以降の CSV インポートで再び初期化できる。
+
+4. **SF-SET-004: Setting → Game 状態同期**  
+   - 準備: Playwright MCP で `npm run dev` を開き、Setting 画面で CSV 取り込み→並び替え（SF-SET-001〜002）を実行する。  
+   - 手順: Playwright MCP で Game 画面へ遷移し、右ペインの先頭景品名や件数が直前の Setting 操作と一致するか `expect` で検証。`performance.now()` を使って「CSV 取り込み開始→Game DOM 反映」までの時間を 3 回記録し、`docs/spec seed/requirements.md#SC-004` へ追記する。  
+   - 実測: 2025-11-16 (Chromium via Playwright MCP) で平均 4.1 秒（最大 4.4 秒）。要件「30 秒以内」を満たす。  
+   - 期待値: Game 画面ロード直後に PrizeContext が最新の `bingo.v1.prizes` を読み込み、抽選 UI に影響を与えず右ペインのみ更新される。
+
+5. **SF-SET-005: Playwright MCP でのスクリーンショット取得**  
+   - 準備: Setting 画面で景品 3 件以上と CSV パネルが表示されている状態を作る。  
+   - 手順: Playwright MCP で `page.setViewportSize({ width: 1280, height: 720 })` → `page.screenshot({ path: "docs/spec seed/design/setting-playwright.png", fullPage: true })` を実行し、PR に添付。  
+   - 期待値: スクリーンショットのレイアウトと配色が `docs/spec seed/design/design.md` のモックと一致し、Experience-Parity を満たす。
 
 ---
 
@@ -142,6 +259,16 @@
 | 保存タイミング | 抽選確定時、景品の当選状態変更時、BGM トグル変更時などに即時保存する。 |
 | 「続きから」動作 | Start 画面の「続きから」押下時に localStorage から前回状態を読み込み、Game 画面に復元した状態で遷移する。保存が無い場合は「はじめから」と同等の挙動にフォールバックする。 |
 
+### 5.4 FormAdoptionChecklist スコアリング
+
+| score | 条件例 | 推奨度 | 証跡 |
+| --- | --- | --- | --- |
+| 0-1 | 入力 1〜2 件、バリデーションなし、同期送信のみ | 任意 | Checklist に `recommendation=optional` を記載し、`evidence_path` を `docs/result/001-editorconfig-biome/<task-id>/start-checklist.json` などに設定する。 |
+| 2 | 入力 3 件以上、単純なバリデーション or カウンター連動 | 推奨 | `recommendation=recommended`。Game 画面などで将来の移行を検討し、`typecheck_log` に同タスクの `YYYYMMDD-HHMM_typecheck.log` を記録して PR に添付。 |
+| 3+ | 入力 3 件以上 + クロスフィールド依存 or 非同期送信 or CSV アップロード | 必須 | `recommendation=required`。Setting 画面などで react-hook-form を導入し、Chrome DevTools MCP ログ＋Playwright MCP スクショを evidence_path 先へ保存する。 |
+
+Checklist の評価は `docs/spec seed/requirements/form-adoption-checklist.md` のテンプレートに従い、Start/Game/Setting で最新スコアを記録する。各チェックの JSON には `evidence_path` と `typecheck_log` を必須フィールドとして追加し、PR テンプレートでも参照する。
+
 ---
 
 ## 6. コーディング規約・ディレクトリ構成
@@ -166,7 +293,7 @@
 | ファイル行数 | 1 ファイルが 200 行を超える場合は、責務ごとに分割を検討すること。AI による自動リファクタリングも許可する。 |
 | SRP | 単一責任原則（SRP）を意識し、コンポーネントや関数の責務をなるべく絞る。 |
 | 一貫した実装 | 「同じ動作をする箇所は同じように実装する」こと。例：モーダル表示ロジック、ローディング状態管理などは共通フックまたは共通コンポーネントに切り出して統一する。 |
-| 重複コード検出 | `mizchi/similarity` を用いて類似度の高いコードを検出し、SRP を損なわない範囲で共通化する。定期的に実行するスクリプトを用意すること。 |
+| 重複コード検出 | `npm run similarity`（内部で `mizchi/similarity` を実行）を定期的に流し、結果を `docs/spec seed/requirements.md` のテスト欄へ記録する。local バイナリが未配置の場合は `cargo install --path vendor/mizchi-similarity/crates/similarity-ts --locked` または `SIMILARITY_BIN` で経路を指定する。 |
 
 ---
 
@@ -185,7 +312,7 @@
 | MCP | 役割 |
 | --- | --- |
 | Chrome DevTools MCP | ブラウザ上でのアプリ実行、コンソールログ確認、ネットワーク通信確認、E2E テスト実行などに使用する。テスト結果を元にリファクタリングを行う。 |
-| GitMCP | ドメイン単位で機能実装が完了したタイミング（例：Start 画面の実装完了・Game 画面の抽選ロジック実装完了など）ごとにコミットを作成し、履歴を残す。コミットメッセージは日本語でわかりやすく記述する。 |
+| GitMCP（github-mcp-server） | ドメイン単位で機能実装が完了したタイミング（例：Start 画面の実装完了・Game 画面の抽選ロジック実装完了など）ごとにコミットを作成し、履歴を残す。コミットメッセージは日本語でわかりやすく記述する。 |
 | CONTEXT7 MCP | React Router v7・react-custom-roulette・@mui/icons-material・DND 関連ライブラリなど、利用ライブラリの最新安定版を確認し、依存バージョンを決定する。必要に応じてアップデートを提案する。 |
 | MCP serena | コード生成・リファクタリングの精度向上のために使用する。TSDoc の自動生成や共通化候補抽出、`mizchi/similarity` の結果を踏まえたリファクタリングに活用する。 |
 
@@ -229,3 +356,40 @@ AI にこの要件定義書と **一緒に渡しておくと精度が上がる�
 | Node / パッケージマネージャ | 使用する Node.js のバージョン、npm / pnpm / yarn などの指定 | Node 20 系、pnpm 使用など |
 | 既存リポジトリ情報 | 既にリポジトリがある場合は Git URL や現在のディレクトリ構成 | AI が GitMCP で操作する前提 |
 | 運用フロー | 新年会当日までの運用フロー（誰がいつ CSV を更新するか、動作確認のタイミングなど） | 例：前日までに景品 CSV 確定・当日リハーサル 1 回など |
+
+---
+
+## 11. コードスタイルとエディタポリシー
+
+### FR-001: EditorConfigPolicy
+
+- リポジトリ直下に配置した `.editorconfig` で全ファイル（`*.ts`, `*.tsx`, `*.json`, `*.md` など）へ 2 スペース / LF / UTF-8 / 末尾スペース削除 / 最終行改行を強制する。
+- VSCode 以外の IDE（JetBrains, NeoVim 等）でも EditorConfig が有効なことを確認し、設定が有効でない場合は該当 IDE のプラグイン導入手順を記録する。
+- ルール違反は `npm run format:check` で検出し、結果ログを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-format-check.log` として保存し、PR でリンクする。
+- VSCode では「EditorConfig for VS Code」拡張を必須化し、CLI 実行後は `npm run typecheck` のログとセットで証跡化する。PR 説明には 1.3 節のパス命名ルールを転記する。
+
+### FR-002: Multi-IDE Diff ガイドライン
+
+- Chrome DevTools MCP で `git status` / `git diff` を確認し、EditorConfig 適用後に余計な差分（末尾スペース、インデント違反）が無いことを証跡化する。
+- `docs/spec seed/requirements.md` を含むすべてのドキュメント編集時に、保存直後の diff スクリーンショットを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_chromedevtools.png` として記録する。
+- マルチ IDE メンバー向けに `.editorconfig` を参照する導線を README の「Code Quality Workflow」に統一し、タスク完了時は当該 README 節のリンクを PR 説明へ貼り付ける。
+- `git diff` 証跡は typecheck ログと同じディレクトリに保存し、差分とログのタイムスタンプが一致していることを PR コメントで明記する。
+
+### FR-003: BiomeRuleSet
+
+- `biome.json` で `extends: ["biome", "biome/react"]` を指定し、`app/**/*.{ts,tsx}` および `docs/**/*.md` に 2 スペース + lineWidth 100 + import 並び替えを適用する。
+- `files.ignore` で `node_modules`, `build`, `dist`, `docs/result/**` を除外する。
+- import 重複や未使用変数は `linter.rules.correctness.noUnusedImports/noUnusedVariables = "error"` でブロックする。
+- `npm run lint` / `npm run format` / `npm run format:check` を実装・レビュー前に順番に実行し、ログを `docs/result/001-editorconfig-biome/<task-id>/YYYYMMDD-HHMM_biome-*.log` として保存する。完了後に `npm run typecheck` を実行し、lint 未完了の状態で typecheck を進めない。
+
+### FR-004: Biome コマンドと CI
+
+- `npm run lint`（`biome lint --error-on-warnings`）を PR 前に必ず実行し、exit code 0 で完了したログを `docs/result/001-editorconfig-biome/<task-id>/..._biome-lint.log` に保存する。
+- `npm run format` / `npm run format:check` を pre-commit / CI で実行し、未整形ファイルがある場合は push を拒否する。CI ログにも証跡リンクを出力する。
+- CI では `npm run lint` → `npm run format:check` → `npm run typecheck` → `npm run build` の順で動かし、途中失敗時は EvidenceArtifact に失敗ログをそのまま保存する。
+
+### FR-005: EvidenceArtifact 連携
+
+- Biome コマンドの成功/失敗ログとスクリーンショットを EvidenceArtifact として `docs/result/001-editorconfig-biome/<task-id>/` に保存し、PR テンプレートのチェック項目で確認する。
+- フォーマット違反修正後は `git status` のスクリーンショットを添付し、余計な差分が無いことを reviewers が確認できるようにする。
+- Biome ログ (`_biome-lint.log`, `_biome-format.log`, `_biome-format-check.log`) と `YYYYMMDD-HHMM_typecheck.log` は同じタスクフォルダに配置し、PR ではこれらファイル名を evidence_path として列挙する。

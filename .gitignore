@@ -1,4 +1,5 @@
 .DS_Store
+Thumbs.db
 .env
 /node_modules/
 mcp.config.json
@@ -11,3 +12,17 @@ mcp.config.json
 /build/
 
 .vscode
+.idea/
+dist/
+coverage/
+*.log
+*.tmp
+*.swp
+.env.local
+.env.*.local
+
+vendor/*
+!vendor/react-router-testing/
+!vendor/react-router-testing/**
+!vendor/mizchi-similarity/
+!vendor/mizchi-similarity/**

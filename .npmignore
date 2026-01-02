@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+docs/
+specs/
+public/
+*.log
+.env*
+.vscode/
+.idea/
+Dockerfile*
+.dockerignore
+README.md
