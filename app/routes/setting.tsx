@@ -5,6 +5,8 @@ import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { CsvControls } from "~/components/setting/CsvControls";
+import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
+import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
 
 const SettingContent = () => {
@@ -16,6 +18,10 @@ const SettingContent = () => {
   const [manualCsv, setManualCsv] = useState(
     "id,order,prizeName,itemName,imagePath,selected,memo\n",
   );
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const summaryFrom = (
     sourceName: string,
@@ -51,6 +57,32 @@ const SettingContent = () => {
   const handleExport = () => {
     const csv = generatePrizesCsv(prizes);
     setExportText(csv);
+  };
+
+  const handleDeleteAll = async () => {
+    setIsDeleting(true);
+    try {
+      await applyPrizes([]);
+      setSummary(null);
+      setDeleteOpen(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleResetSelections = async () => {
+    setIsResetting(true);
+    try {
+      const next = prizes.map((prize, index) => ({
+        ...prize,
+        selected: false,
+        order: index,
+      }));
+      await applyPrizes(next);
+      setResetOpen(false);
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const buildEmptyPrize = (order: number) => {
@@ -114,6 +146,22 @@ const SettingContent = () => {
           >
             カード追加
           </button>
+          <button
+            type="button"
+            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            onClick={() => setResetOpen(true)}
+            disabled={isMutating || prizes.length === 0}
+          >
+            全未選出
+          </button>
+          <button
+            type="button"
+            className="rounded border border-rose-500 px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-none transition hover:bg-rose-50 disabled:opacity-50"
+            onClick={() => setDeleteOpen(true)}
+            disabled={isMutating || prizes.length === 0}
+          >
+            カード全削除
+          </button>
         </div>
         <button
           type="button"
@@ -149,6 +197,18 @@ const SettingContent = () => {
           disabled={isMutating}
         />
       )}
+      <DeleteAllDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteAll}
+        disabled={isDeleting}
+      />
+      <ResetSelectionDialog
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        onConfirm={handleResetSelections}
+        disabled={isResetting}
+      />
     </section>
   );
 };

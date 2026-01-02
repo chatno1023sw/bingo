@@ -2,12 +2,7 @@ import { useEffect, useMemo, useRef, useState, useId } from "react";
 import type { ChangeEvent, FC } from "react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Prize, PrizeList } from "~/common/types";
 
@@ -78,7 +73,7 @@ const SortableItem: FC<{
     <li
       ref={setNodeRef}
       style={style}
-      className={`relative w-full border border-slate-900 max-w-[300px] rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(15,23,42,0.04)] ${
+      className={`relative w-full max-w-[300px] rounded-3xl bg-white p-6 shadow-[0_12px_24px_rgba(15,23,42,0.16)] transition-transform duration-200 ease-out ${
         isDragging ? "bg-slate-50" : "bg-white"
       }`}
       {...attributes}
@@ -226,7 +221,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+      <SortableContext items={ids} strategy={rectSortingStrategy}>
         <ul
           className="flex flex-wrap gap-4"
           data-testid="setting-prize-list"
