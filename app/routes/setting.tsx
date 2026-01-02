@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { CsvImportResult, PrizeList } from "~/common/types";
+import Papa from "papaparse";
 import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
@@ -57,6 +58,58 @@ const SettingContent = () => {
   const handleExport = () => {
     const csv = generatePrizesCsv(prizes);
     setExportText(csv);
+  };
+
+  const handleCsvImportClick = () => {
+    const input = document.getElementById("csv-import-simple");
+    if (input instanceof HTMLInputElement) {
+      input.click();
+    }
+  };
+
+  const normalizeSelected = (value: string | undefined): boolean => {
+    if (!value) {
+      return false;
+    }
+    const normalized = value.trim().toLowerCase();
+    return (
+      normalized === "true" ||
+      normalized === "1" ||
+      normalized === "yes" ||
+      normalized === "selected" ||
+      value.trim() === "選出"
+    );
+  };
+
+  const handleCsvImport = async (file: File) => {
+    const text = await file.text();
+    const result = Papa.parse<Record<string, string>>(text, {
+      header: true,
+      skipEmptyLines: true,
+    });
+    if (result.errors.length > 0) {
+      setLocalError("csv-import-error");
+      return;
+    }
+    const parsed = result.data
+      .map((row, index) => ({
+        id:
+          globalThis.crypto?.randomUUID?.() ??
+          `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
+        order: prizes.length + index,
+        prizeName: row["賞名"]?.trim() ?? "",
+        itemName: row["商品名"]?.trim() ?? "",
+        imagePath: null,
+        selected: normalizeSelected(row["選出"]),
+        memo: null,
+      }))
+      .filter((row) => row.prizeName || row.itemName);
+    if (parsed.length === 0) {
+      setLocalError("csv-import-empty");
+      return;
+    }
+    await applyPrizes([...prizes, ...parsed]);
+    setLocalError(null);
   };
 
   const handleDeleteAll = async () => {
@@ -149,6 +202,14 @@ const SettingContent = () => {
           <button
             type="button"
             className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            onClick={handleCsvImportClick}
+            disabled={isMutating}
+          >
+            CSV追加
+          </button>
+          <button
+            type="button"
+            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
             onClick={() => setResetOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
@@ -173,6 +234,18 @@ const SettingContent = () => {
       </header>
 
       <div className="sr-only">
+        <input
+          id="csv-import-simple"
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) {
+              void handleCsvImport(file);
+            }
+            event.currentTarget.value = "";
+          }}
+        />
         <CsvControls
           disabled={isMutating}
           onFileImport={handleFileImport}

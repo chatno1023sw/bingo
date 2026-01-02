@@ -228,7 +228,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
             data-testid="setting-prize-list"
             id="setting-prize-list"
           >
-            {prizes.map((prize, index) => (
+            {prizes.map((prize) => (
               <SortableItem
                 key={prize.id}
                 id={prize.id}
