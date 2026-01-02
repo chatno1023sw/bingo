@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PrizeList } from "~/components/game/PrizeList";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
+import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
+import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 
 export type SidePanelProps = {
   className?: string;
@@ -8,6 +10,9 @@ export type SidePanelProps = {
 
 export const SidePanel = ({ className = "" }: SidePanelProps) => {
   const { prizes, isLoading, isMutating, error, togglePrize, refresh } = usePrizeManager();
+  const [rouletteOpen, setRouletteOpen] = useState(false);
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultPrize, setResultPrize] = useState<(typeof prizes)[number] | null>(null);
 
   const summary = useMemo(() => {
     const selected = prizes.filter((prize) => prize.selected).length;
@@ -17,6 +22,24 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       remaining: prizes.length - selected,
     };
   }, [prizes]);
+
+  const handleRouletteStart = () => {
+    setResultOpen(false);
+    setRouletteOpen(true);
+  };
+
+  const handleRouletteComplete = async (prize: (typeof prizes)[number]) => {
+    setRouletteOpen(false);
+    if (!prize.selected) {
+      try {
+        await togglePrize(prize.id, true);
+      } catch {
+        /* 失敗時は結果表示だけ行う */
+      }
+    }
+    setResultPrize(prize);
+    setResultOpen(true);
+  };
 
   return (
     <section
@@ -49,11 +72,23 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       <button
         type="button"
         className="mt-4 w-full rounded-full bg-[#0F6A86] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:opacity-40"
-        disabled
+        onClick={handleRouletteStart}
+        disabled={isLoading || prizes.length === 0}
       >
         景品ルーレット
       </button>
       {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
+      <PrizeRouletteDialog
+        open={rouletteOpen}
+        prizes={prizes}
+        onClose={() => setRouletteOpen(false)}
+        onComplete={handleRouletteComplete}
+      />
+      <PrizeResultDialog
+        open={resultOpen}
+        prize={resultPrize}
+        onClose={() => setResultOpen(false)}
+      />
     </section>
   );
 };
