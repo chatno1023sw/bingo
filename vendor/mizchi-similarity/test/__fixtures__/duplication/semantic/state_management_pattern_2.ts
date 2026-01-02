@@ -8,7 +8,7 @@ export class StateManager {
     this.state = {
       user: new UserStore(),
       products: new ProductStore(),
-      cart: new CartStore()
+      cart: new CartStore(),
     };
   }
 
@@ -19,12 +19,12 @@ export class StateManager {
   subscribe(callback: (state: AppState) => void): () => void {
     this.subscribers.push(callback);
     return () => {
-      this.subscribers = this.subscribers.filter(cb => cb !== callback);
+      this.subscribers = this.subscribers.filter((cb) => cb !== callback);
     };
   }
 
   private notify(): void {
-    this.subscribers.forEach(callback => callback(this.state));
+    this.subscribers.forEach((callback) => callback(this.state));
   }
 }
 
@@ -89,13 +89,11 @@ export class ProductStore {
   }
 
   updateProduct(id: string, updates: Partial<Product>): void {
-    this.items = this.items.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    );
+    this.items = this.items.map((item) => (item.id === id ? { ...item, ...updates } : item));
   }
 
   deleteProduct(id: string): void {
-    this.items = this.items.filter(item => item.id !== id);
+    this.items = this.items.filter((item) => item.id !== id);
   }
 }
 
@@ -104,24 +102,24 @@ export class CartStore {
   total: number = 0;
 
   addItem(item: CartItem): void {
-    const existingItem = this.items.find(i => i.productId === item.productId);
-    
+    const existingItem = this.items.find((i) => i.productId === item.productId);
+
     if (existingItem) {
       existingItem.quantity += item.quantity;
     } else {
       this.items.push(item);
     }
-    
+
     this.updateTotal();
   }
 
   removeItem(productId: string): void {
-    this.items = this.items.filter(item => item.productId !== productId);
+    this.items = this.items.filter((item) => item.productId !== productId);
     this.updateTotal();
   }
 
   updateQuantity(productId: string, quantity: number): void {
-    const item = this.items.find(i => i.productId === productId);
+    const item = this.items.find((i) => i.productId === productId);
     if (item) {
       item.quantity = quantity;
       this.updateTotal();
@@ -134,7 +132,7 @@ export class CartStore {
   }
 
   private updateTotal(): void {
-    this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    this.total = this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 }
 

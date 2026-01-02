@@ -1,6 +1,6 @@
 // visitNode pattern from function_body_comparer.ts
 function visitNode(node: any, callback: (n: any) => void): void {
-  if (!node || typeof node !== 'object') {
+  if (!node || typeof node !== "object") {
     return;
   }
 
@@ -15,7 +15,7 @@ function visitNode(node: any, callback: (n: any) => void): void {
   }
 
   // Skip certain properties
-  const skipKeys = new Set(['loc', 'range', 'start', 'end', 'parent']);
+  const skipKeys = new Set(["loc", "range", "start", "end", "parent"]);
 
   // Visit all properties
   for (const key in node) {

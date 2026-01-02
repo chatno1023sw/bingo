@@ -10,23 +10,23 @@ export class DataFetcher {
       }
       return await response.json();
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
       throw error;
     }
   }
-  
+
   async fetchWithRetry(url: string, maxRetries: number = 3): Promise<any> {
     let lastError;
-    
+
     for (let i = 0; i < maxRetries; i++) {
       try {
         return await this.fetchData(url);
       } catch (error) {
         lastError = error;
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
       }
     }
-    
+
     throw lastError;
   }
 }

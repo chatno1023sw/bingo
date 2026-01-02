@@ -10,8 +10,8 @@
       "expectedSimilarity": {
         "addUser": 0.85,
         "removeUser": 0.85,
-        "getUser": 0.90,
-        "getAllUsers": 0.90
+        "getUser": 0.9,
+        "getAllUsers": 0.9
       },
       "notes": "Methods converted to functions with state parameter"
     },
@@ -22,8 +22,8 @@
         "after": "calculator_functions.ts"
       },
       "expectedSimilarity": {
-        "add": 0.80,
-        "subtract": 0.80
+        "add": 0.8,
+        "subtract": 0.8
       },
       "notes": "Stateful class converted to functional with state parameter"
     }

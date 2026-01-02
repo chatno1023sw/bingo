@@ -2,39 +2,39 @@
 // Common pattern of iterating arrays with for loops
 export function processUserData(users: User[]): ProcessedUser[] {
   const result: ProcessedUser[] = [];
-  
+
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
     if (user.isActive) {
       const processed: ProcessedUser = {
         id: user.id,
-        displayName: user.firstName + ' ' + user.lastName,
-        status: 'active',
-        lastSeen: user.lastLogin
+        displayName: user.firstName + " " + user.lastName,
+        status: "active",
+        lastSeen: user.lastLogin,
       };
       result.push(processed);
     }
   }
-  
+
   return result;
 }
 
 export function processOrderData(orders: Order[]): ProcessedOrder[] {
   const result: ProcessedOrder[] = [];
-  
+
   for (let i = 0; i < orders.length; i++) {
     const order = orders[i];
-    if (order.status === 'completed') {
+    if (order.status === "completed") {
       const processed: ProcessedOrder = {
         id: order.id,
-        customerName: order.customer.firstName + ' ' + order.customer.lastName,
+        customerName: order.customer.firstName + " " + order.customer.lastName,
         total: order.items.reduce((sum, item) => sum + item.price, 0),
-        completedAt: order.completedDate
+        completedAt: order.completedDate,
       };
       result.push(processed);
     }
   }
-  
+
   return result;
 }
 

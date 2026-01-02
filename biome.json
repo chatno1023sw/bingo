@@ -1,42 +1,49 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
-  "extends": ["biome", "biome/react"],
-  "files": {
-    "ignore": ["node_modules", "build", "dist", "docs/result"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentWidth": 2,
-    "lineWidth": 100
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "style": {
-        "useConst": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useImportSorting": "error"
-      },
-      "correctness": {
-        "noUnusedImports": "error",
-        "noUnusedVariables": "error"
-      },
-      "suspicious": {
-        "noExplicitAny": "warn"
-      }
-    }
-  },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  },
-  "overrides": [
-    {
-      "includes": ["docs/**/*.md"],
-      "formatter": {
-        "lineWidth": 100
-      }
-    }
-  ]
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"files": {
+		"includes": ["app/**", "scripts/**", "docs/**", "public/**", "*.{js,mjs,ts,tsx,json,md}"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentWidth": 2,
+		"lineWidth": 100
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"style": {
+				"useConst": "error",
+				"noUnusedTemplateLiteral": "error"
+			},
+			"correctness": {
+				"noUnusedImports": "error",
+				"noUnusedVariables": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn"
+			}
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["vendor/**"],
+			"formatter": {
+				"enabled": false
+			},
+			"linter": {
+				"enabled": false
+			}
+		},
+		{
+			"includes": ["docs/**/*.md"],
+			"formatter": {
+				"lineWidth": 100
+			}
+		}
+	]
 }

@@ -4,7 +4,7 @@ class ShoppingCart {
   private discount: number = 0;
 
   addItem(item: CartItem): void {
-    const existing = this.items.find(i => i.id === item.id);
+    const existing = this.items.find((i) => i.id === item.id);
     if (existing) {
       existing.quantity += item.quantity;
     } else {
@@ -13,7 +13,7 @@ class ShoppingCart {
   }
 
   removeItem(id: string): void {
-    const index = this.items.findIndex(i => i.id === id);
+    const index = this.items.findIndex((i) => i.id === id);
     if (index !== -1) {
       this.items.splice(index, 1);
     }

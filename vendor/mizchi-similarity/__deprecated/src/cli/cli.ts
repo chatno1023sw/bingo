@@ -172,7 +172,7 @@ function compareFunctions(func1: FunctionInfo, func2: FunctionInfo, noSizePenalt
       if (sizeRatio < 0.1) {
         finalSimilarity *= sizeRatio * 10; // Scale down dramatically
       } else if (sizeRatio < 0.3) {
-        finalSimilarity *= (0.7 + sizeRatio); // Moderate penalty
+        finalSimilarity *= 0.7 + sizeRatio; // Moderate penalty
       }
 
       // Apply additional penalty for very short functions
@@ -296,16 +296,12 @@ Examples:
     return lineCount >= minLines;
   });
 
-  console.log(
-    chalk.blue(`Analyzing ${filteredFunctions.length} functions (filtered by minimum ${minLines} lines)\n`),
-  );
+  console.log(chalk.blue(`Analyzing ${filteredFunctions.length} functions (filtered by minimum ${minLines} lines)\n`));
 
   if (filteredFunctions.length === 0) {
     console.log(chalk.yellow("No functions found after filtering!"));
     if (allFunctions.length > 0) {
-      console.log(
-        chalk.gray(`  (${allFunctions.length} functions were excluded due to minimum line threshold)`),
-      );
+      console.log(chalk.gray(`  (${allFunctions.length} functions were excluded due to minimum line threshold)`));
     }
     process.exit(0);
   }

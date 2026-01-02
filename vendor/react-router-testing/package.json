@@ -1,12 +1,12 @@
 {
-  "name": "@react-router/testing",
-  "version": "7.9.2-local",
-  "type": "module",
-  "main": "index.js",
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "types": "./index.d.ts"
-    }
-  }
+	"name": "@react-router/testing",
+	"version": "7.9.2-local",
+	"type": "module",
+	"main": "index.js",
+	"exports": {
+		".": {
+			"import": "./index.js",
+			"types": "./index.d.ts"
+		}
+	}
 }

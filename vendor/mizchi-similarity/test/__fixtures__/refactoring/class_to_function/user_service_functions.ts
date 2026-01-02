@@ -1,7 +1,7 @@
 // Refactored to functional style
 function addUser(users: Map<string, User>, user: User): void {
   if (!user.id) {
-    throw new Error('User must have an ID');
+    throw new Error("User must have an ID");
   }
   users.set(user.id, user);
   console.log(`Added user: ${user.name}`);

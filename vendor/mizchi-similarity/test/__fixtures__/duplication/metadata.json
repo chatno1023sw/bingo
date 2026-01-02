@@ -18,7 +18,7 @@
         {
           "name": "Array iteration patterns",
           "files": ["array_iteration_pattern_1.ts", "array_iteration_pattern_2.ts"],
-          "expectedSimilarity": 0.70,
+          "expectedSimilarity": 0.7,
           "detection": "Should detect structural similarity despite imperative vs functional style"
         },
         {
@@ -35,7 +35,7 @@
         {
           "name": "Validation logic",
           "files": ["validation_pattern_1.ts", "validation_pattern_2.ts"],
-          "expectedSimilarity": 0.60,
+          "expectedSimilarity": 0.6,
           "detection": "Should detect same validation rules despite different patterns"
         },
         {
@@ -73,7 +73,7 @@
         {
           "name": "Calculator pattern",
           "files": ["calculator_class.ts", "calculator_functions.ts"],
-          "expectedSimilarity": 0.90,
+          "expectedSimilarity": 0.9,
           "detection": "Should detect stateful class converted to functional approach"
         },
         {

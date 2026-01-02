@@ -28,10 +28,7 @@ interface ExtractorState {
   filePath: string;
 }
 
-export function extractTypes(
-  code: string,
-  filePath: string = "temp.ts"
-): TypeDefinition[] {
+export function extractTypes(code: string, filePath: string = "temp.ts"): TypeDefinition[] {
   const ast = parseTypeScript(filePath, code);
   const state: ExtractorState = {
     types: [],
@@ -82,12 +79,10 @@ export function extractTypes(
         const elementType = extractTypeString(typeNode.elementType);
         return `${elementType}[]`;
       case "TSUnionType":
-        const unionTypes =
-          typeNode.types?.map((t: any) => extractTypeString(t)) || [];
+        const unionTypes = typeNode.types?.map((t: any) => extractTypeString(t)) || [];
         return unionTypes.join(" | ");
       case "TSIntersectionType":
-        const intersectionTypes =
-          typeNode.types?.map((t: any) => extractTypeString(t)) || [];
+        const intersectionTypes = typeNode.types?.map((t: any) => extractTypeString(t)) || [];
         return intersectionTypes.join(" & ");
       case "TSLiteralType":
         if (typeNode.literal?.type === "StringLiteral") {
@@ -205,7 +200,7 @@ export function extractTypes(
         }
       },
     }),
-    state
+    state,
   );
 
   return state.types;
@@ -215,7 +210,7 @@ export function extractTypes(
  * Extract types from multiple files
  */
 export async function extractTypesFromFiles(
-  files: Array<{ path: string; content: string }>
+  files: Array<{ path: string; content: string }>,
 ): Promise<TypeDefinition[]> {
   const allTypes: TypeDefinition[] = [];
 
@@ -234,10 +229,7 @@ export async function extractTypesFromFiles(
 /**
  * Find types by name
  */
-export function findTypeByName(
-  types: TypeDefinition[],
-  name: string
-): TypeDefinition[] {
+export function findTypeByName(types: TypeDefinition[], name: string): TypeDefinition[] {
   return types.filter((type) => type.name === name);
 }
 

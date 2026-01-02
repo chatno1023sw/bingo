@@ -5,13 +5,13 @@ export class FileService {
   async readUserData(userId: string): Promise<UserData | null> {
     try {
       const filePath = `./data/users/${userId}.json`;
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
       const data = JSON.parse(content);
       console.log(`Successfully read user data for ${userId}`);
       return data;
     } catch (error) {
       console.error(`Failed to read user data for ${userId}:`, error);
-      if (error.code === 'ENOENT') {
+      if (error.code === "ENOENT") {
         return null;
       }
       throw new Error(`Error reading user data: ${error.message}`);
@@ -21,13 +21,13 @@ export class FileService {
   async readProductData(productId: string): Promise<ProductData | null> {
     try {
       const filePath = `./data/products/${productId}.json`;
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
       const data = JSON.parse(content);
       console.log(`Successfully read product data for ${productId}`);
       return data;
     } catch (error) {
       console.error(`Failed to read product data for ${productId}:`, error);
-      if (error.code === 'ENOENT') {
+      if (error.code === "ENOENT") {
         return null;
       }
       throw new Error(`Error reading product data: ${error.message}`);
@@ -37,13 +37,13 @@ export class FileService {
   async readOrderData(orderId: string): Promise<OrderData | null> {
     try {
       const filePath = `./data/orders/${orderId}.json`;
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
       const data = JSON.parse(content);
       console.log(`Successfully read order data for ${orderId}`);
       return data;
     } catch (error) {
       console.error(`Failed to read order data for ${orderId}:`, error);
-      if (error.code === 'ENOENT') {
+      if (error.code === "ENOENT") {
         return null;
       }
       throw new Error(`Error reading order data: ${error.message}`);
@@ -54,7 +54,7 @@ export class FileService {
     try {
       const filePath = `./data/users/${userId}.json`;
       const content = JSON.stringify(data, null, 2);
-      await fs.writeFile(filePath, content, 'utf-8');
+      await fs.writeFile(filePath, content, "utf-8");
       console.log(`Successfully wrote user data for ${userId}`);
     } catch (error) {
       console.error(`Failed to write user data for ${userId}:`, error);
@@ -66,7 +66,7 @@ export class FileService {
     try {
       const filePath = `./data/products/${productId}.json`;
       const content = JSON.stringify(data, null, 2);
-      await fs.writeFile(filePath, content, 'utf-8');
+      await fs.writeFile(filePath, content, "utf-8");
       console.log(`Successfully wrote product data for ${productId}`);
     } catch (error) {
       console.error(`Failed to write product data for ${productId}:`, error);
@@ -77,8 +77,8 @@ export class FileService {
 
 // Mock fs for the example
 const fs = {
-  readFile: async (path: string, encoding: string) => '{}',
-  writeFile: async (path: string, content: string, encoding: string) => {}
+  readFile: async (path: string, encoding: string) => "{}",
+  writeFile: async (path: string, content: string, encoding: string) => {},
 };
 
 interface UserData {

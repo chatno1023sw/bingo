@@ -2,23 +2,23 @@
 // Same logic as pattern_1 but using functional approach
 export function processUserData(users: User[]): ProcessedUser[] {
   return users
-    .filter(user => user.isActive)
-    .map(user => ({
+    .filter((user) => user.isActive)
+    .map((user) => ({
       id: user.id,
       displayName: `${user.firstName} ${user.lastName}`,
-      status: 'active',
-      lastSeen: user.lastLogin
+      status: "active",
+      lastSeen: user.lastLogin,
     }));
 }
 
 export function processOrderData(orders: Order[]): ProcessedOrder[] {
   return orders
-    .filter(order => order.status === 'completed')
-    .map(order => ({
+    .filter((order) => order.status === "completed")
+    .map((order) => ({
       id: order.id,
       customerName: `${order.customer.firstName} ${order.customer.lastName}`,
       total: order.items.reduce((sum, item) => sum + item.price, 0),
-      completedAt: order.completedDate
+      completedAt: order.completedDate,
     }));
 }
 

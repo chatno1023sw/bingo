@@ -7,11 +7,11 @@ class UserService {
   }
 
   getUser(id: number): User | undefined {
-    return this.users.find(u => u.id === id);
+    return this.users.find((u) => u.id === id);
   }
 
   removeUser(id: number): boolean {
-    const index = this.users.findIndex(u => u.id === id);
+    const index = this.users.findIndex((u) => u.id === id);
     if (index !== -1) {
       this.users.splice(index, 1);
       return true;

@@ -20,7 +20,7 @@ const multiply = (state: CalculatorState, n: number): number => {
 
 const divide = (state: CalculatorState, n: number): number => {
   if (n === 0) {
-    throw new Error('Division by zero');
+    throw new Error("Division by zero");
   }
   state.value /= n;
   return state.value;

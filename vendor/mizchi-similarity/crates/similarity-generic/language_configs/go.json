@@ -1,13 +1,7 @@
 {
   "language": "go",
-  "function_nodes": [
-    "function_declaration",
-    "method_declaration"
-  ],
-  "type_nodes": [
-    "type_declaration",
-    "struct_type"
-  ],
+  "function_nodes": ["function_declaration", "method_declaration"],
+  "type_nodes": ["type_declaration", "struct_type"],
   "field_mappings": {
     "name_field": "name",
     "params_field": "parameters",
@@ -25,12 +19,7 @@
   ],
   "test_patterns": {
     "attribute_patterns": [],
-    "name_prefixes": [
-      "Test",
-      "Benchmark"
-    ],
-    "name_suffixes": [
-      "_test"
-    ]
+    "name_prefixes": ["Test", "Benchmark"],
+    "name_suffixes": ["_test"]
   }
 }

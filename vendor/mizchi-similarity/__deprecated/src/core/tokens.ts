@@ -12,7 +12,6 @@ function extractTokens(code: string): Set<string> {
   return tokens;
 }
 
-
 /**
  * Extract tokens from pre-parsed AST
  */

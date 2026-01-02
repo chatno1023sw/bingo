@@ -1,10 +1,7 @@
 // Refactoring pattern: Generic repository with functional approach
 // Same functionality as repository_class.ts but using functions and closures
 
-export function createRepository<T extends Entity>(
-  db: Database,
-  tableName: string
-) {
+export function createRepository<T extends Entity>(db: Database, tableName: string) {
   const findById = async (id: string): Promise<T | null> => {
     const query = `SELECT * FROM ${tableName} WHERE id = ?`;
     const result = await db.query(query, [id]);
@@ -20,34 +17,34 @@ export function createRepository<T extends Entity>(
   const findBy = async (conditions: Partial<T>): Promise<T[]> => {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
-    const whereClause = keys.map(key => `${key} = ?`).join(' AND ');
-    
+    const whereClause = keys.map((key) => `${key} = ?`).join(" AND ");
+
     const query = `SELECT * FROM ${tableName} WHERE ${whereClause}`;
     const result = await db.query(query, values);
     return result.rows;
   };
 
-  const create = async (entity: Omit<T, 'id'>): Promise<T> => {
+  const create = async (entity: Omit<T, "id">): Promise<T> => {
     const id = generateId();
     const data = { ...entity, id };
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const placeholders = keys.map(() => '?').join(', ');
-    
-    const query = `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
+    const placeholders = keys.map(() => "?").join(", ");
+
+    const query = `INSERT INTO ${tableName} (${keys.join(", ")}) VALUES (${placeholders})`;
     await db.query(query, values);
-    
+
     return data as T;
   };
 
   const update = async (id: string, updates: Partial<T>): Promise<T | null> => {
     const keys = Object.keys(updates);
     const values = Object.values(updates);
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    
+    const setClause = keys.map((key) => `${key} = ?`).join(", ");
+
     const query = `UPDATE ${tableName} SET ${setClause} WHERE id = ?`;
     await db.query(query, [...values, id]);
-    
+
     return findById(id);
   };
 
@@ -63,14 +60,14 @@ export function createRepository<T extends Entity>(
     findBy,
     create,
     update,
-    delete: remove
+    delete: remove,
   };
 }
 
 // Usage example
 export function createUserRepository(db: Database) {
-  const baseRepo = createRepository<User>(db, 'users');
-  
+  const baseRepo = createRepository<User>(db, "users");
+
   const findByEmail = async (email: string): Promise<User | null> => {
     const users = await baseRepo.findBy({ email });
     return users[0] || null;
@@ -78,7 +75,7 @@ export function createUserRepository(db: Database) {
 
   return {
     ...baseRepo,
-    findByEmail
+    findByEmail,
   };
 }
 

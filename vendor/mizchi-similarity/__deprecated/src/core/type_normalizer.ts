@@ -21,10 +21,7 @@ export interface NormalizationOptions {
 /**
  * Normalize a type definition for comparison
  */
-export function normalizeType(
-  typeDef: TypeDefinition,
-  options: NormalizationOptions = {}
-): NormalizedType {
+export function normalizeType(typeDef: TypeDefinition, options: NormalizationOptions = {}): NormalizedType {
   const {
     ignorePropertyOrder = true,
     ignoreOptionalModifiers = false,
@@ -39,9 +36,7 @@ export function normalizeType(
   // Process each property
   for (const prop of typeDef.properties) {
     const normalizedPropName = prop.name.toLowerCase().trim();
-    const normalizedType = normalizeTypeNames
-      ? normalizeTypeName(prop.type)
-      : prop.type;
+    const normalizedType = normalizeTypeNames ? normalizeTypeName(prop.type) : prop.type;
 
     properties.set(normalizedPropName, normalizedType);
 
@@ -55,12 +50,7 @@ export function normalizeType(
   }
 
   // Generate normalized signature
-  const signature = generateTypeSignature(
-    properties,
-    optionalProperties,
-    readonlyProperties,
-    ignorePropertyOrder
-  );
+  const signature = generateTypeSignature(properties, optionalProperties, readonlyProperties, ignorePropertyOrder);
 
   return {
     properties,
@@ -91,10 +81,7 @@ function normalizeTypeName(typeName: string): string {
 
   // Replace known type aliases
   for (const [original, replacement] of Object.entries(typeMap)) {
-    normalized = normalized.replace(
-      new RegExp(`\\b${original}\\b`, "g"),
-      replacement
-    );
+    normalized = normalized.replace(new RegExp(`\\b${original}\\b`, "g"), replacement);
   }
 
   // Normalize array syntax: T[] vs Array<T>
@@ -128,7 +115,7 @@ function generateTypeSignature(
   properties: Map<string, string>,
   optionalProperties: Set<string>,
   readonlyProperties: Set<string>,
-  ignoreOrder: boolean = true
+  ignoreOrder: boolean = true,
 ): string {
   const propEntries = Array.from(properties.entries());
 
@@ -157,10 +144,7 @@ function generateTypeSignature(
 /**
  * Calculate similarity between two property names using Levenshtein distance
  */
-export function calculatePropertySimilarity(
-  prop1: string,
-  prop2: string
-): number {
+export function calculatePropertySimilarity(prop1: string, prop2: string): number {
   if (prop1 === prop2) return 1.0;
 
   const normalized1 = prop1.toLowerCase().trim();
@@ -206,43 +190,26 @@ export function calculateTypeSimilarity(type1: string, type2: string): number {
  * Calculate similarity between union types
  */
 function calculateUnionTypeSimilarity(type1: string, type2: string): number {
-  const union1 = type1.includes(" | ")
-    ? type1.split(" | ").map((t) => t.trim())
-    : [type1];
-  const union2 = type2.includes(" | ")
-    ? type2.split(" | ").map((t) => t.trim())
-    : [type2];
+  const union1 = type1.includes(" | ") ? type1.split(" | ").map((t) => t.trim()) : [type1];
+  const union2 = type2.includes(" | ") ? type2.split(" | ").map((t) => t.trim()) : [type2];
 
   const commonTypes = union1.filter((t1) => union2.some((t2) => t1 === t2));
   const totalTypes = new Set([...union1, ...union2]).size;
 
-  return totalTypes === 0
-    ? 1.0
-    : (commonTypes.length * 2) / (union1.length + union2.length);
+  return totalTypes === 0 ? 1.0 : (commonTypes.length * 2) / (union1.length + union2.length);
 }
 
 /**
  * Calculate similarity between intersection types
  */
-function calculateIntersectionTypeSimilarity(
-  type1: string,
-  type2: string
-): number {
-  const intersection1 = type1.includes(" & ")
-    ? type1.split(" & ").map((t) => t.trim())
-    : [type1];
-  const intersection2 = type2.includes(" & ")
-    ? type2.split(" & ").map((t) => t.trim())
-    : [type2];
+function calculateIntersectionTypeSimilarity(type1: string, type2: string): number {
+  const intersection1 = type1.includes(" & ") ? type1.split(" & ").map((t) => t.trim()) : [type1];
+  const intersection2 = type2.includes(" & ") ? type2.split(" & ").map((t) => t.trim()) : [type2];
 
-  const commonTypes = intersection1.filter((t1) =>
-    intersection2.some((t2) => t1 === t2)
-  );
+  const commonTypes = intersection1.filter((t1) => intersection2.some((t2) => t1 === t2));
   const totalTypes = new Set([...intersection1, ...intersection2]).size;
 
-  return totalTypes === 0
-    ? 1.0
-    : (commonTypes.length * 2) / (intersection1.length + intersection2.length);
+  return totalTypes === 0 ? 1.0 : (commonTypes.length * 2) / (intersection1.length + intersection2.length);
 }
 
 /**
@@ -251,7 +218,7 @@ function calculateIntersectionTypeSimilarity(
 export function findPropertyMatches(
   type1: NormalizedType,
   type2: NormalizedType,
-  threshold: number = 0.7
+  threshold: number = 0.7,
 ): Array<{
   prop1: string;
   prop2: string;
@@ -275,7 +242,7 @@ export function findPropertyMatches(
       const nameSimilarity = calculatePropertySimilarity(prop1, prop2);
       const typeSimilarity = calculateTypeSimilarity(
         type1.properties.get(prop1) || "",
-        type2.properties.get(prop2) || ""
+        type2.properties.get(prop2) || "",
       );
 
       // Weight name similarity more heavily than type similarity

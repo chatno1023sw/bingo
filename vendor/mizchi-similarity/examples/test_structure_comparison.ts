@@ -11,7 +11,7 @@ interface User {
 // Type alias with similar structure
 type Person = {
   id: string;
-  name: string; 
+  name: string;
   email: string;
   age?: number;
 };
@@ -34,7 +34,7 @@ const employee: {
   id: "emp001",
   name: "John Doe",
   email: "john@example.com",
-  age: 30
+  age: 30,
 };
 
 // Similar class structure

@@ -37,20 +37,20 @@ function getMaximumValue(values: number[]): number {
 // Duplicate 3: Data processing with different field names
 function processUserData(users: any[]) {
   return users
-    .filter(user => user.isActive)
-    .map(user => ({
+    .filter((user) => user.isActive)
+    .map((user) => ({
       id: user.userId,
       name: user.fullName,
-      email: user.emailAddress
+      email: user.emailAddress,
     }));
 }
 
 function processCustomerData(customers: any[]) {
   return customers
-    .filter(customer => customer.isActive)
-    .map(customer => ({
+    .filter((customer) => customer.isActive)
+    .map((customer) => ({
       id: customer.customerId,
       name: customer.fullName,
-      email: customer.emailAddress
+      email: customer.emailAddress,
     }));
 }

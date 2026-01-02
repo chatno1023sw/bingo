@@ -7,11 +7,11 @@ class PersonManager {
   }
 
   getPerson(identifier: number): Person | undefined {
-    return this.people.find(p => p.id === identifier);
+    return this.people.find((p) => p.id === identifier);
   }
 
   removePerson(identifier: number): boolean {
-    const idx = this.people.findIndex(p => p.id === identifier);
+    const idx = this.people.findIndex((p) => p.id === identifier);
     if (idx !== -1) {
       this.people.splice(idx, 1);
       return true;

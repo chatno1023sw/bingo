@@ -27,26 +27,24 @@ export interface CartState {
 // User reducer
 export function userReducer(state: UserState = initialUserState, action: Action): UserState {
   switch (action.type) {
-    case 'USER_LOGIN_START':
+    case "USER_LOGIN_START":
       return { ...state, isLoading: true, error: null };
-    
-    case 'USER_LOGIN_SUCCESS':
+
+    case "USER_LOGIN_SUCCESS":
       return { ...state, currentUser: action.payload, isLoading: false };
-    
-    case 'USER_LOGIN_ERROR':
+
+    case "USER_LOGIN_ERROR":
       return { ...state, error: action.payload, isLoading: false };
-    
-    case 'USER_LOGOUT':
+
+    case "USER_LOGOUT":
       return { ...state, currentUser: null };
-    
-    case 'USER_UPDATE':
-      return { 
-        ...state, 
-        currentUser: state.currentUser 
-          ? { ...state.currentUser, ...action.payload }
-          : null 
+
+    case "USER_UPDATE":
+      return {
+        ...state,
+        currentUser: state.currentUser ? { ...state.currentUser, ...action.payload } : null,
       };
-    
+
     default:
       return state;
   }
@@ -55,35 +53,33 @@ export function userReducer(state: UserState = initialUserState, action: Action)
 // Product reducer
 export function productReducer(state: ProductState = initialProductState, action: Action): ProductState {
   switch (action.type) {
-    case 'PRODUCTS_FETCH_START':
+    case "PRODUCTS_FETCH_START":
       return { ...state, isLoading: true, error: null };
-    
-    case 'PRODUCTS_FETCH_SUCCESS':
+
+    case "PRODUCTS_FETCH_SUCCESS":
       return { ...state, items: action.payload, isLoading: false };
-    
-    case 'PRODUCTS_FETCH_ERROR':
+
+    case "PRODUCTS_FETCH_ERROR":
       return { ...state, error: action.payload, isLoading: false };
-    
-    case 'PRODUCT_SELECT':
+
+    case "PRODUCT_SELECT":
       return { ...state, selectedProduct: action.payload };
-    
-    case 'PRODUCT_ADD':
+
+    case "PRODUCT_ADD":
       return { ...state, items: [...state.items, action.payload] };
-    
-    case 'PRODUCT_UPDATE':
+
+    case "PRODUCT_UPDATE":
       return {
         ...state,
-        items: state.items.map(item =>
-          item.id === action.payload.id ? { ...item, ...action.payload } : item
-        )
+        items: state.items.map((item) => (item.id === action.payload.id ? { ...item, ...action.payload } : item)),
       };
-    
-    case 'PRODUCT_DELETE':
+
+    case "PRODUCT_DELETE":
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload)
+        items: state.items.filter((item) => item.id !== action.payload),
       };
-    
+
     default:
       return state;
   }
@@ -92,46 +88,44 @@ export function productReducer(state: ProductState = initialProductState, action
 // Cart reducer
 export function cartReducer(state: CartState = initialCartState, action: Action): CartState {
   switch (action.type) {
-    case 'CART_ADD_ITEM':
-      const existingItem = state.items.find(item => item.productId === action.payload.productId);
+    case "CART_ADD_ITEM":
+      const existingItem = state.items.find((item) => item.productId === action.payload.productId);
       if (existingItem) {
         return {
           ...state,
-          items: state.items.map(item =>
+          items: state.items.map((item) =>
             item.productId === action.payload.productId
               ? { ...item, quantity: item.quantity + action.payload.quantity }
-              : item
+              : item,
           ),
-          total: calculateTotal(state.items)
+          total: calculateTotal(state.items),
         };
       }
       return {
         ...state,
         items: [...state.items, action.payload],
-        total: calculateTotal([...state.items, action.payload])
+        total: calculateTotal([...state.items, action.payload]),
       };
-    
-    case 'CART_REMOVE_ITEM':
+
+    case "CART_REMOVE_ITEM":
       return {
         ...state,
-        items: state.items.filter(item => item.productId !== action.payload),
-        total: calculateTotal(state.items.filter(item => item.productId !== action.payload))
+        items: state.items.filter((item) => item.productId !== action.payload),
+        total: calculateTotal(state.items.filter((item) => item.productId !== action.payload)),
       };
-    
-    case 'CART_UPDATE_QUANTITY':
+
+    case "CART_UPDATE_QUANTITY":
       return {
         ...state,
-        items: state.items.map(item =>
-          item.productId === action.payload.productId
-            ? { ...item, quantity: action.payload.quantity }
-            : item
+        items: state.items.map((item) =>
+          item.productId === action.payload.productId ? { ...item, quantity: action.payload.quantity } : item,
         ),
-        total: calculateTotal(state.items)
+        total: calculateTotal(state.items),
       };
-    
-    case 'CART_CLEAR':
+
+    case "CART_CLEAR":
       return initialCartState;
-    
+
     default:
       return state;
   }
@@ -139,26 +133,26 @@ export function cartReducer(state: CartState = initialCartState, action: Action)
 
 // Helper functions
 function calculateTotal(items: CartItem[]): number {
-  return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
 }
 
 // Initial states
 const initialUserState: UserState = {
   currentUser: null,
   isLoading: false,
-  error: null
+  error: null,
 };
 
 const initialProductState: ProductState = {
   items: [],
   selectedProduct: null,
   isLoading: false,
-  error: null
+  error: null,
 };
 
 const initialCartState: CartState = {
   items: [],
-  total: 0
+  total: 0,
 };
 
 // Types

@@ -3,74 +3,74 @@
 export function validateUserRegistration(data: any): ValidationResult {
   const rules: ValidationRule[] = [
     {
-      field: 'email',
+      field: "email",
       required: true,
-      message: 'Email is required'
+      message: "Email is required",
     },
     {
-      field: 'email',
+      field: "email",
       validator: (value) => isValidEmail(value),
-      message: 'Invalid email format'
+      message: "Invalid email format",
     },
     {
-      field: 'password',
+      field: "password",
       required: true,
-      message: 'Password is required'
+      message: "Password is required",
     },
     {
-      field: 'password',
+      field: "password",
       minLength: 8,
-      message: 'Password must be at least 8 characters'
+      message: "Password must be at least 8 characters",
     },
     {
-      field: 'username',
+      field: "username",
       required: true,
-      message: 'Username is required'
+      message: "Username is required",
     },
     {
-      field: 'username',
+      field: "username",
       minLength: 3,
-      message: 'Username must be at least 3 characters'
-    }
+      message: "Username must be at least 3 characters",
+    },
   ];
-  
+
   return validate(data, rules);
 }
 
 export function validateProductCreation(data: any): ValidationResult {
   const rules: ValidationRule[] = [
     {
-      field: 'name',
+      field: "name",
       required: true,
-      message: 'Product name is required'
+      message: "Product name is required",
     },
     {
-      field: 'name',
+      field: "name",
       minLength: 3,
-      message: 'Product name must be at least 3 characters'
+      message: "Product name must be at least 3 characters",
     },
     {
-      field: 'price',
+      field: "price",
       required: true,
-      message: 'Price is required'
+      message: "Price is required",
     },
     {
-      field: 'price',
-      validator: (value) => typeof value === 'number' && value > 0,
-      message: 'Price must be a positive number'
+      field: "price",
+      validator: (value) => typeof value === "number" && value > 0,
+      message: "Price must be a positive number",
     },
     {
-      field: 'category',
+      field: "category",
       required: true,
-      message: 'Category is required'
+      message: "Category is required",
     },
     {
-      field: 'category',
-      validator: (value) => ['electronics', 'clothing', 'food', 'other'].includes(value),
-      message: 'Invalid category'
-    }
+      field: "category",
+      validator: (value) => ["electronics", "clothing", "food", "other"].includes(value),
+      message: "Invalid category",
+    },
   ];
-  
+
   return validate(data, rules);
 }
 
@@ -78,20 +78,20 @@ export function validateProductCreation(data: any): ValidationResult {
 function validate(data: any, rules: ValidationRule[]): ValidationResult {
   for (const rule of rules) {
     const value = data[rule.field];
-    
+
     if (rule.required && !value) {
       return { valid: false, error: rule.message };
     }
-    
+
     if (rule.minLength && value && value.length < rule.minLength) {
       return { valid: false, error: rule.message };
     }
-    
+
     if (rule.validator && value && !rule.validator(value)) {
       return { valid: false, error: rule.message };
     }
   }
-  
+
   return { valid: true };
 }
 

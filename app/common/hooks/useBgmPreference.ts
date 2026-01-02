@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import type { BgmPreference } from "~/common/types";
 import {
-  createDefaultBgmPreference,
-  getBgmPreference,
-  saveBgmPreference,
+	createDefaultBgmPreference,
+	getBgmPreference,
+	saveBgmPreference,
 } from "~/common/services/bgmService";
 
 const toErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "unknown-error";
+	if (error instanceof Error) {
+		return error.message;
+	}
+	return "unknown-error";
 };
 
 export type UseBgmPreferenceResult = {
-  preference: BgmPreference;
-  isReady: boolean;
-  toggle: () => Promise<void>;
-  error: string | null;
+	preference: BgmPreference;
+	isReady: boolean;
+	toggle: () => Promise<void>;
+	error: string | null;
 };
 
 /**
@@ -28,49 +28,49 @@ export type UseBgmPreferenceResult = {
  * - Chrome DevTools MCP では `localStorage.getItem("bingo.v1.bgm")` を確認してトグル状態を検証します。
  */
 export const useBgmPreference = (): UseBgmPreferenceResult => {
-  const [preference, setPreference] = useState<BgmPreference>(() => createDefaultBgmPreference());
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [preference, setPreference] = useState<BgmPreference>(() => createDefaultBgmPreference());
+	const [isReady, setIsReady] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    getBgmPreference()
-      .then((pref) => {
-        if (!mounted) {
-          return;
-        }
-        setPreference(pref);
-        setIsReady(true);
-      })
-      .catch((err) => {
-        if (!mounted) {
-          return;
-        }
-        setPreference(createDefaultBgmPreference());
-        setIsReady(true);
-        setError(toErrorMessage(err));
-      });
+	useEffect(() => {
+		let mounted = true;
+		getBgmPreference()
+			.then((pref) => {
+				if (!mounted) {
+					return;
+				}
+				setPreference(pref);
+				setIsReady(true);
+			})
+			.catch((err) => {
+				if (!mounted) {
+					return;
+				}
+				setPreference(createDefaultBgmPreference());
+				setIsReady(true);
+				setError(toErrorMessage(err));
+			});
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
-  const toggle = useCallback(async () => {
-    const next: BgmPreference = {
-      ...preference,
-      enabled: !preference.enabled,
-      updatedAt: new Date().toISOString(),
-    };
-    setPreference(next);
-    try {
-      await saveBgmPreference(next);
-      setError(null);
-    } catch (err) {
-      setPreference(preference);
-      setError(toErrorMessage(err));
-    }
-  }, [preference]);
+	const toggle = useCallback(async () => {
+		const next: BgmPreference = {
+			...preference,
+			enabled: !preference.enabled,
+			updatedAt: new Date().toISOString(),
+		};
+		setPreference(next);
+		try {
+			await saveBgmPreference(next);
+			setError(null);
+		} catch (err) {
+			setPreference(preference);
+			setError(toErrorMessage(err));
+		}
+	}, [preference]);
 
-  return { preference, isReady, toggle, error };
+	return { preference, isReady, toggle, error };
 };

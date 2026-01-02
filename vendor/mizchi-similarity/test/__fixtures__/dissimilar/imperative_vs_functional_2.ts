@@ -12,17 +12,17 @@ type Order = {
 
 const createOrder = (products: Product[] = [], discount = 0): Order => ({
   products,
-  discount: Math.min(Math.max(discount, 0), 100)
+  discount: Math.min(Math.max(discount, 0), 100),
 });
 
 const addProduct = (order: Order, product: Product): Order => ({
   ...order,
-  products: [...order.products, product]
+  products: [...order.products, product],
 });
 
 const removeProduct = (order: Order, productId: string): Order => ({
   ...order,
-  products: order.products.filter(p => p.id !== productId)
+  products: order.products.filter((p) => p.id !== productId),
 });
 
 const calculateOrderTotal = (order: Order): number => {
@@ -30,5 +30,7 @@ const calculateOrderTotal = (order: Order): number => {
   return subtotal * (1 - order.discount / 100);
 };
 
-const pipe = <T>(...fns: Array<(arg: T) => T>) => (value: T): T =>
-  fns.reduce((acc, fn) => fn(acc), value);
+const pipe =
+  <T>(...fns: Array<(arg: T) => T>) =>
+  (value: T): T =>
+    fns.reduce((acc, fn) => fn(acc), value);
