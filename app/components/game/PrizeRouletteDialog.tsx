@@ -100,8 +100,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       onClose={onClose}
       title="景品ルーレット"
       titleClassName="text-xl"
-      contentClassName="max-w-2xl"
-      showCloseButton
+      contentClassName="w-2xl"
     >
       <div className="mt-6 grid grid-cols-5 gap-1.25">
         {entries.map((prize, index) => {
@@ -109,16 +108,17 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
           const isWinner = isFlashing && index === winnerIndex;
           const isDisabled = prize.selected;
           return (
-            <div
-              key={prize.id}
-              className={cn(
-                "flex items-center justify-center roulette-card aspect-square text-3xl",
-                isDisabled && "roulette-card--disabled",
-                isActive && !isDisabled && "roulette-card--active",
-                isWinner && !isDisabled && "roulette-card--winner",
-              )}
-            >
-              {prize.prizeName || "賞名未設定"}
+            <div key={prize.id} className="aspect-square">
+              <div
+                className={cn(
+                  "flex h-full w-full items-center justify-center roulette-card text-3xl",
+                  isDisabled && "roulette-card--disabled",
+                  isActive && !isDisabled && "roulette-card--active",
+                  isWinner && !isDisabled && "roulette-card--winner",
+                )}
+              >
+                {prize.prizeName || "賞名未設定"}
+              </div>
             </div>
           );
         })}

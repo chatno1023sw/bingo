@@ -1,5 +1,5 @@
-import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as React from "react";
 import { cn } from "~/lib/utils";
 
 /**
@@ -82,7 +82,7 @@ export const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white p-8 shadow-2xl outline-none",
+          "fixed left-1/2 top-1/2 z-50 min-w-xl -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white p-8 shadow-2xl outline-none",
           className,
         )}
         {...props}
@@ -100,10 +100,7 @@ DialogContent.displayName = "DialogContent";
  * - 戻り値: 見出し用のラッパー要素を返します。
  * - Chrome DevTools MCP では見出し周りの余白が維持されることを確認します。
  */
-export const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+export const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   return <div className={cn("space-y-3", className)} {...props} />;
 };
 
@@ -115,10 +112,7 @@ export const DialogHeader = ({
  * - 戻り値: 操作ボタン用のラッパー要素を返します。
  * - Chrome DevTools MCP ではボタン群のレイアウトが崩れないことを確認します。
  */
-export const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+export const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   return <div className={cn("mt-8 flex flex-col gap-3 md:flex-row", className)} {...props} />;
 };
 

@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { cn } from "~/lib/utils";
 
 export type CommonDialogProps = {
   open: boolean;
@@ -93,7 +92,7 @@ export const CommonDialog: FC<CommonDialogProps> = ({
           </DialogHeader>
         ) : null}
         {children}
-        {footer ? <DialogFooter className={cn(footerClassName)}>{footer}</DialogFooter> : null}
+        {footer ? <DialogFooter className={footerClassName}>{footer}</DialogFooter> : null}
       </DialogContent>
     </Dialog>
   );
