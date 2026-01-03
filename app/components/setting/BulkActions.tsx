@@ -2,9 +2,13 @@ import type { FC } from "react";
 import { Button } from "~/components/common/Button";
 
 export type BulkActionsProps = {
+  /** 景品総数 */
   total: number;
+  /** 当選済み数 */
   selected: number;
+  /** 全削除操作 */
   onDeleteAll: () => void;
+  /** 操作無効フラグ */
   disabled?: boolean;
 };
 

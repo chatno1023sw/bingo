@@ -13,19 +13,33 @@ import {
 import { cn } from "~/lib/utils";
 
 export type CommonDialogProps = {
+  /** ダイアログの表示状態 */
   open: boolean;
+  /** 閉じる操作 */
   onClose: () => void;
+  /** タイトル要素 */
   title?: ReactNode;
+  /** 説明要素 */
   description?: ReactNode;
+  /** 本文要素 */
   children?: ReactNode;
+  /** フッター要素 */
   footer?: ReactNode;
+  /** コンテンツの追加クラス */
   contentClassName?: string;
+  /** ヘッダーの追加クラス */
   headerClassName?: string;
+  /** タイトルの追加クラス */
   titleClassName?: string;
+  /** 説明文の追加クラス */
   descriptionClassName?: string;
+  /** フッターの追加クラス */
   footerClassName?: string;
+  /** 閉じるボタンを表示するかどうか */
   showCloseButton?: boolean;
+  /** 閉じるボタンの aria-label */
   closeButtonAriaLabel?: string;
+  /** 閉じるボタンの無効化 */
   closeDisabled?: boolean;
 };
 

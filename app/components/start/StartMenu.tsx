@@ -2,10 +2,15 @@ import type { FC } from "react";
 import { Button } from "~/components/common/Button";
 
 export type StartMenuProps = {
+  /** 最初から開始する操作 */
   onStart: () => void;
+  /** 続きから開始する操作 */
   onResumeRequest: () => void;
+  /** 設定画面へ遷移する操作 */
   onNavigateSetting: () => void;
+  /** 送信中フラグ */
   isSubmitting?: boolean;
+  /** 続きからを表示できるかどうか */
   canResume?: boolean;
 };
 

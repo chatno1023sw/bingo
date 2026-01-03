@@ -1,4 +1,8 @@
+/**
+ * 祝福用の紙吹雪 SVG のプロパティです。
+ */
 export type OmedetouConfettiProps = React.SVGProps<SVGSVGElement> & {
+  /** 一括指定するサイズ */
   size?: number | string;
 };
 

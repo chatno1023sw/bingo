@@ -3,21 +3,24 @@ import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
 
 export type StartOverDialogProps = {
+  /** ダイアログの表示状態 */
   open: boolean;
+  /** ダイアログのタイトル */
   title?: string;
+  /** ダイアログの説明文 */
   description?: ReactNode;
+  /** ダイアログを閉じるときに呼び出されるコールバック関数 */
   onClose: () => void;
+  /** 確認ボタンが押されたときに呼び出されるコールバック関数 */
   onConfirm: () => void;
+  /** ボタンの無効化状態 */
   disabled?: boolean;
 };
 
 /**
- * 「はじめから」押下時の確認ダイアログです。
- *
- * - 入力制約: `open` が false の場合は描画せず、`onClose`/`onConfirm` は必須です。
- * - 副作用: CommonDialog の Portal により `document.body` へ描画します。
- * - 戻り値: ダイアログの React 要素、または `null` を返します。
- * - Chrome DevTools MCP では「はじめから」押下時にダイアログが開き、OK で遷移することを確認します。
+ * 最初から始める確認ダイアログコンポーネント
+ * @param props StartOverDialogProps
+ * @returns JSX.Element
  */
 export const StartOverDialog: FC<StartOverDialogProps> = ({
   open,

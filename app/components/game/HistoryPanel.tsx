@@ -2,7 +2,9 @@ import type { FC } from "react";
 import type { DrawHistoryEntry } from "~/common/types";
 
 export type HistoryPanelProps = {
+  /** 表示する直近履歴 */
   recent: DrawHistoryEntry[];
+  /** 追加のクラス名 */
   className?: string;
 };
 

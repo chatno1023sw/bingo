@@ -97,7 +97,17 @@ const SettingContent = () => {
 
   const handleCsvImport = async (file: File) => {
     const text = await file.text();
-    type CsvRow = { 賞名?: string; 賞品名?: string; 選出?: string };
+    /**
+     * CSV 取り込み時の行データ。
+     */
+    type CsvRow = {
+      /** 賞名 */
+      賞名?: string;
+      /** 賞品名 */
+      賞品名?: string;
+      /** 選出フラグ */
+      選出?: string;
+    };
     const result = Papa.parse<CsvRow>(text, {
       header: true,
       skipEmptyLines: true,

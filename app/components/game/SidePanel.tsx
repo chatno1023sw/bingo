@@ -6,6 +6,7 @@ import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
 
 export type SidePanelProps = {
+  /** 追加のクラス名 */
   className?: string;
 };
 

@@ -9,6 +9,7 @@ import {
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
 export type ReorderPayload = {
+  /** 並び順の ID 配列 */
   order: string[];
 };
 

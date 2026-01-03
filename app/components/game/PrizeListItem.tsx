@@ -6,10 +6,15 @@ import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
 export type PrizeListItemProps = {
+  /** 表示する景品 */
   prize: Prize;
+  /** 操作無効フラグ */
   disabled?: boolean;
+  /** 選出状態の切り替え */
   onToggle: (id: string, nextSelected: boolean) => void;
+  /** 賞名のみ表示するかどうか */
   showPrizeNameOnly: boolean;
+  /** 表示名切り替え操作 */
   onToggleDisplay: (id: string) => void;
 };
 

@@ -12,10 +12,15 @@ import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
 export type PrizeSortableListProps = {
+  /** 表示する景品一覧 */
   prizes: PrizeList;
+  /** 操作無効フラグ */
   disabled?: boolean;
+  /** 並び替え後の順序を通知するコールバック */
   onReorder: (order: string[]) => void;
+  /** 削除操作のコールバック */
   onRemove?: (id: string) => void;
+  /** 更新操作のコールバック */
   onUpdate?: (id: string, patch: Partial<Prize>) => void;
 };
 

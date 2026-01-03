@@ -2,6 +2,7 @@ import type { GameState, GameStateEnvelope, Prize, PrizeList, BgmPreference } fr
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
 export type SessionStartOptions = {
+  /** 景品の選出状態を初期化するかどうか */
   resetPrizes?: boolean;
 };
 

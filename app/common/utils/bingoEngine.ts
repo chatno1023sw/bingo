@@ -21,7 +21,9 @@ export const getAvailableNumbers = (history: DrawHistoryEntry[]): number[] => {
 };
 
 export type DrawOptions = {
+  /** 乱数シード */
   seed?: number;
+  /** 抽選日時（ISO 8601 形式） */
   timestamp?: string;
 };
 

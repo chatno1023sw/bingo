@@ -14,9 +14,13 @@ const toErrorMessage = (error: unknown): string => {
 };
 
 export type UseBgmPreferenceResult = {
+  /** 現在の BGM 設定 */
   preference: BgmPreference;
+  /** 初期化完了フラグ */
   isReady: boolean;
+  /** トグル実行関数 */
   toggle: () => Promise<void>;
+  /** エラーメッセージ */
   error: string | null;
 };
 

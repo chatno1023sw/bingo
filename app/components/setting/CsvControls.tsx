@@ -3,14 +3,23 @@ import type { CsvImportResult } from "~/common/types";
 import { Button } from "~/components/common/Button";
 
 export type CsvControlsProps = {
+  /** 操作無効フラグ */
   disabled?: boolean;
+  /** ファイル取り込み処理 */
   onFileImport: (file: File) => Promise<void>;
+  /** 手入力 CSV */
   manualCsv: string;
+  /** 手入力 CSV の更新 */
   onManualCsvChange: (value: string) => void;
+  /** 手入力 CSV の取り込み */
   onManualImport: () => Promise<void>;
+  /** CSV エクスポートの実行 */
   onExport: () => void;
+  /** 取り込み結果のサマリー */
   summary: CsvImportResult | null;
+  /** エラーメッセージ */
   error: string | null;
+  /** エクスポートプレビュー文字列 */
   exportText: string | null;
 };
 

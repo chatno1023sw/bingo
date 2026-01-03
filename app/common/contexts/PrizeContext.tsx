@@ -8,17 +8,26 @@ import {
 import { storageKeys } from "~/common/utils/storage";
 
 export type PrizeContextValue = {
+  /** 景品一覧 */
   prizes: PrizeList;
+  /** 取得中フラグ */
   isLoading: boolean;
+  /** 更新中フラグ */
   isMutating: boolean;
+  /** エラーメッセージ */
   error: string | null;
+  /** 景品一覧を再取得する関数 */
   refresh: () => Promise<void>;
+  /** 景品の選出状態を切り替える関数 */
   togglePrize: (id: string, nextSelected?: boolean) => Promise<void>;
+  /** 景品一覧を保存する関数 */
   applyPrizes: (next: PrizeList) => Promise<void>;
 };
 
 type PrizeProviderProps = {
+  /** 初期景品一覧 */
   initialPrizes?: PrizeList;
+  /** 子要素 */
   children: React.ReactNode;
 };
 

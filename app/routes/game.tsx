@@ -27,8 +27,13 @@ const ensureSession = async (): Promise<GameStateEnvelope> => {
   return startSession();
 };
 
+/**
+ * Game 画面のローダー相当データ。
+ */
 type LoaderData = GameStateEnvelope & {
+  /** 表示用の抽選履歴 */
   historyView: DrawHistoryEntry[];
+  /** 抽選可能な番号一覧 */
   availableNumbers: number[];
 };
 

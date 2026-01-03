@@ -1,7 +1,9 @@
 import type { Prize, PrizeList } from "~/common/types";
 
 export type CsvParseResult = {
+  /** 正常に取り込めた景品一覧 */
   prizes: PrizeList;
+  /** スキップした行の情報 */
   skipped: Array<{ id: string; reason: string }>;
 };
 

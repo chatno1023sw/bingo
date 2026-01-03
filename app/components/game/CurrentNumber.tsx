@@ -2,7 +2,9 @@ import type { FC } from "react";
 import { cn } from "~/lib/utils";
 
 export type CurrentNumberProps = {
+  /** 表示する数字 */
   value: number | null;
+  /** 抽選中フラグ */
   isDrawing: boolean;
 };
 

@@ -4,9 +4,13 @@ import { CommonDialog } from "~/components/common/CommonDialog";
 import { cn } from "~/lib/utils";
 
 export type PrizeRouletteDialogProps = {
+  /** ダイアログの表示状態 */
   open: boolean;
+  /** 抽選対象の景品一覧 */
   prizes: Prize[];
+  /** 閉じる操作 */
   onClose: () => void;
+  /** 抽選完了時の通知 */
   onComplete: (prize: Prize) => void;
 };
 
