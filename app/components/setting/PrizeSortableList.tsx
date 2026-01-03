@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState, useId } from "react";
-import type { ChangeEvent, FC } from "react";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
+import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Image, ImageIcon, X } from "lucide-react";
+import type { ChangeEvent, FC } from "react";
+import { useId, useMemo, useRef } from "react";
+import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize, PrizeList } from "~/common/types";
+import { buildPrizeImagePath, deletePrizeImage, savePrizeImage } from "~/common/utils/imageStorage";
+import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
 export type PrizeSortableListProps = {
@@ -32,23 +36,9 @@ const SortableItem: FC<{
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  const [localName, setLocalName] = useState(name);
-  const [localDetail, setLocalDetail] = useState(detail);
-  const [localImage, setLocalImage] = useState(imagePath);
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    setLocalName(name);
-  }, [name]);
-
-  useEffect(() => {
-    setLocalDetail(detail);
-  }, [detail]);
-
-  useEffect(() => {
-    setLocalImage(imagePath);
-  }, [imagePath]);
+  const resolvedImagePath = useStoredImage(imagePath);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -59,15 +49,29 @@ const SortableItem: FC<{
     if (!file) {
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        return;
-      }
-      setLocalImage(reader.result);
-      onUpdate?.({ imagePath: reader.result });
-    };
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+    void savePrizeImage(id, file)
+      .then(() => {
+        onUpdate?.({ imagePath: buildPrizeImagePath(id) });
+      })
+      .catch(() => {
+        /* IndexedDB 保存エラー時は表示更新を行いません */
+      });
+  };
+
+  const handleImageDelete = () => {
+    if (!imagePath) {
+      return;
+    }
+    void deletePrizeImage(id)
+      .then(() => {
+        onUpdate?.({ imagePath: null });
+      })
+      .catch(() => {
+        /* IndexedDB 削除エラー時は表示更新を行いません */
+      });
   };
 
   return (
@@ -75,37 +79,57 @@ const SortableItem: FC<{
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative w-full max-w-75 rounded-3xl bg-white p-6 shadow-[0_12px_24px_rgba(15,23,42,0.16)] transition-transform duration-200 ease-out",
-        isDragging ? "bg-slate-50" : "bg-white",
+        "relative w-full max-w-75 rounded-3xl bg-card p-6 shadow-[0_12px_24px_hsl(var(--foreground)/0.16)] transition-transform duration-200 ease-out",
+        isDragging ? "bg-muted" : "bg-card",
       )}
       {...attributes}
       {...listeners}
     >
-      <button
+      <Button
         type="button"
-        className="absolute right-4 top-3 text-xl text-slate-900"
+        variant="ghost"
+        className="absolute top-2 right-2 rounded-full! bg-muted/90 px-2! hover:bg-muted/80!"
         aria-label="削除"
         onClick={onRemove}
         disabled={disabled || !onRemove}
       >
-        ×
-      </button>
-      <button
+        <X className="h-6 w-6 text-muted-foreground" />
+      </Button>
+      <Button
         type="button"
-        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-slate-900 bg-white text-lg font-semibold text-slate-800"
+        className={cn(
+          "flex h-32 w-full items-center justify-center rounded bg-background! p-0! text-foreground text-lg",
+          resolvedImagePath || "border-2 border-border",
+        )}
         onClick={handleImageClick}
         disabled={disabled}
       >
-        {localImage ? (
-          <img
-            src={localImage}
-            alt={`${name || "景品"} 画像`}
-            className="h-full w-full rounded object-cover"
-          />
+        {resolvedImagePath ? (
+          <>
+            <img
+              src={resolvedImagePath}
+              alt={`${name || "景品"} 画像`}
+              className="h-32 w-64.5 rounded object-cover object-center"
+            />
+            <Button
+              type="button"
+              className="absolute top-28 right-8 z-60 h-8! bg-secondary px-2! py-1! text-xs"
+              onClick={handleImageDelete}
+              disabled={disabled || !imagePath}
+            >
+              <div className="flex items-center gap-1">
+                <ImageIcon className="h-4 w-4" />
+                <span>削除</span>
+              </div>
+            </Button>
+          </>
         ) : (
-          "クリックで画像を追加"
+          <div className="flex h-32 w-64.5 flex-col items-center gap-1 pt-2 text-muted-foreground">
+            <Image className="h-20 w-20 text-muted-foreground" />
+            <span>クリックで画像を追加</span>
+          </div>
         )}
-      </button>
+      </Button>
       <input
         ref={fileInputRef}
         id={inputId}
@@ -115,18 +139,21 @@ const SortableItem: FC<{
         onChange={handleImageChange}
         disabled={disabled}
       />
-      <div className="mt-5 space-y-3 text-sm text-slate-900">
-        <label className="flex items-center gap-3 font-semibold">
+      <div className="mt-5 space-y-3 text-foreground text-sm">
+        <label className="flex items-center gap-3">
           <span className="w-20">賞名</span>
           <input
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
-            value={localName}
-            onChange={(event) => setLocalName(event.target.value)}
+            className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
+            value={name}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              onUpdate?.({ prizeName: nextValue });
+            }}
             onBlur={() => {
               if (!onUpdate) {
                 return;
               }
-              const nextValue = localName.trim();
+              const nextValue = name.trim();
               if (nextValue !== name) {
                 onUpdate({ prizeName: nextValue });
               }
@@ -135,17 +162,20 @@ const SortableItem: FC<{
             disabled={disabled}
           />
         </label>
-        <label className="flex items-center gap-3 font-semibold">
+        <label className="flex items-center gap-3">
           <span className="w-20">賞品名</span>
           <input
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
-            value={localDetail}
-            onChange={(event) => setLocalDetail(event.target.value)}
+            className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
+            value={detail}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              onUpdate?.({ itemName: nextValue });
+            }}
             onBlur={() => {
               if (!onUpdate) {
                 return;
               }
-              const nextValue = localDetail.trim();
+              const nextValue = detail.trim();
               if (nextValue !== detail) {
                 onUpdate({ itemName: nextValue });
               }
@@ -154,10 +184,10 @@ const SortableItem: FC<{
             disabled={disabled}
           />
         </label>
-        <label className="flex items-center gap-3 font-semibold">
+        <label className="flex items-center gap-3">
           <span className="w-20">選出</span>
           <select
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
+            className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
             value={selected ? "selected" : "unselected"}
             onChange={(event) => {
               const nextSelected = event.target.value === "selected";
@@ -176,6 +206,14 @@ const SortableItem: FC<{
   );
 };
 
+/**
+ * 設定画面で賞品カードを並べ替え・編集するリストです。
+ *
+ * - 副作用: ドラッグ操作で順序が変わった際に `onReorder` を呼び出します。
+ * - 入力制約: `prizes` は `id` が一意であることを前提にします。
+ * - 戻り値: 景品カード一覧の UI を描画します。
+ * - Chrome DevTools MCP: ドラッグ操作と画像追加が反映されることを確認します。
+ */
 export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   prizes,
   disabled = false,
@@ -215,7 +253,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
 
   if (prizes.length === 0) {
     return (
-      <div className="rounded-3xl bg-white p-6 text-sm text-slate-500">
+      <div className="rounded-3xl bg-card p-6 text-muted-foreground text-sm">
         景品が登録されていません。
       </div>
     );
@@ -224,9 +262,9 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <ul
-            className="w-325 mx-auto flex flex-wrap justify-start gap-4"
+            className="mx-auto flex w-325 flex-wrap justify-start gap-4"
             data-testid="setting-prize-list"
             id="setting-prize-list"
           >

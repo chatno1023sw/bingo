@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import type { PrizeList } from "~/common/types";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
+import { Button } from "~/components/common/Button";
 
 const serviceMocks = vi.hoisted(() => ({
   getPrizes: vi.fn<() => Promise<PrizeList>>(),
@@ -40,9 +41,9 @@ const Consumer = () => {
       <p data-testid="loading">{isLoading ? "loading" : "ready"}</p>
       <p data-testid="prize-count">{prizes.length}</p>
       <p data-testid="first-selected">{prizes[0]?.selected ? "selected" : "pending"}</p>
-      <button type="button" onClick={() => togglePrize(prizes[0]?.id ?? "p-1")}>
+      <Button type="button" onClick={() => togglePrize(prizes[0]?.id ?? "p-1")}>
         toggle
-      </button>
+      </Button>
     </div>
   );
 };

@@ -1,20 +1,21 @@
+import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { PrizeProvider } from "~/common/contexts/PrizeContext";
+import { getHistoryView } from "~/common/services/historyService";
+import { persistSessionState, resumeSession, startSession } from "~/common/services/sessionService";
 import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
-import { startSession, resumeSession, persistSessionState } from "~/common/services/sessionService";
 import {
   drawNextNumber,
   getAvailableNumbers,
   NoAvailableNumbersError,
 } from "~/common/utils/bingoEngine";
+import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
-import { PrizeProvider } from "~/common/contexts/PrizeContext";
-import { SidePanel } from "~/components/game/SidePanel";
-import { BgmToggle } from "~/components/common/BgmToggle";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
-import { getHistoryView } from "~/common/services/historyService";
 import { ResetDialog } from "~/components/game/ResetDialog";
+import { SidePanel } from "~/components/game/SidePanel";
+import { cn } from "~/lib/utils";
 
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
@@ -49,19 +50,14 @@ export default function GameRoute() {
   const [drawError, setDrawError] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
   const navigate = useNavigate();
-  const {
-    preference,
-    isReady: isBgmReady,
-    toggle: toggleBgm,
-    error: bgmError,
-  } = useBgmPreference();
+  // const { preference, isReady: isBgmReady, toggle: toggleBgm } = useBgmPreference();
   const [displayNumber, setDisplayNumber] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const animationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const availableNumbers = session?.availableNumbers ?? [];
-  const bgmDisabled = !isBgmReady || isMutating || isResetting;
+  // const bgmDisabled = !isBgmReady || isMutating || isResetting;
   const isButtonDisabled =
     isMutating || isResetting || isAnimating || availableNumbers.length === 0;
   const currentNumber = session?.gameState.currentNumber ?? null;
@@ -137,10 +133,25 @@ export default function GameRoute() {
   };
 
   const handleReset = async () => {
+    if (!session) {
+      return;
+    }
     setIsResetting(true);
     try {
-      const nextSession = await startSession();
-      const nextData = await buildLoaderData(nextSession);
+      const now = new Date().toISOString();
+      const nextGameState = {
+        ...session.gameState,
+        currentNumber: null,
+        drawHistory: [],
+        isDrawing: false,
+        updatedAt: now,
+      };
+      const updatedEnvelope = {
+        ...session,
+        gameState: nextGameState,
+      };
+      await persistSessionState(updatedEnvelope);
+      const nextData = await buildLoaderData(updatedEnvelope);
       setSession(nextData);
       setDrawError(null);
       setResetOpen(false);
@@ -177,79 +188,84 @@ export default function GameRoute() {
     availableNumbers.length === 0
       ? "抽選は完了しました"
       : isAnimating || isMutating
-        ? "抽選中..."
+        ? "抽選中"
         : "抽選を開始！";
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
-        <p className="text-sm text-slate-500">読み込み中...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="text-muted-foreground text-sm">読み込み中...</p>
       </main>
     );
   }
 
   if (loadError || !session) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-slate-900">
-        <p className="text-sm text-rose-500">データの読み込みに失敗しました。</p>
-        <button
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-foreground">
+        <p className="text-destructive text-sm">データの読み込みに失敗しました。</p>
+        <Button
           type="button"
-          className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-50"
+          className="rounded border border-border px-4 py-2 text-muted-foreground text-sm hover:bg-muted"
           onClick={() => navigate("/start")}
         >
           Start 画面に戻る
-        </button>
+        </Button>
       </main>
     );
   }
 
   return (
     <PrizeProvider initialPrizes={session.prizes}>
-      <main className="h-screen overflow-hidden bg-white text-slate-900">
-        <div className="flex h-full w-full flex-col border border-slate-400 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.08)]">
-          <header className="flex items-center justify-end gap-4">
-            <BgmToggle
-              enabled={preference.enabled}
-              onToggle={() => toggleBgm()}
-              disabled={bgmDisabled}
-            />
-            <button
+      <main className="h-screen overflow-hidden bg-background text-foreground">
+        <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
+          <header className="flex items-center justify-between px-6 py-4">
+            <Button
               type="button"
-              className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              variant="secondary"
+              className={cn(
+                "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
+                "relative top-2",
+              )}
               onClick={() => setResetOpen(true)}
               disabled={isLoading || isResetting}
             >
-              リセット
-            </button>
-            <button
-              type="button"
-              className="rounded-full border border-slate-300 px-3 py-1 text-xl text-slate-600 transition hover:bg-slate-50"
-              aria-label="Start 画面に戻る"
-              onClick={handleBackToStart}
-            >
-              {/* todo: あとでlucide reactにしたい */}×
-            </button>
+              クリア
+            </Button>
+            <div className="flex items-center gap-2">
+              {/* todo: あとで音を出す設定を入れたい */}
+              {/* <BgmToggle
+                enabled={preference.enabled}
+                onToggle={() => toggleBgm()}
+                disabled={bgmDisabled}
+              /> */}
+              <Button
+                type="button"
+                variant="secondary"
+                className="rounded-full!"
+                aria-label="Start 画面に戻る"
+                onClick={handleBackToStart}
+              >
+                <X className="aspect-square h-6 w-6" />
+              </Button>
+            </div>
           </header>
-          {bgmError ? (
-            <p className="text-right text-xs text-rose-500">BGM 設定の保存に失敗しました</p>
-          ) : null}
-          <div className="flex flex-1 gap-6 overflow-hidden px-6 py-6">
+          <div className="flex flex-1 gap-6 overflow-hidden px-6 pb-6">
             <HistoryPanel recent={session.historyView} className="flex-[0_0_420px]" />
-
             <section className="flex flex-1 flex-col items-center justify-center gap-8">
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
-              <button
+              <Button
                 type="button"
-                className="w-80 rounded-full bg-[#0F6A86] px-8 py-4 text-xl font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary/90"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
+                {(isAnimating || isMutating) && <Loader2 className={"animate-spin"} />}
                 {drawButtonLabel}
-              </button>
+              </Button>
               {drawError === "no-available-numbers" && (
-                <p className="text-sm text-rose-500">すべての番号が抽選済みです。</p>
+                <p className="text-destructive text-sm">すべての番号が抽選済みです。</p>
               )}
-              <p className="text-xs text-slate-500">残り {availableNumbers.length} / 75</p>
+              <p className="text-muted-foreground text-xs">残り {availableNumbers.length} / 75</p>
             </section>
 
             <SidePanel className="flex-[0_0_420px]" />

@@ -1,0 +1,26 @@
+[tasks.dev]
+run = "react-router dev"
+
+[tasks.build]
+run = "react-router build"
+
+[tasks.start]
+run = "node ./scripts/serve-client.mjs"
+
+[tasks.typecheck]
+run = ["react-router typegen", "tsc"]
+
+[tasks.lint]
+run = "biome lint --write --error-on-warnings --files-ignore-unknown=true app scripts docs public *.json *.ts"
+
+[tasks.format]
+run = "biome format --write --files-ignore-unknown=true app scripts docs public *.json *.ts"
+
+[tasks.pre]
+run = ["mise run lint", "mise run typecheck", "mise run format"]
+
+[tasks.test]
+run = "vitest run --passWithNoTests"
+
+[tasks.similarity]
+run = "node ./scripts/run-similarity.mjs"

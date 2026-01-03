@@ -1,5 +1,6 @@
-import type { FC, ChangeEvent } from "react";
+import type { ChangeEvent, FC } from "react";
 import type { CsvImportResult } from "~/common/types";
+import { Button } from "~/components/common/Button";
 
 export type CsvControlsProps = {
   disabled?: boolean;
@@ -34,53 +35,53 @@ export const CsvControls: FC<CsvControlsProps> = ({
   };
 
   return (
-    <div className="rounded border border-slate-300 bg-slate-50 p-4 text-xs text-slate-700">
+    <div className="rounded border border-border bg-muted p-4 text-muted-foreground text-xs">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="flex-1">
-          <label className="block text-[11px] font-semibold text-slate-500" htmlFor="csv-import">
+          <label className="block text-[11px] text-muted-foreground" htmlFor="csv-import">
             CSV インポート
           </label>
           <input
             id="csv-import"
             type="file"
             accept=".csv,text/csv"
-            className="mt-2 w-full rounded border border-slate-300 bg-white px-3 py-2 text-xs"
+            className="mt-2 w-full rounded border border-input bg-background px-3 py-2 text-foreground text-xs"
             onChange={handleFileChange}
             disabled={disabled}
           />
         </div>
         <div className="flex items-end gap-2">
-          <button
+          <Button
             type="button"
-            className="rounded bg-sky-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-50"
+            className="rounded bg-primary px-3 py-2 text-primary-foreground text-xs shadow-sm hover:bg-primary/90 disabled:opacity-50"
             onClick={onExport}
             disabled={disabled}
           >
             CSV エクスポート
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-[2fr,1fr]">
         <textarea
           aria-label="CSV 貼り付け"
-          className="rounded border border-slate-300 bg-white p-3 text-xs"
+          className="rounded border border-input bg-background p-3 text-foreground text-xs"
           rows={5}
           value={manualCsv}
           onChange={(event) => onManualCsvChange(event.target.value)}
         />
-        <button
+        <Button
           type="button"
-          className="rounded border border-sky-700 px-3 py-2 text-xs font-semibold text-sky-800 shadow-sm transition hover:bg-sky-50 disabled:opacity-50"
+          className="rounded border border-primary px-3 py-2 text-primary text-xs shadow-sm hover:bg-primary/10 disabled:opacity-50"
           onClick={onManualImport}
           disabled={disabled}
         >
           貼り付け内容を取り込む
-        </button>
+        </Button>
       </div>
 
       {summary && (
-        <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-[11px] text-emerald-700">
+        <div className="mt-4 rounded border border-border bg-accent p-3 text-[11px] text-accent-foreground">
           <p>
             {summary.sourceName} を取り込みました（追加 {summary.addedCount} 件、スキップ{" "}
             {summary.skipped.length} 件）
@@ -96,10 +97,10 @@ export const CsvControls: FC<CsvControlsProps> = ({
           )}
         </div>
       )}
-      {error && <p className="mt-3 text-[11px] text-rose-600">{error}</p>}
+      {error && <p className="mt-3 text-[11px] text-destructive">{error}</p>}
       {exportText && (
         <textarea
-          className="mt-4 w-full rounded border border-slate-300 bg-white p-3 text-xs"
+          className="mt-4 w-full rounded border border-input bg-background p-3 text-foreground text-xs"
           rows={5}
           readOnly
           value={exportText}

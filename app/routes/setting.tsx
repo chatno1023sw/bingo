@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import type { CsvImportResult, PrizeList } from "~/common/types";
 import Papa from "papaparse";
-import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
+import { useEffect, useRef, useState } from "react";
+import { useBlocker, useNavigate } from "react-router";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
+import type { CsvImportResult, PrizeList } from "~/common/types";
+import { generatePrizesCsv, parsePrizesCsv } from "~/common/utils/csvParser";
+import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
+import { Button } from "~/components/common/Button";
+import { CommonDialog } from "~/components/common/CommonDialog";
 import { CsvControls } from "~/components/setting/CsvControls";
 import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
-import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
-import { UploadImagesDialog } from "~/components/setting/UploadImagesDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
+import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
 
 const SettingContent = () => {
   const navigate = useNavigate();
@@ -21,12 +23,13 @@ const SettingContent = () => {
     "id,order,prizeName,itemName,imagePath,selected,memo\n",
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
-  const [uploadOpen, setUploadOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [pendingUploads, setPendingUploads] = useState<FileList | null>(null);
+  const [draftPrizes, setDraftPrizes] = useState<PrizeList>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [allowNavigation, setAllowNavigation] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   const summaryFrom = (
     sourceName: string,
@@ -41,7 +44,7 @@ const SettingContent = () => {
   const runImport = async (text: string, sourceName: string) => {
     try {
       const result = parsePrizesCsv(text);
-      await applyPrizes(result.prizes);
+      setDraftPrizes(result.prizes);
       setSummary(summaryFrom(sourceName, result));
       setLocalError(null);
     } catch (err) {
@@ -60,12 +63,19 @@ const SettingContent = () => {
   };
 
   const handleExport = () => {
-    const csv = generatePrizesCsv(prizes);
+    const csv = generatePrizesCsv(draftPrizes);
     setExportText(csv);
   };
 
   const handleCsvImportClick = () => {
     const input = document.getElementById("csv-import-simple");
+    if (input instanceof HTMLInputElement) {
+      input.click();
+    }
+  };
+
+  const handleImageUploadClick = () => {
+    const input = document.getElementById("image-import-simple");
     if (input instanceof HTMLInputElement) {
       input.click();
     }
@@ -101,7 +111,7 @@ const SettingContent = () => {
         id:
           globalThis.crypto?.randomUUID?.() ??
           `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
-        order: prizes.length + index,
+        order: draftPrizes.length + index,
         prizeName: row.賞名?.trim() ?? "",
         itemName: row.賞品名?.trim() ?? "",
         imagePath: null,
@@ -113,92 +123,104 @@ const SettingContent = () => {
       setLocalError("csv-import-empty");
       return;
     }
-    await applyPrizes([...prizes, ...parsed]);
+    setDraftPrizes((prev) => [...prev, ...parsed]);
     setLocalError(null);
   };
 
-  const handleDeleteAll = async () => {
-    setIsDeleting(true);
-    try {
-      await applyPrizes([]);
-      setSummary(null);
-      setDeleteOpen(false);
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDeleteAll = () => {
+    setDraftPrizes([]);
+    setSummary(null);
+    setDeleteOpen(false);
   };
 
-  const handleResetSelections = async () => {
-    setIsResetting(true);
-    try {
-      const next = prizes.map((prize, index) => ({
+  const handleResetSelections = () => {
+    setDraftPrizes((prev) =>
+      prev.map((prize, index) => ({
         ...prize,
         selected: false,
         order: index,
-      }));
-      await applyPrizes(next);
-      setResetOpen(false);
-    } finally {
-      setIsResetting(false);
-    }
+      })),
+    );
+    setResetOpen(false);
   };
 
-  const handleUploadImages = async () => {
-    const files = pendingUploads;
-    if (!files || files.length === 0) {
-      setUploadOpen(false);
-      setPendingUploads(null);
+  const handleUploadImages = async (files: FileList) => {
+    if (files.length === 0) {
       return;
     }
     setIsUploading(true);
     try {
-      const mappings = await Promise.all(
-        Array.from(files).map((file) => {
-          return new Promise<{ name: string; dataUrl: string }>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              if (typeof reader.result !== "string") {
-                reject(new Error("invalid-image"));
-                return;
-              }
-              resolve({ name: file.name, dataUrl: reader.result });
-            };
-            reader.onerror = () => reject(new Error("read-error"));
-            reader.readAsDataURL(file);
-          });
-        }),
-      );
+      const mappings = Array.from(files)
+        .filter((file) => file.type.startsWith("image/"))
+        .map((file) => ({ name: file.name, file }));
       const normalizeName = (value: string) =>
         value
           .trim()
           .toLowerCase()
           .replace(/\.[^/.]+$/, "");
-      const grouped = mappings.reduce<Record<string, { name: string; dataUrl: string }[]>>(
+      const grouped = mappings.reduce<Record<string, { name: string; file: File }[]>>(
         (acc, entry) => {
           const key = normalizeName(entry.name);
+          if (!key) {
+            return acc;
+          }
           acc[key] = acc[key] ? [...acc[key], entry] : [entry];
           return acc;
         },
         {},
       );
-      const next = prizes.map((prize) => {
-        const itemKey = normalizeName(prize.itemName);
-        const matched = Object.entries(grouped).find(([key]) => key.includes(itemKey));
-        if (!matched) {
-          return prize;
+      const keys = Object.keys(grouped);
+      const remaining = mappings.slice();
+      const next: PrizeList = [];
+      for (const prize of draftPrizes) {
+        const candidates = [prize.itemName, prize.prizeName]
+          .map((value) => normalizeName(value))
+          .filter((value) => value.length > 0);
+        const matchedKey =
+          candidates.find((candidate) => grouped[candidate]?.length) ??
+          keys.find((key) => candidates.some((candidate) => key.includes(candidate)));
+        if (!matchedKey && candidates.length === 0) {
+          const fallback = remaining.shift();
+          if (!fallback) {
+            next.push(prize);
+            continue;
+          }
+          await savePrizeImage(prize.id, fallback.file);
+          next.push({
+            ...prize,
+            imagePath: buildPrizeImagePath(prize.id),
+          });
+          continue;
         }
-        const images = matched[1];
-        if (images.length === 0) {
-          return prize;
+        if (!matchedKey) {
+          next.push(prize);
+          continue;
         }
-        return {
+        const images = grouped[matchedKey];
+        if (!images || images.length === 0) {
+          next.push(prize);
+          continue;
+        }
+        const nextImage = images.shift();
+        if (!nextImage) {
+          next.push(prize);
+          continue;
+        }
+        const usedIndex = remaining.findIndex((entry) => entry.name === nextImage.name);
+        if (usedIndex >= 0) {
+          remaining.splice(usedIndex, 1);
+        }
+        await savePrizeImage(prize.id, nextImage.file);
+        next.push({
           ...prize,
-          imagePath: images[0].dataUrl,
-        };
-      });
-      await applyPrizes(next);
-      setUploadOpen(false);
-      setPendingUploads(null);
+          imagePath: buildPrizeImagePath(prize.id),
+        });
+      }
+      setDraftPrizes(next);
+      setLocalError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "image-upload-error";
+      setLocalError(message);
     } finally {
       setIsUploading(false);
     }
@@ -219,28 +241,29 @@ const SettingContent = () => {
     };
   };
 
-  const handleAddCard = async () => {
-    const next = [...prizes, buildEmptyPrize(prizes.length)];
-    await applyPrizes(next);
+  const handleAddCard = () => {
+    setDraftPrizes((prev) => [...prev, buildEmptyPrize(prev.length)]);
   };
 
-  const handleRemove = async (id: string) => {
-    const next = prizes
-      .filter((prize) => prize.id !== id)
-      .map((prize, index) => ({
-        ...prize,
-        order: index,
-      }));
-    await applyPrizes(next);
+  const handleRemove = (id: string) => {
+    setDraftPrizes((prev) =>
+      prev
+        .filter((prize) => prize.id !== id)
+        .map((prize, index) => ({
+          ...prize,
+          order: index,
+        })),
+    );
   };
 
-  const handleUpdate = async (id: string, patch: Partial<PrizeList[number]>) => {
-    const next = prizes.map((prize) => (prize.id === id ? { ...prize, ...patch } : prize));
-    await applyPrizes(next);
+  const handleUpdate = (id: string, patch: Partial<PrizeList[number]>) => {
+    setDraftPrizes((prev) =>
+      prev.map((prize) => (prize.id === id ? { ...prize, ...patch } : prize)),
+    );
   };
 
-  const handleReorder = async (ids: string[]) => {
-    const lookup = new Map(prizes.map((prize) => [prize.id, prize]));
+  const handleReorder = (ids: string[]) => {
+    const lookup = new Map(draftPrizes.map((prize) => [prize.id, prize]));
     const ordered = ids
       .map((id) => lookup.get(id))
       .filter((prize): prize is (typeof prizes)[number] => Boolean(prize))
@@ -248,7 +271,76 @@ const SettingContent = () => {
         ...prize,
         order: index,
       }));
-    await applyPrizes(ordered);
+    setDraftPrizes(ordered);
+  };
+
+  const isPrizesEqual = (left: PrizeList, right: PrizeList) => {
+    if (left.length !== right.length) {
+      return false;
+    }
+    return left.every((prize, index) => {
+      const target = right[index];
+      return (
+        prize.id === target.id &&
+        prize.order === target.order &&
+        prize.prizeName === target.prizeName &&
+        prize.itemName === target.itemName &&
+        prize.imagePath === target.imagePath &&
+        prize.selected === target.selected &&
+        prize.memo === target.memo
+      );
+    });
+  };
+
+  const isDirty = !isPrizesEqual(draftPrizes, prizes);
+
+  useEffect(() => {
+    if (!hasInitializedRef.current && !isLoading) {
+      setDraftPrizes(prizes);
+      hasInitializedRef.current = true;
+      return;
+    }
+    if (!isDirty) {
+      setDraftPrizes(prizes);
+    }
+  }, [isDirty, isLoading, prizes]);
+
+  const blocker = useBlocker(isDirty && !allowNavigation);
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setConfirmOpen(true);
+    }
+  }, [blocker.state]);
+
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+    const handler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+    };
+  }, [isDirty]);
+
+  const handleSaveAndBack = async () => {
+    setIsSaving(true);
+    try {
+      setAllowNavigation(true);
+      if (!isDirty) {
+        navigate("/start");
+        return;
+      }
+      await applyPrizes(draftPrizes);
+      navigate("/start");
+    } finally {
+      setIsSaving(false);
+      setAllowNavigation(false);
+    }
   };
 
   const combinedError = error ?? localError;
@@ -257,54 +349,59 @@ const SettingContent = () => {
     <section className="space-y-3">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <button
+          <Button
             type="button"
-            className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800 disabled:opacity-50"
+            className="rounded bg-primary px-3 py-1.5 text-primary-foreground text-xs shadow-none hover:bg-primary/90 disabled:opacity-50"
             onClick={handleAddCard}
             disabled={isMutating}
           >
-            カード追加
-          </button>
-          <button
+            追加
+          </Button>
+          <Button
             type="button"
-            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
             onClick={handleCsvImportClick}
             disabled={isMutating}
           >
             CSV追加
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
-            onClick={() => setUploadOpen(true)}
-            disabled={isMutating || prizes.length === 0}
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
+            onClick={handleImageUploadClick}
+            disabled={isMutating || draftPrizes.length === 0}
           >
             画像追加
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded border border-slate-500 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-none transition hover:bg-slate-50 disabled:opacity-50"
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
             onClick={() => setResetOpen(true)}
-            disabled={isMutating || prizes.length === 0}
+            disabled={isMutating || draftPrizes.length === 0}
           >
             全未選出
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded border border-rose-500 px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-none transition hover:bg-rose-50 disabled:opacity-50"
+            variant="destructive"
+            className="rounded border border-destructive px-3 py-1.5 text-destructive text-xs shadow-none hover:bg-destructive/10 disabled:opacity-50"
             onClick={() => setDeleteOpen(true)}
-            disabled={isMutating || prizes.length === 0}
+            disabled={isMutating || draftPrizes.length === 0}
           >
             カード全削除
-          </button>
+          </Button>
         </div>
-        <button
+        <Button
           type="button"
-          className="rounded bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white shadow-none transition hover:bg-teal-800"
-          onClick={() => navigate("/start")}
+          className="rounded bg-secondary px-3 py-1.5 text-secondary-foreground text-xs shadow-none hover:bg-secondary/80"
+          onClick={() => void handleSaveAndBack()}
+          disabled={isSaving || isMutating}
         >
           戻る
-        </button>
+        </Button>
       </header>
 
       <div className="sr-only">
@@ -320,6 +417,20 @@ const SettingContent = () => {
             event.currentTarget.value = "";
           }}
         />
+        <input
+          id="image-import-simple"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(event) => {
+            const files = event.target.files;
+            if (files) {
+              void handleUploadImages(files);
+            }
+            event.currentTarget.value = "";
+          }}
+          disabled={isUploading || isMutating}
+        />
         <CsvControls
           disabled={isMutating}
           onFileImport={handleFileImport}
@@ -334,10 +445,10 @@ const SettingContent = () => {
       </div>
 
       {isLoading ? (
-        <p className="px-4 py-6 text-sm text-slate-500">読み込み中...</p>
+        <p className="px-4 py-6 text-muted-foreground text-sm">読み込み中...</p>
       ) : (
         <PrizeSortableList
-          prizes={prizes}
+          prizes={draftPrizes}
           onReorder={handleReorder}
           onRemove={handleRemove}
           onUpdate={handleUpdate}
@@ -348,20 +459,50 @@ const SettingContent = () => {
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDeleteAll}
-        disabled={isDeleting}
+        disabled={isMutating}
       />
       <ResetSelectionDialog
         open={resetOpen}
         onClose={() => setResetOpen(false)}
         onConfirm={handleResetSelections}
-        disabled={isResetting}
+        disabled={isMutating}
       />
-      <UploadImagesDialog
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onConfirm={handleUploadImages}
-        onFilesSelected={setPendingUploads}
-        disabled={isUploading}
+      <CommonDialog
+        open={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setAllowNavigation(false);
+          blocker.reset?.();
+        }}
+        title="編集中のデータが消えちゃいます！"
+        description="保存したかったら戻るボタンを押してね。"
+        footer={
+          <>
+            <Button
+              type="button"
+              className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
+              onClick={() => {
+                setConfirmOpen(false);
+                setAllowNavigation(false);
+                blocker.reset?.();
+              }}
+            >
+              キャンセル
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 rounded-2xl px-4 py-3"
+              onClick={() => {
+                setConfirmOpen(false);
+                setAllowNavigation(true);
+                blocker.proceed?.();
+              }}
+            >
+              移動する！
+            </Button>
+          </>
+        }
       />
     </section>
   );
@@ -369,8 +510,8 @@ const SettingContent = () => {
 
 export default function SettingRoute() {
   return (
-    <main className="min-h-screen bg-white p-2 text-slate-900">
-      <div className="w-full bg-white p-3">
+    <main className="min-h-screen bg-background p-2 text-foreground">
+      <div className="w-full bg-background p-3">
         <PrizeProvider>
           <SettingContent />
         </PrizeProvider>

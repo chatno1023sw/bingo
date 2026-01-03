@@ -1,5 +1,11 @@
 import type { CsvImportResult, Prize, PrizeList } from "~/common/types";
 import { parsePrizesCsv, generatePrizesCsv } from "~/common/utils/csvParser";
+import {
+  clearPrizeImages,
+  deletePrizeImages,
+  extractPrizeImageId,
+  isPrizeImagePath,
+} from "~/common/utils/imageStorage";
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
 export type ReorderPayload = {
@@ -85,6 +91,7 @@ export const exportPrizes = async (prizes: PrizeList): Promise<Blob> => {
  * `/prizes/delete-all`
  */
 export const deleteAllPrizes = async (): Promise<PrizeList> => {
+  await clearPrizeImages();
   return persistPrizes([]);
 };
 
@@ -92,5 +99,18 @@ export const deleteAllPrizes = async (): Promise<PrizeList> => {
  * Prize を直接保存するヘルパー。
  */
 export const savePrizes = async (prizes: PrizeList): Promise<void> => {
+  const stored = readPrizes();
+  const storedImageIds = stored
+    .map((prize) => prize.imagePath)
+    .filter(isPrizeImagePath)
+    .map((imagePath) => extractPrizeImageId(imagePath));
+  const nextImageIds = new Set(
+    prizes
+      .map((prize) => prize.imagePath)
+      .filter(isPrizeImagePath)
+      .map((imagePath) => extractPrizeImageId(imagePath)),
+  );
+  const removedImageIds = storedImageIds.filter((id) => !nextImageIds.has(id));
+  await deletePrizeImages(removedImageIds);
   persistPrizes(prizes);
 };

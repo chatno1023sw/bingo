@@ -6,17 +6,19 @@ export type PrizeListProps = {
   prizes: PrizeListData;
   disabled?: boolean;
   onToggle: (id: string, nextSelected: boolean) => void;
-  showPrizeNameOnly: boolean;
+  itemNameOverrides: Set<string>;
+  onToggleDisplay: (id: string) => void;
 };
 
 export const PrizeList: FC<PrizeListProps> = ({
   prizes,
   disabled = false,
   onToggle,
-  showPrizeNameOnly,
+  itemNameOverrides,
+  onToggleDisplay,
 }) => {
   if (prizes.length === 0) {
-    return <p className="text-sm text-slate-500">景品が登録されていません。</p>;
+    return <p className="text-muted-foreground text-sm">景品が登録されていません。</p>;
   }
 
   return (
@@ -27,7 +29,8 @@ export const PrizeList: FC<PrizeListProps> = ({
           prize={prize}
           disabled={disabled}
           onToggle={onToggle}
-          showPrizeNameOnly={showPrizeNameOnly}
+          showPrizeNameOnly={!itemNameOverrides.has(prize.id)}
+          onToggleDisplay={onToggleDisplay}
         />
       ))}
     </ul>

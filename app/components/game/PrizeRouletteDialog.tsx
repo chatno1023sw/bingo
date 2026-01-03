@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type FC } from "react";
-import { createPortal } from "react-dom";
+import { type FC, useEffect, useRef, useState } from "react";
 import type { Prize } from "~/common/types";
+import { CommonDialog } from "~/components/common/CommonDialog";
 import { cn } from "~/lib/utils";
 
 export type PrizeRouletteDialogProps = {
@@ -93,36 +93,25 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     };
   }, [open, prizes, onComplete]);
 
-  if (!open) {
-    return null;
-  }
-  if (typeof document === "undefined") {
-    return null;
-  }
-
   const entries = prizes.slice(0, 25);
-  const dialog = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
-      <div className="relative w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl">
-        <button
-          type="button"
-          className="absolute right-4 top-4 rounded-full border border-slate-200 px-2 py-1 text-sm text-slate-500 transition hover:bg-slate-50"
-          onClick={onClose}
-          aria-label="閉じる"
-        >
-          ×
-        </button>
-        <h2 className="text-xl font-bold text-slate-900">景品ルーレット</h2>
-        <div className="mt-6 grid grid-cols-5 gap-1.25">
-          {entries.map((prize, index) => {
-            const isActive = index === activeIndex;
-            const isWinner = isFlashing && index === winnerIndex;
-            const isDisabled = prize.selected;
-            return (
+  return (
+    <CommonDialog
+      open={open}
+      onClose={onClose}
+      title="景品ルーレット"
+      titleClassName="text-xl"
+      contentClassName="w-2xl"
+    >
+      <div className="mt-6 grid grid-cols-5 gap-1.25">
+        {entries.map((prize, index) => {
+          const isActive = index === activeIndex;
+          const isWinner = isFlashing && index === winnerIndex;
+          const isDisabled = prize.selected;
+          return (
+            <div key={prize.id} className="aspect-square">
               <div
-                key={prize.id}
                 className={cn(
-                  "flex items-center justify-center roulette-card aspect-square text-xs",
+                  "roulette-card flex h-full w-full items-center justify-center text-3xl",
                   isDisabled && "roulette-card--disabled",
                   isActive && !isDisabled && "roulette-card--active",
                   isWinner && !isDisabled && "roulette-card--winner",
@@ -130,12 +119,10 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
               >
                 {prize.prizeName || "賞名未設定"}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </CommonDialog>
   );
-
-  return createPortal(dialog, document.body);
 };

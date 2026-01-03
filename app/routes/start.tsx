@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import {
-  startSession,
-  resumeSession,
   hasStoredDrawHistory,
   hasStoredGameState,
+  resumeSession,
+  startSession,
 } from "~/common/services/sessionService";
 import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
-import { BgmToggle } from "~/components/common/BgmToggle";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 
 /**
  * Start 画面のルートコンポーネント。
@@ -22,13 +20,13 @@ export default function StartRoute() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const navigate = useNavigate();
-  const {
-    preference,
-    isReady: isBgmReady,
-    toggle: toggleBgm,
-    error: bgmError,
-  } = useBgmPreference();
-  const bgmDisabled = !isBgmReady || isSubmitting;
+  // const {
+  //   preference,
+  //   isReady: isBgmReady,
+  //   toggle: toggleBgm,
+  //   error: bgmError,
+  // } = useBgmPreference();
+  // const bgmDisabled = !isBgmReady || isSubmitting;
 
   const handleStart = async () => {
     setIsSubmitting(true);
@@ -60,7 +58,6 @@ export default function StartRoute() {
         await startSession();
       }
       setIsSubmitting(false);
-      setContinueDialogOpen(false);
       navigate("/game");
     } catch {
       setIsSubmitting(false);
@@ -76,20 +73,16 @@ export default function StartRoute() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10 text-slate-900">
-      <div className="absolute right-8 top-8">
-        <BgmToggle
+    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
+      <div className="absolute top-8 right-8">
+        {/* todo: あとで実装したい */}
+        {/* <BgmToggle
           enabled={preference.enabled}
           onToggle={() => toggleBgm()}
           disabled={bgmDisabled}
-        />
+        /> */}
       </div>
-      {bgmError ? (
-        <p className="absolute right-6 top-20 text-xs text-rose-500">
-          BGM 設定の保存に失敗しました
-        </p>
-      ) : null}
-      <div className="flex min-h-[360px] items-center justify-center">
+      <div className="flex min-h-90 items-center justify-center">
         <StartMenu
           onStart={handleStartRequest}
           onResumeRequest={() => void handleResumeConfirm()}
