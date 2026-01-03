@@ -1,5 +1,6 @@
 import { Image } from "lucide-react";
 import type { FC } from "react";
+import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize } from "~/common/types";
 import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
@@ -19,6 +20,8 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   showPrizeNameOnly,
   onToggleDisplay,
 }) => {
+  const resolvedImagePath = useStoredImage(prize.imagePath);
+  const hasImage = Boolean(resolvedImagePath);
   const handleToggle = () => {
     onToggle(prize.id, !prize.selected);
   };
@@ -29,7 +32,17 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <Image className="h-10 w-10 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+      <div className="flex w-14 items-center justify-center overflow-hidden rounded-lg bg-muted [aspect-ratio:4/3]">
+        {hasImage ? (
+          <img
+            src={resolvedImagePath ?? ""}
+            alt={`${prize.prizeName || "景品"} 画像`}
+            className="h-full w-full object-cover object-center"
+          />
+        ) : (
+          <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+        )}
+      </div>
       <div className="flex-1">
         <button
           type="button"

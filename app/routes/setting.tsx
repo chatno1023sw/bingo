@@ -356,7 +356,7 @@ const SettingContent = () => {
             onClick={handleAddCard}
             disabled={isMutating}
           >
-            カード追加
+            追加
           </Button>
           <Button
             type="button"
