@@ -19,6 +19,10 @@ export type StartMenuProps = {
  *
  * - ボタンは縦並びにし、モックと同じ視線移動で操作できるようにします。
  * - 余白・角丸は design/image.png を参考に最小構成へ揃えています。
+ * - 副作用: ありません。
+ * - 入力制約: `onStart` などのハンドラを渡してください。
+ * - 戻り値: メニュー UI を返します。
+ * - Chrome DevTools MCP ではボタン操作を確認します。
  */
 export const StartMenu: FC<StartMenuProps> = ({
   onStart,

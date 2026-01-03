@@ -5,6 +5,14 @@
  * - 依存ライブラリなしで shadcn 互換の `cn` として使用します。
  * - Chrome DevTools MCP では対象要素の className が期待通り連結されることを確認します。
  */
+/**
+ * クラス名を結合します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: falsy 値は無視されます。
+ * - 戻り値: 結合済みの className を返します。
+ * - Chrome DevTools MCP では className の結合結果を確認します。
+ */
 export const cn = (...inputs: Array<string | false | null | undefined>) => {
   return inputs.filter(Boolean).join(" ");
 };

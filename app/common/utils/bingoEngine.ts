@@ -12,9 +12,25 @@ export class NoAvailableNumbersError extends Error {
   }
 }
 
+/**
+ * 抽選対象の番号一覧を生成します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: なし。
+ * - 戻り値: 1〜75 の配列を返します。
+ * - Chrome DevTools MCP では生成結果を確認します。
+ */
 const createNumberRange = (): number[] =>
   Array.from({ length: TOTAL_BINGO_NUMBERS }, (_, index) => BINGO_MIN + index);
 
+/**
+ * 抽選可能な番号を取得します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `history` は DrawHistoryEntry 配列を渡してください。
+ * - 戻り値: 未抽選の番号配列を返します。
+ * - Chrome DevTools MCP では抽選済み番号が除外されることを確認します。
+ */
 export const getAvailableNumbers = (history: DrawHistoryEntry[]): number[] => {
   const used = new Set(history.map((entry) => entry.number));
   return createNumberRange().filter((candidate) => !used.has(candidate));
@@ -27,6 +43,14 @@ export type DrawOptions = {
   timestamp?: string;
 };
 
+/**
+ * 抽選候補から 1 つの番号を選びます。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `available` は空配列にしないでください。
+ * - 戻り値: 選択した番号を返します。
+ * - Chrome DevTools MCP では seed 指定時の再現性を確認します。
+ */
 const chooseNumber = (available: number[], seed?: number): number => {
   if (available.length === 0) {
     throw new NoAvailableNumbersError();
@@ -42,6 +66,14 @@ const chooseNumber = (available: number[], seed?: number): number => {
   return available[randomIndex];
 };
 
+/**
+ * 次の番号を抽選して GameState を更新します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `state` は GameState を渡してください。
+ * - 戻り値: 更新後の GameState を返します。
+ * - Chrome DevTools MCP では currentNumber の更新を確認します。
+ */
 export const drawNextNumber = (state: GameState, options: DrawOptions = {}): GameState => {
   const available = getAvailableNumbers(state.drawHistory);
   if (available.length === 0) {

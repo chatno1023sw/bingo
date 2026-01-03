@@ -31,9 +31,25 @@ type PrizeProviderProps = {
   children: React.ReactNode;
 };
 
+/**
+ * 初期景品一覧を正規化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: order 順に並べた配列を返します。
+ * - Chrome DevTools MCP では並び順を確認します。
+ */
 const normalizeInitialPrizes = (prizes?: PrizeList): PrizeList =>
   prizes ? [...prizes].sort((a, b) => a.order - b.order) : [];
 
+/**
+ * エラーをメッセージ化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `error` は unknown を想定します。
+ * - 戻り値: メッセージ文字列を返します。
+ * - Chrome DevTools MCP ではエラー表示を確認します。
+ */
 const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;

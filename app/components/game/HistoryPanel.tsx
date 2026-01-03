@@ -10,6 +10,11 @@ export type HistoryPanelProps = {
 
 /**
  * 左ペインの直近履歴表示。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `recent` は DrawHistoryEntry 配列を渡してください。
+ * - 戻り値: 履歴表示の JSX を返します。
+ * - Chrome DevTools MCP では履歴表示を確認します。
  */
 export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) => {
   return (

@@ -6,6 +6,14 @@ import {
   saveBgmPreference,
 } from "~/common/services/bgmService";
 
+/**
+ * エラーをメッセージ化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `error` は unknown を想定します。
+ * - 戻り値: メッセージ文字列を返します。
+ * - Chrome DevTools MCP ではエラー表示を確認します。
+ */
 const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;

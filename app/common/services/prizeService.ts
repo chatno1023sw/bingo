@@ -16,8 +16,24 @@ export type ReorderPayload = {
 /**
  * `/prizes` 相当の取得。
  */
+/**
+ * 保存済みの景品一覧を取得します。
+ *
+ * - 副作用: localStorage を読み取ります。
+ * - 入力制約: ありません。
+ * - 戻り値: 景品一覧を返します。
+ * - Chrome DevTools MCP では localStorage を確認します。
+ */
 const readPrizes = (): PrizeList => readStorageJson(storageKeys.prizes, []);
 
+/**
+ * 景品一覧を order 順に正規化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: order を振り直した配列を返します。
+ * - Chrome DevTools MCP では並び順の反映を確認します。
+ */
 const normalizePrizes = (prizes: PrizeList): PrizeList =>
   [...prizes]
     .sort((a, b) => a.order - b.order)
@@ -26,6 +42,14 @@ const normalizePrizes = (prizes: PrizeList): PrizeList =>
       order: index,
     }));
 
+/**
+ * 景品一覧を保存します。
+ *
+ * - 副作用: localStorage に保存します。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: 正規化済みの景品一覧を返します。
+ * - Chrome DevTools MCP では localStorage への保存を確認します。
+ */
 const persistPrizes = (prizes: PrizeList): PrizeList => {
   const normalized = normalizePrizes(prizes);
   writeStorageJson(storageKeys.prizes, normalized);

@@ -28,6 +28,14 @@ export default function StartRoute() {
   // } = useBgmPreference();
   // const bgmDisabled = !isBgmReady || isSubmitting;
 
+  /**
+   * セッション開始処理を実行します。
+   *
+   * - 副作用: セッション開始 API を呼び出し、画面遷移します。
+   * - 入力制約: なし。
+   * - 戻り値: Promise を返します。
+   * - Chrome DevTools MCP では Start→Game の遷移を確認します。
+   */
   const handleStart = async () => {
     setIsSubmitting(true);
     try {
@@ -39,6 +47,14 @@ export default function StartRoute() {
     }
   };
 
+  /**
+   * 「はじめから」押下時の処理です。
+   *
+   * - 副作用: 必要に応じて確認ダイアログを開きます。
+   * - 入力制約: なし。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では確認ダイアログの表示を確認します。
+   */
   const handleStartRequest = () => {
     if (isSubmitting) {
       return;
@@ -50,6 +66,14 @@ export default function StartRoute() {
     void handleStart();
   };
 
+  /**
+   * 「続きから」確定時の処理です。
+   *
+   * - 副作用: セッション復元/開始と画面遷移を行います。
+   * - 入力制約: なし。
+   * - 戻り値: Promise を返します。
+   * - Chrome DevTools MCP では続きからの遷移を確認します。
+   */
   const handleResumeConfirm = async () => {
     setIsSubmitting(true);
     try {
@@ -64,6 +88,14 @@ export default function StartRoute() {
     }
   };
 
+  /**
+   * 設定画面へ遷移します。
+   *
+   * - 副作用: 画面遷移を実行します。
+   * - 入力制約: なし。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では Setting 画面への遷移を確認します。
+   */
   const handleSetting = () => {
     navigate("/setting");
   };

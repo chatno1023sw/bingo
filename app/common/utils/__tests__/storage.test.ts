@@ -35,6 +35,9 @@ class MemoryStorage implements Storage {
   }
 }
 
+/**
+ * localStorage がスタブ済みであることを確認します。
+ */
 const ensureLocalStorage = (): Storage => {
   const storage = globalThis.localStorage;
   if (!storage) {

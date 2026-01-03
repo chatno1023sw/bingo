@@ -27,6 +27,9 @@ vi.mock("~/common/hooks/useBgmPreference", () => ({
   }),
 }));
 
+/**
+ * テスト用のセッションデータを生成します。
+ */
 const createEnvelope = () => ({
   gameState: {
     currentNumber: null,

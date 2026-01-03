@@ -18,6 +18,14 @@ export type PrizeListItemProps = {
   onToggleDisplay: (id: string) => void;
 };
 
+/**
+ * 景品一覧の 1 行を表示します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prize` は Prize を渡してください。
+ * - 戻り値: 景品行の JSX を返します。
+ * - Chrome DevTools MCP では行表示を確認します。
+ */
 export const PrizeListItem: FC<PrizeListItemProps> = ({
   prize,
   disabled = false,
@@ -27,6 +35,14 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
 }) => {
   const resolvedImagePath = useStoredImage(prize.imagePath);
   const hasImage = Boolean(resolvedImagePath);
+  /**
+   * 選出状態の切り替え処理です。
+   *
+   * - 副作用: `onToggle` を呼び出します。
+   * - 入力制約: なし。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では選出状態の変更を確認します。
+   */
   const handleToggle = () => {
     onToggle(prize.id, !prize.selected);
   };

@@ -10,6 +10,14 @@ export type SidePanelProps = {
   className?: string;
 };
 
+/**
+ * Game 画面右側の景品一覧パネルです。
+ *
+ * - 副作用: 景品操作で状態更新を行います。
+ * - 入力制約: PrizeProvider 配下で利用してください。
+ * - 戻り値: パネルの JSX を返します。
+ * - Chrome DevTools MCP では景品操作を確認します。
+ */
 export const SidePanel = ({ className = "" }: SidePanelProps) => {
   const { prizes, isLoading, isMutating, error, togglePrize } = usePrizeManager();
   const [rouletteOpen, setRouletteOpen] = useState(false);
@@ -46,6 +54,14 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     });
   }, [prizes, showPrizeNameOnly]);
 
+  /**
+   * 個別の表示名切り替えを行います。
+   *
+   * - 副作用: 表示状態の Set を更新します。
+   * - 入力制約: `id` は景品 ID を渡してください。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では表示名の切替を確認します。
+   */
   const handleToggleDisplay = (id: string) => {
     setItemNameOverrides((prev) => {
       const next = new Set(prev);
@@ -58,6 +74,14 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     });
   };
 
+  /**
+   * 表示名の一括切り替えを行います。
+   *
+   * - 副作用: 表示状態の Set を更新します。
+   * - 入力制約: なし。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では一括切替を確認します。
+   */
   const handleToggleDisplayAll = () => {
     setShowPrizeNameOnly((prev) => {
       const next = !prev;
@@ -66,11 +90,27 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     });
   };
 
+  /**
+   * ルーレットを開始します。
+   *
+   * - 副作用: ダイアログ状態を更新します。
+   * - 入力制約: なし。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP ではルーレット表示を確認します。
+   */
   const handleRouletteStart = () => {
     setResultOpen(false);
     setRouletteOpen(true);
   };
 
+  /**
+   * ルーレット完了時の処理です。
+   *
+   * - 副作用: 選出状態の更新と結果表示を行います。
+   * - 入力制約: `prize` は景品データを渡してください。
+   * - 戻り値: Promise を返します。
+   * - Chrome DevTools MCP では結果表示を確認します。
+   */
   const handleRouletteComplete = async (prize: (typeof prizes)[number]) => {
     setRouletteOpen(false);
     if (!prize.selected) {

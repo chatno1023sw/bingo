@@ -15,6 +15,14 @@ export type PrizeListProps = {
   onToggleDisplay: (id: string) => void;
 };
 
+/**
+ * 景品一覧を表示するリストです。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: 景品一覧の JSX を返します。
+ * - Chrome DevTools MCP では一覧表示を確認します。
+ */
 export const PrizeList: FC<PrizeListProps> = ({
   prizes,
   disabled = false,

@@ -22,6 +22,11 @@ export type GameRouletteProps = {
  * Game 画面中央のルーレット演出。
  * react-custom-roulette は `mustStartSpinning` が true → false に遷移するときのみ回転するため、
  * 親コンポーネントからの `spinning` を監視して内部状態を更新する。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `numbers` は数値配列を渡してください。
+ * - 戻り値: ルーレット UI を返します。
+ * - Chrome DevTools MCP では回転演出の開始を確認します。
  */
 export const GameRoulette = ({
   numbers,

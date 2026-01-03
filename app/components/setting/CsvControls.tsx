@@ -23,6 +23,14 @@ export type CsvControlsProps = {
   exportText: string | null;
 };
 
+/**
+ * CSV 操作欄のコンポーネントです。
+ *
+ * - 副作用: ファイル選択時に `onFileImport` を呼び出します。
+ * - 入力制約: `onFileImport` は Promise を返す関数を渡してください。
+ * - 戻り値: CSV 操作 UI を返します。
+ * - Chrome DevTools MCP では CSV 取り込み操作を確認します。
+ */
 export const CsvControls: FC<CsvControlsProps> = ({
   disabled = false,
   onFileImport,
@@ -34,6 +42,14 @@ export const CsvControls: FC<CsvControlsProps> = ({
   error,
   exportText,
 }) => {
+  /**
+   * CSV ファイル選択時の処理です。
+   *
+   * - 副作用: `onFileImport` を呼び出します。
+   * - 入力制約: ファイルが選択されている必要があります。
+   * - 戻り値: Promise を返します。
+   * - Chrome DevTools MCP では選択後の反映を確認します。
+   */
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {

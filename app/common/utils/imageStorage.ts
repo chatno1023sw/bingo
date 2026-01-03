@@ -2,9 +2,25 @@ const imageStorageName = "bingo-prize-images";
 const imageStoreName = "prize-images";
 const imageKeyPrefix = "idb:";
 
+/**
+ * IndexedDB が利用可能か判定します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: なし。
+ * - 戻り値: 利用可能なら true を返します。
+ * - Chrome DevTools MCP では Application タブで IndexedDB を確認します。
+ */
 const isIndexedDbAvailable = (): boolean =>
   typeof globalThis !== "undefined" && typeof globalThis.indexedDB !== "undefined";
 
+/**
+ * 画像用の IndexedDB を開きます。
+ *
+ * - 副作用: IndexedDB を開き、必要ならストアを作成します。
+ * - 入力制約: なし。
+ * - 戻り値: IDBDatabase を返します。
+ * - Chrome DevTools MCP では DB の生成を確認します。
+ */
 const openImageDatabase = (): Promise<IDBDatabase> => {
   if (!isIndexedDbAvailable()) {
     return Promise.reject(new Error("indexeddb-unavailable"));
@@ -22,6 +38,14 @@ const openImageDatabase = (): Promise<IDBDatabase> => {
   });
 };
 
+/**
+ * IndexedDB を開いて処理を実行します。
+ *
+ * - 副作用: DB のオープン/クローズを行います。
+ * - 入力制約: `task` は Promise を返す関数を渡してください。
+ * - 戻り値: task の結果を返します。
+ * - Chrome DevTools MCP では DB 接続が閉じられることを確認します。
+ */
 const withImageDatabase = async <T>(task: (db: IDBDatabase) => Promise<T>): Promise<T> => {
   const db = await openImageDatabase();
   try {

@@ -8,6 +8,14 @@ export type SessionStartOptions = {
 
 const DEFAULT_BGM_VOLUME = 0.6;
 
+/**
+ * 初期のゲーム状態を生成します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `timestamp` は ISO 文字列を渡してください。
+ * - 戻り値: 初期 GameState を返します。
+ * - Chrome DevTools MCP では初期状態が保存されることを確認します。
+ */
 const createDefaultGameState = (timestamp: string): GameState => ({
   currentNumber: null,
   drawHistory: [],
@@ -16,22 +24,62 @@ const createDefaultGameState = (timestamp: string): GameState => ({
   updatedAt: timestamp,
 });
 
+/**
+ * 初期の BGM 設定を生成します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `timestamp` は ISO 文字列を渡してください。
+ * - 戻り値: 初期 BgmPreference を返します。
+ * - Chrome DevTools MCP では初期設定が保存されることを確認します。
+ */
 const createDefaultBgmPreference = (timestamp: string): BgmPreference => ({
   enabled: true,
   volume: DEFAULT_BGM_VOLUME,
   updatedAt: timestamp,
 });
 
+/**
+ * 保存済みのゲーム状態を取得します。
+ *
+ * - 副作用: localStorage を読み取ります。
+ * - 入力制約: ありません。
+ * - 戻り値: GameState が無い場合は null を返します。
+ * - Chrome DevTools MCP では localStorage を確認します。
+ */
 const readStoredGameState = (): GameState | null =>
   readStorageJson<GameState | null>(storageKeys.gameState, null);
 
+/**
+ * 保存済みの景品一覧を取得します。
+ *
+ * - 副作用: localStorage を読み取ります。
+ * - 入力制約: ありません。
+ * - 戻り値: 景品一覧を返します。
+ * - Chrome DevTools MCP では localStorage を確認します。
+ */
 const readStoredPrizes = (): PrizeList => readStorageJson<PrizeList>(storageKeys.prizes, []);
 
+/**
+ * 保存済みの BGM 設定を取得します。
+ *
+ * - 副作用: localStorage を読み取ります。
+ * - 入力制約: `timestamp` は ISO 文字列を渡してください。
+ * - 戻り値: BgmPreference を返します。
+ * - Chrome DevTools MCP では localStorage を確認します。
+ */
 const readStoredBgm = (timestamp: string): BgmPreference => {
   const stored = readStorageJson<BgmPreference | null>(storageKeys.bgm, null);
   return stored ?? createDefaultBgmPreference(timestamp);
 };
 
+/**
+ * 景品の選出状態を初期化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: 選出状態を解除した配列を返します。
+ * - Chrome DevTools MCP では選出状態の変更を確認します。
+ */
 const resetPrizeSelections = (prizes: PrizeList): PrizeList =>
   prizes.map<Prize>((prize) => ({
     ...prize,
