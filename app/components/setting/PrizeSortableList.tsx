@@ -2,9 +2,12 @@ import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { X } from "lucide-react";
 import type { ChangeEvent, FC } from "react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef } from "react";
+import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize, PrizeList } from "~/common/types";
+import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
 import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
@@ -33,23 +36,9 @@ const SortableItem: FC<{
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  const [localName, setLocalName] = useState(name);
-  const [localDetail, setLocalDetail] = useState(detail);
-  const [localImage, setLocalImage] = useState(imagePath);
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    setLocalName(name);
-  }, [name]);
-
-  useEffect(() => {
-    setLocalDetail(detail);
-  }, [detail]);
-
-  useEffect(() => {
-    setLocalImage(imagePath);
-  }, [imagePath]);
+  const resolvedImagePath = useStoredImage(imagePath);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -60,15 +49,16 @@ const SortableItem: FC<{
     if (!file) {
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        return;
-      }
-      setLocalImage(reader.result);
-      onUpdate?.({ imagePath: reader.result });
-    };
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+    void savePrizeImage(id, file)
+      .then(() => {
+        onUpdate?.({ imagePath: buildPrizeImagePath(id) });
+      })
+      .catch(() => {
+        /* IndexedDB 保存エラー時は表示更新を行いません */
+      });
   };
 
   return (
@@ -84,22 +74,23 @@ const SortableItem: FC<{
     >
       <Button
         type="button"
-        className="absolute top-3 right-4 text-foreground text-xl"
+        variant="ghost"
+        className="absolute top-2 right-2 rounded-full! bg-muted/90 px-2! hover:bg-muted/80!"
         aria-label="削除"
         onClick={onRemove}
         disabled={disabled || !onRemove}
       >
-        ×
+        <X className="h-6 w-6 text-muted-foreground" />
       </Button>
       <Button
         type="button"
-        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background text-foreground text-lg"
+        className="flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background! text-foreground text-lg"
         onClick={handleImageClick}
         disabled={disabled}
       >
-        {localImage ? (
+        {resolvedImagePath ? (
           <img
-            src={localImage}
+            src={resolvedImagePath}
             alt={`${name || "景品"} 画像`}
             className="h-full w-full rounded object-cover object-center"
           />
@@ -121,13 +112,16 @@ const SortableItem: FC<{
           <span className="w-20">賞名</span>
           <input
             className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
-            value={localName}
-            onChange={(event) => setLocalName(event.target.value)}
+            value={name}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              onUpdate?.({ prizeName: nextValue });
+            }}
             onBlur={() => {
               if (!onUpdate) {
                 return;
               }
-              const nextValue = localName.trim();
+              const nextValue = name.trim();
               if (nextValue !== name) {
                 onUpdate({ prizeName: nextValue });
               }
@@ -140,13 +134,16 @@ const SortableItem: FC<{
           <span className="w-20">賞品名</span>
           <input
             className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
-            value={localDetail}
-            onChange={(event) => setLocalDetail(event.target.value)}
+            value={detail}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              onUpdate?.({ itemName: nextValue });
+            }}
             onBlur={() => {
               if (!onUpdate) {
                 return;
               }
-              const nextValue = localDetail.trim();
+              const nextValue = detail.trim();
               if (nextValue !== detail) {
                 onUpdate({ itemName: nextValue });
               }
@@ -177,6 +174,14 @@ const SortableItem: FC<{
   );
 };
 
+/**
+ * 設定画面で賞品カードを並べ替え・編集するリストです。
+ *
+ * - 副作用: ドラッグ操作で順序が変わった際に `onReorder` を呼び出します。
+ * - 入力制約: `prizes` は `id` が一意であることを前提にします。
+ * - 戻り値: 景品カード一覧の UI を描画します。
+ * - Chrome DevTools MCP: ドラッグ操作と画像追加が反映されることを確認します。
+ */
 export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   prizes,
   disabled = false,

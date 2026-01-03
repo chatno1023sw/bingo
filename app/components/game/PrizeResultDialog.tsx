@@ -1,5 +1,6 @@
 import { Image } from "lucide-react";
 import type { FC } from "react";
+import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
 
@@ -17,6 +18,8 @@ export type PrizeResultDialogProps = {
  * - Chrome DevTools MCP では結果ダイアログが自動表示されることを確認します。
  */
 export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onClose }) => {
+  const resolvedImagePath = useStoredImage(prize?.imagePath ?? null);
+  const hasImage = Boolean(resolvedImagePath);
   if (!prize) {
     return null;
   }
@@ -32,9 +35,9 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
     >
       <div className="flex flex-col items-center justify-center space-y-4">
         <div className="flex h-48 w-full items-center justify-center rounded-2xl">
-          {prize.imagePath ? (
+          {hasImage ? (
             <img
-              src={prize.imagePath}
+              src={resolvedImagePath ?? ""}
               alt={`${prize.prizeName || "景品"} 画像`}
               className="h-full w-full rounded-2xl object-cover object-center"
             />

@@ -38,7 +38,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         {canResume ? (
           <Button
             type="button"
-            className="rounded-full bg-secondary px-6 py-2 text-base text-secondary-foreground shadow-sm hover:bg-secondary/80"
+            className="rounded-full bg-primary px-6 py-2 text-base text-primary-foreground shadow-sm hover:bg-primary/90"
             onClick={onResumeRequest}
             disabled={isSubmitting}
           >

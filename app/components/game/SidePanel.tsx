@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { Button } from "~/components/common/Button";
 import { PrizeList } from "~/components/game/PrizeList";
@@ -15,6 +15,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
   const [resultOpen, setResultOpen] = useState(false);
   const [resultPrize, setResultPrize] = useState<(typeof prizes)[number] | null>(null);
   const [showPrizeNameOnly, setShowPrizeNameOnly] = useState(true);
+  const [itemNameOverrides, setItemNameOverrides] = useState<Set<string>>(new Set());
 
   const summary = useMemo(() => {
     const selected = prizes.filter((prize) => prize.selected).length;
@@ -24,6 +25,45 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       remaining: prizes.length - selected,
     };
   }, [prizes]);
+
+  useEffect(() => {
+    setItemNameOverrides((prev) => {
+      const validIds = new Set(prizes.map((prize) => prize.id));
+      const next = new Set<string>();
+      if (!showPrizeNameOnly) {
+        for (const id of validIds) {
+          next.add(id);
+        }
+        return next;
+      }
+      for (const id of prev) {
+        if (validIds.has(id)) {
+          next.add(id);
+        }
+      }
+      return next;
+    });
+  }, [prizes, showPrizeNameOnly]);
+
+  const handleToggleDisplay = (id: string) => {
+    setItemNameOverrides((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleDisplayAll = () => {
+    setShowPrizeNameOnly((prev) => {
+      const next = !prev;
+      setItemNameOverrides(next ? new Set() : new Set(prizes.map((prize) => prize.id)));
+      return next;
+    });
+  };
 
   const handleRouletteStart = () => {
     setResultOpen(false);
@@ -59,10 +99,10 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
         <Button
           type="button"
           className="rounded-full border border-border px-3 py-1 text-muted-foreground text-xs hover:bg-muted disabled:opacity-50"
-          onClick={() => setShowPrizeNameOnly((prev) => !prev)}
+          onClick={handleToggleDisplayAll}
           disabled={isLoading}
         >
-          表示切替
+          {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
         </Button>
       </header>
       <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
@@ -73,7 +113,8 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
             prizes={prizes}
             disabled={isMutating}
             onToggle={togglePrize}
-            showPrizeNameOnly={showPrizeNameOnly}
+            itemNameOverrides={itemNameOverrides}
+            onToggleDisplay={handleToggleDisplay}
           />
         )}
       </div>

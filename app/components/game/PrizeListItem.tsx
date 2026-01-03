@@ -9,6 +9,7 @@ export type PrizeListItemProps = {
   disabled?: boolean;
   onToggle: (id: string, nextSelected: boolean) => void;
   showPrizeNameOnly: boolean;
+  onToggleDisplay: (id: string) => void;
 };
 
 export const PrizeListItem: FC<PrizeListItemProps> = ({
@@ -16,6 +17,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   disabled = false,
   onToggle,
   showPrizeNameOnly,
+  onToggleDisplay,
 }) => {
   const handleToggle = () => {
     onToggle(prize.id, !prize.selected);
@@ -29,25 +31,17 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
     >
       <Image className="h-10 w-10 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
       <div className="flex-1">
-        {showPrizeNameOnly ? (
-          <p
-            className={cn(
-              "text-3xl",
-              prize.selected ? "text-muted-foreground line-through" : "text-foreground",
-            )}
-          >
-            {prize.prizeName}
-          </p>
-        ) : (
-          <p
-            className={cn(
-              "text-3xl",
-              prize.selected ? "text-muted-foreground line-through" : "text-foreground",
-            )}
-          >
-            {prize.itemName}
-          </p>
-        )}
+        <button
+          type="button"
+          className={cn(
+            "w-full cursor-pointer text-left text-3xl focus:outline-none",
+            prize.selected ? "text-muted-foreground line-through" : "text-foreground",
+          )}
+          onClick={() => onToggleDisplay(prize.id)}
+          disabled={disabled}
+        >
+          {showPrizeNameOnly ? prize.prizeName : prize.itemName}
+        </button>
       </div>
       <Button
         type="button"
