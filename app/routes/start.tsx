@@ -76,7 +76,7 @@ export default function StartRoute() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10 text-slate-900">
-      <div className="absolute right-8 top-8">
+      <div className="absolute top-8 right-8">
         <BgmToggle
           enabled={preference.enabled}
           onToggle={() => toggleBgm()}
@@ -84,7 +84,7 @@ export default function StartRoute() {
         />
       </div>
       {bgmError ? (
-        <p className="absolute right-6 top-20 text-xs text-rose-500">
+        <p className="absolute top-20 right-6 text-rose-500 text-xs">
           BGM 設定の保存に失敗しました
         </p>
       ) : null}

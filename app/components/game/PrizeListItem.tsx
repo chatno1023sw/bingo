@@ -32,7 +32,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         {showPrizeNameOnly ? (
           <p
             className={cn(
-              "text-3xl font-semibold",
+              "font-semibold text-3xl",
               prize.selected ? "text-slate-400 line-through" : "text-slate-500",
             )}
           >
@@ -41,7 +41,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         ) : (
           <p
             className={cn(
-              "text-3xl font-semibold",
+              "font-semibold text-3xl",
               prize.selected ? "text-slate-400 line-through" : "text-slate-500",
             )}
           >
@@ -52,7 +52,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       <Button
         type="button"
         className={cn(
-          "rounded-full px-4 py-1 text-xs font-semibold transition",
+          "rounded-full px-4 py-1 font-semibold text-xs transition",
           prize.selected ? "border border-slate-400 text-slate-600" : "bg-[#0F6A86] text-white",
         )}
         onClick={handleToggle}

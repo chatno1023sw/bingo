@@ -84,7 +84,7 @@ const SortableItem: FC<{
     >
       <Button
         type="button"
-        className="absolute right-4 top-3 text-xl text-slate-900"
+        className="absolute top-3 right-4 text-slate-900 text-xl"
         aria-label="削除"
         onClick={onRemove}
         disabled={disabled || !onRemove}
@@ -93,7 +93,7 @@ const SortableItem: FC<{
       </Button>
       <Button
         type="button"
-        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-slate-900 bg-white text-lg font-semibold text-slate-800"
+        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-slate-900 bg-white font-semibold text-lg text-slate-800"
         onClick={handleImageClick}
         disabled={disabled}
       >
@@ -116,11 +116,11 @@ const SortableItem: FC<{
         onChange={handleImageChange}
         disabled={disabled}
       />
-      <div className="mt-5 space-y-3 text-sm text-slate-900">
+      <div className="mt-5 space-y-3 text-slate-900 text-sm">
         <label className="flex items-center gap-3 font-semibold">
           <span className="w-20">賞名</span>
           <input
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
+            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-slate-700 text-sm"
             value={localName}
             onChange={(event) => setLocalName(event.target.value)}
             onBlur={() => {
@@ -139,7 +139,7 @@ const SortableItem: FC<{
         <label className="flex items-center gap-3 font-semibold">
           <span className="w-20">賞品名</span>
           <input
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
+            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-slate-700 text-sm"
             value={localDetail}
             onChange={(event) => setLocalDetail(event.target.value)}
             onBlur={() => {
@@ -158,7 +158,7 @@ const SortableItem: FC<{
         <label className="flex items-center gap-3 font-semibold">
           <span className="w-20">選出</span>
           <select
-            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-sm text-slate-700"
+            className="h-8 w-full rounded border border-slate-300 bg-white px-2 text-slate-700 text-sm"
             value={selected ? "selected" : "unselected"}
             onChange={(event) => {
               const nextSelected = event.target.value === "selected";
@@ -216,7 +216,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
 
   if (prizes.length === 0) {
     return (
-      <div className="rounded-3xl bg-white p-6 text-sm text-slate-500">
+      <div className="rounded-3xl bg-white p-6 text-slate-500 text-sm">
         景品が登録されていません。
       </div>
     );
@@ -225,9 +225,9 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <ul
-            className="w-325 mx-auto flex flex-wrap justify-start gap-4"
+            className="mx-auto flex w-325 flex-wrap justify-start gap-4"
             data-testid="setting-prize-list"
             id="setting-prize-list"
           >

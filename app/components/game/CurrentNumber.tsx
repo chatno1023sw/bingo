@@ -16,7 +16,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
     <div className="flex flex-col items-center gap-6 text-slate-900">
       <div
         className={cn(
-          "flex h-112 w-md items-center justify-center rounded border border-slate-500 bg-white text-[15rem] font-bold transition",
+          "flex h-112 w-md items-center justify-center rounded border border-slate-500 bg-white font-bold text-[15rem] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
       >

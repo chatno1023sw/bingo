@@ -12,16 +12,16 @@ export type ResetDialogProps = {
 };
 
 /**
- * ゲーム状態をリセットする確認ダイアログ。
+ * 抽選履歴をクリアする確認ダイアログ。
  *
- * - 削除ボタン押下時に `onConfirm` を呼び出し、ゲーム状態の初期化を要求します。
+ * - クリアボタン押下時に `onConfirm` を呼び出し、抽選履歴の削除を要求します。
  * - `open` が false の場合は描画せず、CommonDialog の Portal への描画も行いません。
- * - Chrome DevTools MCP では「リセット」ボタン押下後にモーダルが表示され、×/キャンセルで閉じることを確認します。
+ * - Chrome DevTools MCP では「抽選クリア」ボタン押下後にモーダルが表示され、×/キャンセルで閉じることを確認します。
  */
 export const ResetDialog: FC<ResetDialogProps> = ({
   open,
-  title = "リセットしますか？",
-  description = "抽選履歴と現在の番号を初期化します。",
+  title = "抽選履歴をクリアしますか？",
+  description = "抽選履歴のみを削除します。",
   onClose,
   onConfirm,
   disabled = false,
@@ -50,7 +50,7 @@ export const ResetDialog: FC<ResetDialogProps> = ({
             onClick={onConfirm}
             disabled={disabled}
           >
-            削除
+            クリア
           </Button>
         </>
       }

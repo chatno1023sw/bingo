@@ -35,10 +35,10 @@ export const CsvControls: FC<CsvControlsProps> = ({
   };
 
   return (
-    <div className="rounded border border-slate-300 bg-slate-50 p-4 text-xs text-slate-700">
+    <div className="rounded border border-slate-300 bg-slate-50 p-4 text-slate-700 text-xs">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="flex-1">
-          <label className="block text-[11px] font-semibold text-slate-500" htmlFor="csv-import">
+          <label className="block font-semibold text-[11px] text-slate-500" htmlFor="csv-import">
             CSV インポート
           </label>
           <input
@@ -53,7 +53,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         <div className="flex items-end gap-2">
           <Button
             type="button"
-            className="rounded bg-sky-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-50"
+            className="rounded bg-sky-700 px-3 py-2 font-semibold text-white text-xs shadow-sm transition hover:bg-sky-800 disabled:opacity-50"
             onClick={onExport}
             disabled={disabled}
           >
@@ -72,7 +72,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         />
         <Button
           type="button"
-          className="rounded border border-sky-700 px-3 py-2 text-xs font-semibold text-sky-800 shadow-sm transition hover:bg-sky-50 disabled:opacity-50"
+          className="rounded border border-sky-700 px-3 py-2 font-semibold text-sky-800 text-xs shadow-sm transition hover:bg-sky-50 disabled:opacity-50"
           onClick={onManualImport}
           disabled={disabled}
         >

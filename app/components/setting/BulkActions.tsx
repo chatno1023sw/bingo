@@ -17,19 +17,19 @@ export const BulkActions: FC<BulkActionsProps> = ({
   const remaining = Math.max(total - selected, 0);
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-300">
+    <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300 text-sm">
       <div className="grid grid-cols-3 gap-3 text-center">
         <div className="rounded-2xl bg-slate-800/60 p-3">
-          <p className="text-xs text-slate-400">総数</p>
-          <p className="text-2xl font-semibold text-white">{total}</p>
+          <p className="text-slate-400 text-xs">総数</p>
+          <p className="font-semibold text-2xl text-white">{total}</p>
         </div>
         <div className="rounded-2xl bg-emerald-900/30 p-3">
-          <p className="text-xs text-emerald-200">当選済み</p>
-          <p className="text-2xl font-semibold text-emerald-200">{selected}</p>
+          <p className="text-emerald-200 text-xs">当選済み</p>
+          <p className="font-semibold text-2xl text-emerald-200">{selected}</p>
         </div>
         <div className="rounded-2xl bg-indigo-900/30 p-3">
-          <p className="text-xs text-indigo-200">残り</p>
-          <p className="text-2xl font-semibold text-indigo-200">{remaining}</p>
+          <p className="text-indigo-200 text-xs">残り</p>
+          <p className="font-semibold text-2xl text-indigo-200">{remaining}</p>
         </div>
       </div>
       <Button

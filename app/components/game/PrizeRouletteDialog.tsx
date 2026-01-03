@@ -111,7 +111,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
             <div key={prize.id} className="aspect-square">
               <div
                 className={cn(
-                  "flex h-full w-full items-center justify-center roulette-card text-3xl",
+                  "roulette-card flex h-full w-full items-center justify-center text-3xl",
                   isDisabled && "roulette-card--disabled",
                   isActive && !isDisabled && "roulette-card--active",
                   isWinner && !isDisabled && "roulette-card--winner",

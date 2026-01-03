@@ -30,6 +30,15 @@
       },
       "suspicious": {
         "noExplicitAny": "warn"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "functions": ["twMerge", "twJoin", "cn"]
+          }
+        }
       }
     }
   },

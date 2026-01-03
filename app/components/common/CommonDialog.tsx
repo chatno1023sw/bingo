@@ -75,7 +75,7 @@ export const CommonDialog: FC<CommonDialogProps> = ({
           <DialogClose asChild>
             <Button
               type="button"
-              className="absolute right-4 top-4 rounded-full text-slate-500 transition"
+              className="absolute top-4 right-4 rounded-full text-slate-500 transition"
               aria-label={closeButtonAriaLabel}
               disabled={closeDisabled}
             >

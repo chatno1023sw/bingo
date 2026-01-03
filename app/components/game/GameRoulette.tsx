@@ -88,8 +88,8 @@ export const GameRoulette = ({
       ) : (
         (placeholder ?? (
           <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-slate-600">
-            <span className="text-sm font-semibold">ルーレットを読み込み中...</span>
-            <span className="text-xs text-slate-400">ブラウザが準備でき次第、演出を表示します</span>
+            <span className="font-semibold text-sm">ルーレットを読み込み中...</span>
+            <span className="text-slate-400 text-xs">ブラウザが準備でき次第、演出を表示します</span>
           </div>
         ))
       )}

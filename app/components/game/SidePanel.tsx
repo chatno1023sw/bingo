@@ -49,16 +49,16 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-5">
-          <h2 className="text-base font-semibold">景品一覧</h2>
+          <h2 className="font-semibold text-base">景品一覧</h2>
 
-          <span className="text-xs text-slate-500">
+          <span className="text-slate-500 text-xs">
             当選済み {summary.selected} / {summary.total}
           </span>
         </div>
 
         <Button
           type="button"
-          className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-full border border-slate-300 px-3 py-1 text-slate-600 text-xs transition hover:bg-slate-50 disabled:opacity-50"
           onClick={() => setShowPrizeNameOnly((prev) => !prev)}
           disabled={isLoading}
         >
@@ -67,7 +67,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       </header>
       <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
-          <p className="text-sm text-slate-500">景品情報を読み込み中です...</p>
+          <p className="text-slate-500 text-sm">景品情報を読み込み中です...</p>
         ) : (
           <PrizeList
             prizes={prizes}
@@ -79,13 +79,13 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-full bg-[#0F6A86] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d5870] disabled:opacity-40"
+        className="mt-4 w-full rounded-full bg-[#0F6A86] px-6 py-2 font-semibold text-sm text-white shadow-sm transition hover:bg-[#0d5870] disabled:opacity-40"
         onClick={handleRouletteStart}
         disabled={isLoading || prizes.length === 0}
       >
         景品ルーレット
       </Button>
-      {error && <p className="mt-3 text-xs text-rose-500">{error}</p>}
+      {error && <p className="mt-3 text-rose-500 text-xs">{error}</p>}
       <PrizeRouletteDialog
         open={rouletteOpen}
         prizes={prizes}

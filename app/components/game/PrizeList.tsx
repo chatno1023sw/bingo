@@ -16,7 +16,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   showPrizeNameOnly,
 }) => {
   if (prizes.length === 0) {
-    return <p className="text-sm text-slate-500">景品が登録されていません。</p>;
+    return <p className="text-slate-500 text-sm">景品が登録されていません。</p>;
   }
 
   return (
