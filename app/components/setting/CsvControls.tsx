@@ -1,4 +1,4 @@
-import type { FC, ChangeEvent } from "react";
+import type { ChangeEvent, FC } from "react";
 import type { CsvImportResult } from "~/common/types";
 import { Button } from "~/components/common/Button";
 
@@ -38,10 +38,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
     <div className="rounded border border-border bg-muted p-4 text-muted-foreground text-xs">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="flex-1">
-          <label
-            className="block font-semibold text-[11px] text-muted-foreground"
-            htmlFor="csv-import"
-          >
+          <label className="block text-[11px] text-muted-foreground" htmlFor="csv-import">
             CSV インポート
           </label>
           <input
@@ -56,7 +53,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         <div className="flex items-end gap-2">
           <Button
             type="button"
-            className="rounded bg-primary px-3 py-2 font-semibold text-primary-foreground text-xs shadow-sm hover:bg-primary/90 disabled:opacity-50"
+            className="rounded bg-primary px-3 py-2 text-primary-foreground text-xs shadow-sm hover:bg-primary/90 disabled:opacity-50"
             onClick={onExport}
             disabled={disabled}
           >
@@ -75,7 +72,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         />
         <Button
           type="button"
-          className="rounded border border-primary px-3 py-2 font-semibold text-primary text-xs shadow-sm hover:bg-primary/10 disabled:opacity-50"
+          className="rounded border border-primary px-3 py-2 text-primary text-xs shadow-sm hover:bg-primary/10 disabled:opacity-50"
           onClick={onManualImport}
           disabled={disabled}
         >

@@ -38,7 +38,7 @@ export const DeleteAllDialog: FC<DeleteAllDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground hover:bg-muted"
+            className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
             onClick={onClose}
             disabled={disabled}
           >
@@ -46,7 +46,7 @@ export const DeleteAllDialog: FC<DeleteAllDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-destructive px-4 py-3 font-semibold text-destructive-foreground hover:bg-destructive/90"
+            className="flex-1 rounded-2xl border border-transparent bg-destructive px-4 py-3 text-destructive-foreground hover:bg-destructive/90"
             onClick={onConfirm}
             disabled={disabled}
           >

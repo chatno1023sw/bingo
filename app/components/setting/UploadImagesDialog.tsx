@@ -40,7 +40,7 @@ export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground hover:bg-muted"
+            className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
             onClick={onClose}
             disabled={disabled}
           >
@@ -48,7 +48,7 @@ export const UploadImagesDialog: FC<UploadImagesDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-secondary px-4 py-3 font-semibold text-secondary-foreground hover:bg-secondary/80"
+            className="flex-1 rounded-2xl border border-transparent bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
             onClick={onConfirm}
             disabled={disabled}
           >

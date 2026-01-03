@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState, useId } from "react";
-import type { ChangeEvent, FC } from "react";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
+import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import type { ChangeEvent, FC } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Prize, PrizeList } from "~/common/types";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/common/Button";
+import { cn } from "~/lib/utils";
 
 export type PrizeSortableListProps = {
   prizes: PrizeList;
@@ -93,7 +93,7 @@ const SortableItem: FC<{
       </Button>
       <Button
         type="button"
-        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background font-semibold text-foreground text-lg"
+        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background text-foreground text-lg"
         onClick={handleImageClick}
         disabled={disabled}
       >
@@ -117,7 +117,7 @@ const SortableItem: FC<{
         disabled={disabled}
       />
       <div className="mt-5 space-y-3 text-foreground text-sm">
-        <label className="flex items-center gap-3 font-semibold">
+        <label className="flex items-center gap-3">
           <span className="w-20">賞名</span>
           <input
             className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
@@ -136,7 +136,7 @@ const SortableItem: FC<{
             disabled={disabled}
           />
         </label>
-        <label className="flex items-center gap-3 font-semibold">
+        <label className="flex items-center gap-3">
           <span className="w-20">賞品名</span>
           <input
             className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
@@ -155,7 +155,7 @@ const SortableItem: FC<{
             disabled={disabled}
           />
         </label>
-        <label className="flex items-center gap-3 font-semibold">
+        <label className="flex items-center gap-3">
           <span className="w-20">選出</span>
           <select
             className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"

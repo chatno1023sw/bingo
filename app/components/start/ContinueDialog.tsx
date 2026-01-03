@@ -37,7 +37,7 @@ export const ContinueDialog: FC<ContinueDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground hover:bg-muted"
+            className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
             onClick={onCancel}
             disabled={isSubmitting}
           >
@@ -45,7 +45,7 @@ export const ContinueDialog: FC<ContinueDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
+            className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90"
             onClick={onConfirm}
             disabled={isSubmitting}
           >

@@ -49,7 +49,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-5">
-          <h2 className="font-semibold text-base">景品一覧</h2>
+          <h2 className="text-base">景品一覧</h2>
 
           <span className="text-muted-foreground text-xs">
             当選済み {summary.selected} / {summary.total}
@@ -79,7 +79,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-full bg-primary px-6 py-2 font-semibold text-primary-foreground text-sm shadow-sm hover:bg-primary/90 disabled:opacity-40"
+        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm hover:bg-primary/90 disabled:opacity-40"
         onClick={handleRouletteStart}
         disabled={isLoading || prizes.length === 0}
       >

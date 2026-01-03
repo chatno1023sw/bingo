@@ -11,16 +11,16 @@ import { cn } from "~/lib/utils";
  * - 戻り値: `button` 要素を返します。
  * - Chrome DevTools MCP では任意の画面でボタンをクリックし、既存の UI が崩れないことを確認します。
  */
-export const Button: FC<ButtonProps> = ({ type = "button", className, ...rest }) => {
+export const Button: FC<ButtonProps> = ({ type = "button", className, style, ...rest }) => {
   return (
     <ShadcnButton
       className={cn(
-        "font-bold",
+        "font-bold text-lg",
         "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
         "focus:outline-none",
-        'font-["BIZ_UDPゴシック","BIZ_UDゴシック","Yu_Gothic_UI","Meiryo",sans-serif]',
         className,
       )}
+      style={{ WebkitTextStroke: "0.5px currentColor", ...style }}
       type={type}
       {...rest}
     />

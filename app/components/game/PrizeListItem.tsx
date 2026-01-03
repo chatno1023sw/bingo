@@ -32,7 +32,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         {showPrizeNameOnly ? (
           <p
             className={cn(
-              "font-semibold text-3xl",
+              "text-3xl",
               prize.selected ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
@@ -41,7 +41,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         ) : (
           <p
             className={cn(
-              "font-semibold text-3xl",
+              "text-3xl",
               prize.selected ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
@@ -52,7 +52,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       <Button
         type="button"
         className={cn(
-          "rounded-full px-4 py-1 font-semibold text-xs",
+          "rounded-full px-4 py-1 text-xs",
           prize.selected
             ? "border border-border text-muted-foreground"
             : "bg-primary text-primary-foreground",

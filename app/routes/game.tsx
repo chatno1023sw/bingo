@@ -254,7 +254,7 @@ export default function GameRoute() {
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
                 type="button"
-                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary/90"
+                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary/90"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >

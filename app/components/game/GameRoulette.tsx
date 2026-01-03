@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 type WheelComponentType = typeof import("react-custom-roulette")["Wheel"];
 
@@ -87,7 +87,7 @@ export const GameRoulette = ({
       ) : (
         (placeholder ?? (
           <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-muted-foreground">
-            <span className="font-semibold text-sm">ルーレットを読み込み中...</span>
+            <span className="text-sm">ルーレットを読み込み中...</span>
             <span className="text-xs">ブラウザが準備でき次第、演出を表示します</span>
           </div>
         ))
