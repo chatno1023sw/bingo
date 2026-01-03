@@ -195,19 +195,19 @@ export default function GameRoute() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
-        <p className="text-slate-500 text-sm">読み込み中...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="text-muted-foreground text-sm">読み込み中...</p>
       </main>
     );
   }
 
   if (loadError || !session) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-slate-900">
-        <p className="text-rose-500 text-sm">データの読み込みに失敗しました。</p>
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-foreground">
+        <p className="text-destructive text-sm">データの読み込みに失敗しました。</p>
         <Button
           type="button"
-          className="rounded border border-slate-300 px-4 py-2 text-slate-600 text-sm transition hover:bg-slate-50"
+          className="rounded border border-border px-4 py-2 text-muted-foreground text-sm transition hover:bg-muted"
           onClick={() => navigate("/start")}
         >
           Start 画面に戻る
@@ -218,19 +218,19 @@ export default function GameRoute() {
 
   return (
     <PrizeProvider initialPrizes={session.prizes}>
-      <main className="h-screen overflow-hidden bg-white text-slate-900">
-        <div className="flex h-full w-full flex-col border border-slate-400 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.08)]">
+      <main className="h-screen overflow-hidden bg-background text-foreground">
+        <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
           <header className="flex items-center justify-between px-6 py-4">
             <Button
               type="button"
               className={cn(
-                "rounded-full border border-slate-300 px-3 py-1 text-slate-600 text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50",
+                "rounded-full border border-border px-3 py-1 text-muted-foreground text-sm transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50",
                 "relative top-4",
               )}
               onClick={() => setResetOpen(true)}
               disabled={isLoading || isResetting}
             >
-              リセット
+              抽選クリア
             </Button>
             <div className="flex items-center gap-2">
               <BgmToggle
@@ -240,7 +240,7 @@ export default function GameRoute() {
               />
               <Button
                 type="button"
-                className="rounded-full border border-slate-300 p-1 text-slate-600 text-xl transition hover:bg-slate-50"
+                className="rounded-full border border-border p-1 text-muted-foreground text-xl transition hover:bg-muted"
                 aria-label="Start 画面に戻る"
                 onClick={handleBackToStart}
               >
@@ -254,7 +254,7 @@ export default function GameRoute() {
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
                 type="button"
-                className="flex w-80 items-center justify-center gap-2 rounded-full bg-[#0F6A86] px-8 py-4 font-semibold text-white text-xl shadow-sm transition hover:bg-[#0d5870] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground text-xl shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
@@ -262,9 +262,9 @@ export default function GameRoute() {
                 {drawButtonLabel}
               </Button>
               {drawError === "no-available-numbers" && (
-                <p className="text-rose-500 text-sm">すべての番号が抽選済みです。</p>
+                <p className="text-destructive text-sm">すべての番号が抽選済みです。</p>
               )}
-              <p className="text-slate-500 text-xs">残り {availableNumbers.length} / 75</p>
+              <p className="text-muted-foreground text-xs">残り {availableNumbers.length} / 75</p>
             </section>
 
             <SidePanel className="flex-[0_0_420px]" />

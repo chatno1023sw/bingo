@@ -18,7 +18,7 @@ export const BgmToggle: FC<BgmToggleProps> = ({ enabled, onToggle, disabled = fa
   return (
     <Button
       type="button"
-      className="rounded-full border border-slate-300 bg-white/80 p-2 text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-full border border-border bg-background/80 p-2 text-foreground shadow-sm transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       aria-pressed={enabled}
       aria-label={label}
       onClick={onToggle}

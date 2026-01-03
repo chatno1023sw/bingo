@@ -13,10 +13,10 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
   const display = value == null ? "--" : value.toString().padStart(2, "0");
 
   return (
-    <div className="flex flex-col items-center gap-6 text-slate-900">
+    <div className="flex flex-col items-center gap-6 text-foreground">
       <div
         className={cn(
-          "flex h-112 w-md items-center justify-center rounded border border-slate-500 bg-white font-bold text-[15rem] transition",
+          "flex h-112 w-md items-center justify-center rounded border border-border bg-card font-bold text-[15rem] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
       >

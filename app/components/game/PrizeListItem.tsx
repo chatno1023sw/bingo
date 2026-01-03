@@ -24,16 +24,16 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
     <li
       className={cn(
         "flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition",
-        prize.selected ? "border-slate-300 bg-slate-100 opacity-70" : "border-slate-300 bg-white",
+        prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <Image className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
+      <Image className="h-10 w-10 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
       <div className="flex-1">
         {showPrizeNameOnly ? (
           <p
             className={cn(
               "font-semibold text-3xl",
-              prize.selected ? "text-slate-400 line-through" : "text-slate-500",
+              prize.selected ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
             {prize.prizeName}
@@ -42,7 +42,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
           <p
             className={cn(
               "font-semibold text-3xl",
-              prize.selected ? "text-slate-400 line-through" : "text-slate-500",
+              prize.selected ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
             {prize.itemName}
@@ -53,7 +53,9 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         type="button"
         className={cn(
           "rounded-full px-4 py-1 font-semibold text-xs transition",
-          prize.selected ? "border border-slate-400 text-slate-600" : "bg-[#0F6A86] text-white",
+          prize.selected
+            ? "border border-border text-muted-foreground"
+            : "bg-primary text-primary-foreground",
         )}
         onClick={handleToggle}
         disabled={disabled}

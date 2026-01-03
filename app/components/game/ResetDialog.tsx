@@ -20,7 +20,7 @@ export type ResetDialogProps = {
  */
 export const ResetDialog: FC<ResetDialogProps> = ({
   open,
-  title = "抽選履歴をクリアしますか？",
+  title = "抽選履歴を削除しますか？",
   description = "抽選履歴のみを削除します。",
   onClose,
   onConfirm,
@@ -38,7 +38,7 @@ export const ResetDialog: FC<ResetDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 transition hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-200"
+            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground transition hover:bg-muted focus:outline-none focus:ring-4 focus:ring-ring"
             onClick={onClose}
             disabled={disabled}
           >
@@ -46,11 +46,11 @@ export const ResetDialog: FC<ResetDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-rose-600 px-4 py-3 font-semibold text-white transition hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-2xl border border-transparent bg-destructive px-4 py-3 font-semibold text-destructive-foreground transition hover:bg-destructive/90 focus:outline-none focus:ring-4 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onConfirm}
             disabled={disabled}
           >
-            クリア
+            削除
           </Button>
         </>
       }

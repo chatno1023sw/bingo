@@ -17,24 +17,24 @@ export const BulkActions: FC<BulkActionsProps> = ({
   const remaining = Math.max(total - selected, 0);
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300 text-sm">
+    <div className="rounded-3xl border border-border bg-card p-6 text-muted-foreground text-sm">
       <div className="grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-2xl bg-slate-800/60 p-3">
-          <p className="text-slate-400 text-xs">総数</p>
-          <p className="font-semibold text-2xl text-white">{total}</p>
+        <div className="rounded-2xl bg-muted p-3">
+          <p className="text-muted-foreground text-xs">総数</p>
+          <p className="font-semibold text-2xl text-foreground">{total}</p>
         </div>
-        <div className="rounded-2xl bg-emerald-900/30 p-3">
-          <p className="text-emerald-200 text-xs">当選済み</p>
-          <p className="font-semibold text-2xl text-emerald-200">{selected}</p>
+        <div className="rounded-2xl bg-accent p-3">
+          <p className="text-accent-foreground text-xs">当選済み</p>
+          <p className="font-semibold text-2xl text-accent-foreground">{selected}</p>
         </div>
-        <div className="rounded-2xl bg-indigo-900/30 p-3">
-          <p className="text-indigo-200 text-xs">残り</p>
-          <p className="font-semibold text-2xl text-indigo-200">{remaining}</p>
+        <div className="rounded-2xl bg-secondary p-3">
+          <p className="text-secondary-foreground text-xs">残り</p>
+          <p className="font-semibold text-2xl text-secondary-foreground">{remaining}</p>
         </div>
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-2xl border border-rose-500/60 px-4 py-2 font-semibold text-rose-200"
+        className="mt-4 w-full rounded-2xl border border-destructive px-4 py-2 font-semibold text-destructive transition hover:bg-destructive/10"
         onClick={onDeleteAll}
         disabled={disabled || total === 0}
       >

@@ -51,8 +51,9 @@ export const GameRoulette = ({
       numbers.map((value) => ({
         option: value.toString(),
         style: {
-          backgroundColor: value % 2 === 0 ? "#E2E8F0" : "#F8FAFC",
-          textColor: "#0F172A",
+          backgroundColor:
+            value % 2 === 0 ? "hsl(var(--muted))" : "hsl(var(--background))",
+          textColor: "hsl(var(--foreground))",
         },
       })),
     [numbers],
@@ -67,7 +68,7 @@ export const GameRoulette = ({
   }, [currentNumber, numbers]);
 
   const wrapperClassName =
-    className ?? "rounded-3xl border border-indigo-500/30 bg-slate-900/70 p-6 shadow-2xl";
+    className ?? "rounded-3xl border border-border bg-card p-6 shadow-2xl";
 
   return (
     <div className={wrapperClassName}>
@@ -77,9 +78,9 @@ export const GameRoulette = ({
           prizeNumber={prizeIndex}
           data={data}
           spinDuration={0.8}
-          outerBorderColor="#CBD5F5"
+          outerBorderColor="hsl(var(--border))"
           outerBorderWidth={4}
-          radiusLineColor="#E2E8F0"
+          radiusLineColor="hsl(var(--muted))"
           textDistance={70}
           onStopSpinning={() => {
             setMustSpin(false);
@@ -87,9 +88,9 @@ export const GameRoulette = ({
         />
       ) : (
         (placeholder ?? (
-          <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-slate-600">
+          <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-muted-foreground">
             <span className="font-semibold text-sm">ルーレットを読み込み中...</span>
-            <span className="text-slate-400 text-xs">ブラウザが準備でき次第、演出を表示します</span>
+            <span className="text-xs">ブラウザが準備でき次第、演出を表示します</span>
           </div>
         ))
       )}
