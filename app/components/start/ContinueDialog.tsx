@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { Button } from "~/components/common/Button";
+import { CommonDialog } from "~/components/common/CommonDialog";
 
 export type ContinueDialogProps = {
   open: boolean;
@@ -12,7 +12,12 @@ export type ContinueDialogProps = {
 };
 
 /**
- * 「続きから」押下時の確認ダイアログ。
+ * 「続きから」押下時の確認ダイアログです。
+ *
+ * - 入力制約: `open` が false の場合は描画せず、`onConfirm`/`onCancel` は必須です。
+ * - 副作用: CommonDialog の Portal 経由で `document.body` へ描画します。
+ * - 戻り値: ダイアログの React 要素、または `null` を返します。
+ * - Chrome DevTools MCP では「続きから」押下でダイアログが開くことを確認します。
  */
 export const ContinueDialog: FC<ContinueDialogProps> = ({
   open,
@@ -22,18 +27,14 @@ export const ContinueDialog: FC<ContinueDialogProps> = ({
   onCancel,
   isSubmitting = false,
 }) => {
-  if (!open) {
-    return null;
-  }
-  if (typeof document === "undefined") {
-    return null;
-  }
-  const dialog = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl">
-        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-        <p className="mt-3 text-sm text-slate-600">{description}</p>
-        <div className="mt-8 flex flex-col gap-3 md:flex-row">
+  return (
+    <CommonDialog
+      open={open}
+      onClose={onCancel}
+      title={title}
+      description={description}
+      footer={
+        <>
           <Button
             type="button"
             className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 transition hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-200"
@@ -50,9 +51,8 @@ export const ContinueDialog: FC<ContinueDialogProps> = ({
           >
             復元する
           </Button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
-  return createPortal(dialog, document.body);
 };
