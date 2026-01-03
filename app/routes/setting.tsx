@@ -12,7 +12,6 @@ import { CsvControls } from "~/components/setting/CsvControls";
 import { DeleteAllDialog } from "~/components/setting/DeleteAllDialog";
 import { PrizeSortableList } from "~/components/setting/PrizeSortableList";
 import { ResetSelectionDialog } from "~/components/setting/ResetSelectionDialog";
-import { UploadImagesDialog } from "~/components/setting/UploadImagesDialog";
 
 const SettingContent = () => {
   const navigate = useNavigate();
@@ -25,9 +24,7 @@ const SettingContent = () => {
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
-  const [uploadOpen, setUploadOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [pendingUploads, setPendingUploads] = useState<FileList | null>(null);
   const [draftPrizes, setDraftPrizes] = useState<PrizeList>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -72,6 +69,13 @@ const SettingContent = () => {
 
   const handleCsvImportClick = () => {
     const input = document.getElementById("csv-import-simple");
+    if (input instanceof HTMLInputElement) {
+      input.click();
+    }
+  };
+
+  const handleImageUploadClick = () => {
+    const input = document.getElementById("image-import-simple");
     if (input instanceof HTMLInputElement) {
       input.click();
     }
@@ -140,11 +144,8 @@ const SettingContent = () => {
     setResetOpen(false);
   };
 
-  const handleUploadImages = async () => {
-    const files = pendingUploads;
-    if (!files || files.length === 0) {
-      setUploadOpen(false);
-      setPendingUploads(null);
+  const handleUploadImages = async (files: FileList) => {
+    if (files.length === 0) {
       return;
     }
     setIsUploading(true);
@@ -216,8 +217,6 @@ const SettingContent = () => {
         });
       }
       setDraftPrizes(next);
-      setUploadOpen(false);
-      setPendingUploads(null);
       setLocalError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : "image-upload-error";
@@ -371,7 +370,7 @@ const SettingContent = () => {
             type="button"
             variant="outline"
             className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
-            onClick={() => setUploadOpen(true)}
+            onClick={handleImageUploadClick}
             disabled={isMutating || draftPrizes.length === 0}
           >
             画像追加
@@ -418,6 +417,20 @@ const SettingContent = () => {
             event.currentTarget.value = "";
           }}
         />
+        <input
+          id="image-import-simple"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(event) => {
+            const files = event.target.files;
+            if (files) {
+              void handleUploadImages(files);
+            }
+            event.currentTarget.value = "";
+          }}
+          disabled={isUploading || isMutating}
+        />
         <CsvControls
           disabled={isMutating}
           onFileImport={handleFileImport}
@@ -454,13 +467,6 @@ const SettingContent = () => {
         onConfirm={handleResetSelections}
         disabled={isMutating}
       />
-      <UploadImagesDialog
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onConfirm={handleUploadImages}
-        onFilesSelected={setPendingUploads}
-        disabled={isUploading || isMutating}
-      />
       <CommonDialog
         open={confirmOpen}
         onClose={() => {
@@ -468,8 +474,8 @@ const SettingContent = () => {
           setAllowNavigation(false);
           blocker.reset?.();
         }}
-        title="いま編集中のデータは保存されません"
-        description="よろしいですか？戻るボタン押下で保存されます。"
+        title="編集中のデータが消えちゃいます！"
+        description="保存したかったら戻るボタンを押してね。"
         footer={
           <>
             <Button
@@ -485,14 +491,15 @@ const SettingContent = () => {
             </Button>
             <Button
               type="button"
-              className="flex-1 rounded-2xl border border-transparent bg-destructive px-4 py-3 text-destructive-foreground hover:bg-destructive/90"
+              variant="outline"
+              className="flex-1 rounded-2xl px-4 py-3"
               onClick={() => {
                 setConfirmOpen(false);
                 setAllowNavigation(true);
                 blocker.proceed?.();
               }}
             >
-              破棄して移動
+              移動する！
             </Button>
           </>
         }

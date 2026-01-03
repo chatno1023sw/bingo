@@ -2,7 +2,6 @@ import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { getHistoryView } from "~/common/services/historyService";
 import { persistSessionState, resumeSession, startSession } from "~/common/services/sessionService";
 import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
@@ -11,7 +10,6 @@ import {
   getAvailableNumbers,
   NoAvailableNumbersError,
 } from "~/common/utils/bingoEngine";
-import { BgmToggle } from "~/components/common/BgmToggle";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
@@ -52,14 +50,14 @@ export default function GameRoute() {
   const [drawError, setDrawError] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
   const navigate = useNavigate();
-  const { preference, isReady: isBgmReady, toggle: toggleBgm } = useBgmPreference();
+  // const { preference, isReady: isBgmReady, toggle: toggleBgm } = useBgmPreference();
   const [displayNumber, setDisplayNumber] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const animationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const availableNumbers = session?.availableNumbers ?? [];
-  const bgmDisabled = !isBgmReady || isMutating || isResetting;
+  // const bgmDisabled = !isBgmReady || isMutating || isResetting;
   const isButtonDisabled =
     isMutating || isResetting || isAnimating || availableNumbers.length === 0;
   const currentNumber = session?.gameState.currentNumber ?? null;
@@ -223,8 +221,9 @@ export default function GameRoute() {
           <header className="flex items-center justify-between px-6 py-4">
             <Button
               type="button"
+              variant="secondary"
               className={cn(
-                "rounded-full border border-border px-3 py-1 text-muted-foreground text-sm hover:bg-muted",
+                "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
                 "relative top-2",
               )}
               onClick={() => setResetOpen(true)}
@@ -233,18 +232,20 @@ export default function GameRoute() {
               クリア
             </Button>
             <div className="flex items-center gap-2">
-              <BgmToggle
+              {/* todo: あとで音を出す設定を入れたい */}
+              {/* <BgmToggle
                 enabled={preference.enabled}
                 onToggle={() => toggleBgm()}
                 disabled={bgmDisabled}
-              />
+              /> */}
               <Button
                 type="button"
-                className="rounded-full border border-border p-1 text-muted-foreground text-xl hover:bg-muted"
+                variant="secondary"
+                className="rounded-full!"
                 aria-label="Start 画面に戻る"
                 onClick={handleBackToStart}
               >
-                <X className="aspect-square h-8 w-8" />
+                <X className="aspect-square h-6 w-6" />
               </Button>
             </div>
           </header>

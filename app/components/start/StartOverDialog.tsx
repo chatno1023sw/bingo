@@ -21,8 +21,8 @@ export type StartOverDialogProps = {
  */
 export const StartOverDialog: FC<StartOverDialogProps> = ({
   open,
-  title = "最初から始めますか？",
-  description = "過去の履歴は削除されるけど、本当に最初から初めてもいい？",
+  title = "最初から始める？",
+  description = "前回の抽選結果を忘れて再スタート！",
   onClose,
   onConfirm,
   disabled = false,
@@ -39,7 +39,7 @@ export const StartOverDialog: FC<StartOverDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
+            className="flex-1 rounded-2xl px-4 py-3"
             onClick={onClose}
             disabled={disabled}
           >
@@ -47,7 +47,8 @@ export const StartOverDialog: FC<StartOverDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90"
+            variant="outline"
+            className="flex-1 rounded-2xl px-4 py-3"
             onClick={onConfirm}
             disabled={disabled}
           >

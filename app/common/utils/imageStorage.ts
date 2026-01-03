@@ -60,7 +60,8 @@ export const isPrizeImagePath = (value: string | null): value is string =>
  * - 戻り値: 接頭辞を除いた賞品 ID を返します。
  * - Chrome DevTools MCP: `idb:` プレフィックスの解除結果をコンソールで確認します。
  */
-export const extractPrizeImageId = (imagePath: string): string => imagePath.slice(imageKeyPrefix.length);
+export const extractPrizeImageId = (imagePath: string): string =>
+  imagePath.slice(imageKeyPrefix.length);
 
 /**
  * 賞品画像を IndexedDB に保存します。

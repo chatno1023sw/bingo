@@ -98,7 +98,8 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
 
         <Button
           type="button"
-          className="rounded-full border border-border px-3 py-1 text-muted-foreground text-xs hover:bg-muted disabled:opacity-50"
+          variant="secondary"
+          className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
           onClick={handleToggleDisplayAll}
           disabled={isLoading}
         >

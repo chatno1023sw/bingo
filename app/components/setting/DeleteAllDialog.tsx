@@ -20,8 +20,8 @@ export type DeleteAllDialogProps = {
  */
 export const DeleteAllDialog: FC<DeleteAllDialogProps> = ({
   open,
-  title = "本当に削除しますか？",
-  description = "すべての景品カードが削除されます。",
+  title = "本当にすべて削除する？",
+  description = "新しく景品を登録するときにオススメ！",
   onClose,
   onConfirm,
   disabled = false,
@@ -38,7 +38,8 @@ export const DeleteAllDialog: FC<DeleteAllDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 text-muted-foreground hover:bg-muted"
+            variant="outline"
+            className="flex-1 rounded-2xl px-4 py-3"
             onClick={onClose}
             disabled={disabled}
           >
@@ -46,7 +47,8 @@ export const DeleteAllDialog: FC<DeleteAllDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-destructive px-4 py-3 text-destructive-foreground hover:bg-destructive/90"
+            variant="destructive"
+            className="flex-1 rounded-2xl px-4 py-3"
             onClick={onConfirm}
             disabled={disabled}
           >

@@ -58,11 +58,10 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       </div>
       <Button
         type="button"
+        variant={prize.selected ? "secondary" : "secondary"}
         className={cn(
           "rounded-full px-4 py-1 text-xs",
-          prize.selected
-            ? "border border-border text-muted-foreground"
-            : "bg-primary text-primary-foreground",
+          prize.selected && "border border-border text-muted-foreground",
         )}
         onClick={handleToggle}
         disabled={disabled}

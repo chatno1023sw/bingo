@@ -20,8 +20,8 @@ export type ResetDialogProps = {
  */
 export const ResetDialog: FC<ResetDialogProps> = ({
   open,
-  title = "抽選履歴を削除しますか？",
-  description = "抽選履歴のみを削除します。",
+  title = "抽選履歴を削除する？",
+  description = "あたらしく抽選を始めよう！",
   onClose,
   onConfirm,
   disabled = false,

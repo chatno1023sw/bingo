@@ -20,7 +20,7 @@ export const Button: FC<ButtonProps> = ({ type = "button", className, style, ...
         "focus:outline-none",
         className,
       )}
-      style={{ WebkitTextStroke: "0.5px currentColor", ...style }}
+      style={{ WebkitTextStroke: "0.4px currentColor", ...style }}
       type={type}
       {...rest}
     />
