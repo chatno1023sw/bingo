@@ -2,12 +2,12 @@ import type { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { X } from "lucide-react";
+import { Image, ImageIcon, X } from "lucide-react";
 import type { ChangeEvent, FC } from "react";
 import { useId, useMemo, useRef } from "react";
 import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize, PrizeList } from "~/common/types";
-import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
+import { buildPrizeImagePath, deletePrizeImage, savePrizeImage } from "~/common/utils/imageStorage";
 import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
@@ -61,6 +61,19 @@ const SortableItem: FC<{
       });
   };
 
+  const handleImageDelete = () => {
+    if (!imagePath) {
+      return;
+    }
+    void deletePrizeImage(id)
+      .then(() => {
+        onUpdate?.({ imagePath: null });
+      })
+      .catch(() => {
+        /* IndexedDB 削除エラー時は表示更新を行いません */
+      });
+  };
+
   return (
     <li
       ref={setNodeRef}
@@ -84,18 +97,37 @@ const SortableItem: FC<{
       </Button>
       <Button
         type="button"
-        className="flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background! text-foreground text-lg"
+        className={cn(
+          "flex h-32 w-full items-center justify-center rounded bg-background! p-0! text-foreground text-lg",
+          resolvedImagePath || "border-2 border-border",
+        )}
         onClick={handleImageClick}
         disabled={disabled}
       >
         {resolvedImagePath ? (
-          <img
-            src={resolvedImagePath}
-            alt={`${name || "景品"} 画像`}
-            className="h-full w-full rounded object-cover object-center"
-          />
+          <>
+            <img
+              src={resolvedImagePath}
+              alt={`${name || "景品"} 画像`}
+              className="h-32 w-64.5 rounded object-cover object-center"
+            />
+            <Button
+              type="button"
+              className="absolute top-28 right-8 z-60 h-8! bg-secondary px-2! py-1! text-xs"
+              onClick={handleImageDelete}
+              disabled={disabled || !imagePath}
+            >
+              <div className="flex items-center gap-1">
+                <ImageIcon className="h-4 w-4" />
+                <span>削除</span>
+              </div>
+            </Button>
+          </>
         ) : (
-          "クリックで画像を追加"
+          <div className="flex h-32 w-64.5 flex-col items-center gap-1 pt-2 text-muted-foreground">
+            <Image className="h-20 w-20 text-muted-foreground" />
+            <span>クリックで画像を追加</span>
+          </div>
         )}
       </Button>
       <input
