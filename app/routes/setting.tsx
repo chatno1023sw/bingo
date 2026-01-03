@@ -260,7 +260,7 @@ const SettingContent = () => {
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
-            className="rounded bg-primary px-3 py-1.5 font-semibold text-primary-foreground text-xs shadow-none transition hover:bg-primary/90 disabled:opacity-50"
+            className="rounded bg-primary px-3 py-1.5 font-semibold text-primary-foreground text-xs shadow-none hover:bg-primary/90 disabled:opacity-50"
             onClick={handleAddCard}
             disabled={isMutating}
           >
@@ -268,7 +268,7 @@ const SettingContent = () => {
           </Button>
           <Button
             type="button"
-            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none transition hover:bg-muted disabled:opacity-50"
+            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
             onClick={handleCsvImportClick}
             disabled={isMutating}
           >
@@ -276,7 +276,7 @@ const SettingContent = () => {
           </Button>
           <Button
             type="button"
-            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none transition hover:bg-muted disabled:opacity-50"
+            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
             onClick={() => setUploadOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
@@ -284,7 +284,7 @@ const SettingContent = () => {
           </Button>
           <Button
             type="button"
-            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none transition hover:bg-muted disabled:opacity-50"
+            className="rounded border border-border px-3 py-1.5 font-semibold text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
             onClick={() => setResetOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
@@ -292,7 +292,7 @@ const SettingContent = () => {
           </Button>
           <Button
             type="button"
-            className="rounded border border-destructive px-3 py-1.5 font-semibold text-destructive text-xs shadow-none transition hover:bg-destructive/10 disabled:opacity-50"
+            className="rounded border border-destructive px-3 py-1.5 font-semibold text-destructive text-xs shadow-none hover:bg-destructive/10 disabled:opacity-50"
             onClick={() => setDeleteOpen(true)}
             disabled={isMutating || prizes.length === 0}
           >
@@ -301,7 +301,7 @@ const SettingContent = () => {
         </div>
         <Button
           type="button"
-          className="rounded bg-secondary px-3 py-1.5 font-semibold text-secondary-foreground text-xs shadow-none transition hover:bg-secondary/80"
+          className="rounded bg-secondary px-3 py-1.5 font-semibold text-secondary-foreground text-xs shadow-none hover:bg-secondary/80"
           onClick={() => navigate("/start")}
         >
           戻る

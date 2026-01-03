@@ -34,7 +34,7 @@
       "nursery": {
         "useSortedClasses": {
           "fix": "safe",
-          "level": "error",
+          "level": "warn",
           "options": {
             "functions": ["twMerge", "twJoin", "cn"]
           }

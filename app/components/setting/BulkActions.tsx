@@ -34,7 +34,7 @@ export const BulkActions: FC<BulkActionsProps> = ({
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-2xl border border-destructive px-4 py-2 font-semibold text-destructive transition hover:bg-destructive/10"
+        className="mt-4 w-full rounded-2xl border border-destructive px-4 py-2 font-semibold text-destructive hover:bg-destructive/10"
         onClick={onDeleteAll}
         disabled={disabled || total === 0}
       >

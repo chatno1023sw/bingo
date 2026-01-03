@@ -29,7 +29,7 @@ export const StartMenu: FC<StartMenuProps> = ({
       <div className="flex w-48 flex-col gap-4">
         <Button
           type="button"
-          className="rounded-full bg-primary px-6 py-2 font-semibold text-base text-primary-foreground shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-primary px-6 py-2 font-semibold text-base text-primary-foreground shadow-sm hover:bg-primary/90"
           onClick={onStart}
           disabled={isSubmitting}
         >
@@ -38,7 +38,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         {canResume ? (
           <Button
             type="button"
-            className="rounded-full bg-secondary px-6 py-2 font-semibold text-base text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus:ring-4 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-secondary px-6 py-2 font-semibold text-base text-secondary-foreground shadow-sm hover:bg-secondary/80"
             onClick={onResumeRequest}
             disabled={isSubmitting}
           >
@@ -47,7 +47,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         ) : null}
         <Button
           type="button"
-          className="rounded-full bg-secondary px-6 py-2 font-semibold text-base text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus:ring-4 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-secondary px-6 py-2 font-semibold text-base text-secondary-foreground shadow-sm hover:bg-secondary/80"
           onClick={onNavigateSetting}
           disabled={isSubmitting}
         >

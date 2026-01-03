@@ -39,7 +39,7 @@ export const StartOverDialog: FC<StartOverDialogProps> = ({
         <>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground transition hover:bg-muted focus:outline-none focus:ring-4 focus:ring-ring"
+            className="flex-1 rounded-2xl border border-border px-4 py-3 font-semibold text-muted-foreground hover:bg-muted"
             onClick={onClose}
             disabled={disabled}
           >
@@ -47,7 +47,7 @@ export const StartOverDialog: FC<StartOverDialogProps> = ({
           </Button>
           <Button
             type="button"
-            className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 font-semibold text-primary-foreground transition hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
             onClick={onConfirm}
             disabled={disabled}
           >

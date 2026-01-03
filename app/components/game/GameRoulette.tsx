@@ -51,8 +51,7 @@ export const GameRoulette = ({
       numbers.map((value) => ({
         option: value.toString(),
         style: {
-          backgroundColor:
-            value % 2 === 0 ? "hsl(var(--muted))" : "hsl(var(--background))",
+          backgroundColor: value % 2 === 0 ? "hsl(var(--muted))" : "hsl(var(--background))",
           textColor: "hsl(var(--foreground))",
         },
       })),
@@ -67,8 +66,7 @@ export const GameRoulette = ({
     return index >= 0 ? index : 0;
   }, [currentNumber, numbers]);
 
-  const wrapperClassName =
-    className ?? "rounded-3xl border border-border bg-card p-6 shadow-2xl";
+  const wrapperClassName = className ?? "rounded-3xl border border-border bg-card p-6 shadow-2xl";
 
   return (
     <div className={wrapperClassName}>

@@ -3,16 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "mise run build",
-    "dev": "mise run dev",
-    "start": "mise run start",
-    "typecheck": "mise run typecheck",
-    "lint": "mise run lint",
-    "format": "mise run format",
-    "pre": "mise run pre",
-    "test": "mise run test",
-    "similarity": "mise run similarity",
-    "type": "pnpm add -D @types/node"
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "node ./scripts/serve-client.mjs",
+    "typecheck": "react-router typegen && tsc",
+    "lint": "biome lint --write --error-on-warnings --files-ignore-unknown=true app scripts docs public *.json *.ts",
+    "format": "biome format --write --files-ignore-unknown=true app scripts docs public *.json *.ts",
+    "pre": "npm run lint && npm run typecheck && npm run format",
+    "test": "vitest run --passWithNoTests",
+    "similarity": "node ./scripts/run-similarity.mjs"
   },
   "dependencies": {
     "@biomejs/biome": "^2.3.10",

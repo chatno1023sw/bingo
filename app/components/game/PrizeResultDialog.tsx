@@ -39,7 +39,11 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
               className="h-full w-full rounded-2xl object-cover object-center"
             />
           ) : (
-            <Image className="h-48 w-48 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+            <Image
+              className="h-48 w-48 text-muted-foreground"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
           )}
         </div>
         <div className="flex w-full flex-col items-center justify-center space-y-2 text-3xl text-foreground">

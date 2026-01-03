@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { cn } from "~/lib/utils";
 
 export type CommonDialogProps = {
   open: boolean;
@@ -75,7 +76,11 @@ export const CommonDialog: FC<CommonDialogProps> = ({
           <DialogClose asChild>
             <Button
               type="button"
-              className="absolute top-4 right-4 rounded-full text-muted-foreground transition hover:text-foreground"
+              className={cn(
+                "absolute top-4 right-4 rounded-full bg-transparent text-muted-foreground",
+                "hover:bg-transparent hover:text-foreground focus:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+              )}
               aria-label={closeButtonAriaLabel}
               disabled={closeDisabled}
             >

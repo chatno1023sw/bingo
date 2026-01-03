@@ -93,7 +93,7 @@ const SortableItem: FC<{
       </Button>
       <Button
         type="button"
-        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background font-semibold text-lg text-foreground"
+        className="mt-4 flex h-32 w-full items-center justify-center rounded border-2 border-border bg-background font-semibold text-foreground text-lg"
         onClick={handleImageClick}
         disabled={disabled}
       >

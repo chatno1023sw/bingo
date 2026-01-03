@@ -52,7 +52,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       <Button
         type="button"
         className={cn(
-          "rounded-full px-4 py-1 font-semibold text-xs transition",
+          "rounded-full px-4 py-1 font-semibold text-xs",
           prize.selected
             ? "border border-border text-muted-foreground"
             : "bg-primary text-primary-foreground",

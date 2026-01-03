@@ -207,7 +207,7 @@ export default function GameRoute() {
         <p className="text-destructive text-sm">データの読み込みに失敗しました。</p>
         <Button
           type="button"
-          className="rounded border border-border px-4 py-2 text-muted-foreground text-sm transition hover:bg-muted"
+          className="rounded border border-border px-4 py-2 text-muted-foreground text-sm hover:bg-muted"
           onClick={() => navigate("/start")}
         >
           Start 画面に戻る
@@ -224,13 +224,13 @@ export default function GameRoute() {
             <Button
               type="button"
               className={cn(
-                "rounded-full border border-border px-3 py-1 text-muted-foreground text-sm transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50",
-                "relative top-4",
+                "rounded-full border border-border px-3 py-1 text-muted-foreground text-sm hover:bg-muted",
+                "relative top-2",
               )}
               onClick={() => setResetOpen(true)}
               disabled={isLoading || isResetting}
             >
-              抽選クリア
+              クリア
             </Button>
             <div className="flex items-center gap-2">
               <BgmToggle
@@ -240,7 +240,7 @@ export default function GameRoute() {
               />
               <Button
                 type="button"
-                className="rounded-full border border-border p-1 text-muted-foreground text-xl transition hover:bg-muted"
+                className="rounded-full border border-border p-1 text-muted-foreground text-xl hover:bg-muted"
                 aria-label="Start 画面に戻る"
                 onClick={handleBackToStart}
               >
@@ -254,7 +254,7 @@ export default function GameRoute() {
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
                 type="button"
-                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground text-xl shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary/90"
                 onClick={handleDraw}
                 disabled={isButtonDisabled}
               >
