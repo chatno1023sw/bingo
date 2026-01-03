@@ -4,10 +4,9 @@ import {
   RouterProvider,
   createHashRouter,
   type ClientOnErrorFunction,
-  type FutureConfig,
   type HydrationState,
-  type Router,
   type RouterInit,
+  type RouterState,
   type ServerBuild,
   type unstable_ClientInstrumentation,
   UNSAFE_FrameworkContext as FrameworkContext,
@@ -27,7 +26,7 @@ import {
 
 type ReactRouterContext = {
   basename: string;
-  future: FutureConfig;
+  future: ServerBuild["future"];
   routeDiscovery: ServerBuild["routeDiscovery"];
   ssr: boolean;
   isSpaMode: boolean;
@@ -35,11 +34,13 @@ type ReactRouterContext = {
   state?: HydrationState;
 };
 
+type DataRouter = ReturnType<typeof createHashRouter>;
+
 type ReactRouterWindow = Window & {
   __reactRouterContext?: ReactRouterContext;
   __reactRouterManifest?: AssetsManifest;
   __reactRouterRouteModules?: RouteModules;
-  __reactRouterDataRouter?: Router;
+  __reactRouterDataRouter?: DataRouter;
 };
 
 type StateDecodingPromise = Promise<void> & {
@@ -52,7 +53,7 @@ type SsrInfo = {
   manifest: AssetsManifest;
   routeModules: RouteModules;
   stateDecodingPromise?: StateDecodingPromise;
-  router?: Router;
+  router?: DataRouter;
   routerInitialized: boolean;
 };
 
@@ -67,7 +68,7 @@ type HashHydratedRouterProps = HashHydratedRouterOptions & {
 };
 
 let ssrInfo: SsrInfo | null = null;
-let router: Router | null = null;
+let router: DataRouter | null = null;
 
 function initSsrInfo() {
   const globalWindow = window as ReactRouterWindow;
@@ -101,7 +102,7 @@ function initSsrInfo() {
 function createHydratedHashRouter({
   getContext,
   unstable_instrumentations,
-}: HashHydratedRouterOptions): Router {
+}: HashHydratedRouterOptions): DataRouter {
   initSsrInfo();
   invariant(
     ssrInfo,
@@ -114,11 +115,15 @@ function createHydratedHashRouter({
     ssrInfo.context.stream = undefined;
     ssrInfo.stateDecodingPromise = decodeViaTurboStream(stream, window)
       .then((value) => {
-        ssrInfo.context.state = value.value;
-        localSsrInfo.stateDecodingPromise?.value = true;
+        localSsrInfo.context.state = value.value as HydrationState;
+        if (localSsrInfo.stateDecodingPromise) {
+          localSsrInfo.stateDecodingPromise.value = true;
+        }
       })
       .catch((error: unknown) => {
-        localSsrInfo.stateDecodingPromise?.error = error;
+        if (localSsrInfo.stateDecodingPromise) {
+          localSsrInfo.stateDecodingPromise.error = error;
+        }
       }) as StateDecodingPromise;
   }
   if (ssrInfo.stateDecodingPromise.error) {
@@ -188,7 +193,7 @@ function createHydratedHashRouter({
   });
   ssrInfo.router = hashRouter;
   ssrInfo.routerInitialized = true;
-  const hmrRouter = hashRouter as Router & {
+  const hmrRouter = hashRouter as DataRouter & {
     createRoutesForHMR?: typeof createClientRoutesWithHMRRevalidationOptOut;
   };
   hmrRouter.createRoutesForHMR = createClientRoutesWithHMRRevalidationOptOut;
@@ -205,14 +210,14 @@ function HashHydratedRouter(props: HashHydratedRouterProps) {
   }
   const [location, setLocation] = useState(router.state.location);
   useLayoutEffect(() => {
-    if (ssrInfo && ssrInfo.router && !ssrInfo.routerInitialized) {
+    if (ssrInfo?.router && !ssrInfo.routerInitialized) {
       ssrInfo.routerInitialized = true;
       ssrInfo.router.initialize();
     }
   }, []);
   useLayoutEffect(() => {
-    if (ssrInfo && ssrInfo.router) {
-      return ssrInfo.router.subscribe((newState) => {
+    if (ssrInfo?.router) {
+      return ssrInfo.router.subscribe((newState: RouterState) => {
         if (newState.location !== location) {
           setLocation(newState.location);
         }
@@ -229,28 +234,25 @@ function HashHydratedRouter(props: HashHydratedRouterProps) {
     ssrInfo.context.isSpaMode,
   );
   return (
-    <>
-      <FrameworkContext.Provider
-        value={{
-          manifest: ssrInfo.manifest,
-          routeModules: ssrInfo.routeModules,
-          future: ssrInfo.context.future,
-          criticalCss: undefined,
-          ssr: ssrInfo.context.ssr,
-          isSpaMode: ssrInfo.context.isSpaMode,
-          routeDiscovery: ssrInfo.context.routeDiscovery,
-        }}
-      >
-        <RemixErrorBoundary location={location}>
-          <RouterProvider
-            router={router}
-            unstable_useTransitions={props.unstable_useTransitions}
-            onError={props.onError}
-          />
-        </RemixErrorBoundary>
-      </FrameworkContext.Provider>
-      <></>
-    </>
+    <FrameworkContext.Provider
+      value={{
+        manifest: ssrInfo.manifest,
+        routeModules: ssrInfo.routeModules,
+        future: ssrInfo.context.future,
+        criticalCss: undefined,
+        ssr: ssrInfo.context.ssr,
+        isSpaMode: ssrInfo.context.isSpaMode,
+        routeDiscovery: ssrInfo.context.routeDiscovery,
+      }}
+    >
+      <RemixErrorBoundary location={location}>
+        <RouterProvider
+          router={router}
+          unstable_useTransitions={props.unstable_useTransitions}
+          onError={props.onError}
+        />
+      </RemixErrorBoundary>
+    </FrameworkContext.Provider>
   );
 }
 
