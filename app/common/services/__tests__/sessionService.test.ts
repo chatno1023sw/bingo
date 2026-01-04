@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { BgmPreference, GameState, PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
-import { hasStoredPrizeSelection, startSession, resumeSession } from "~/common/services/sessionService";
+import {
+  hasStoredPrizeSelection,
+  startSession,
+  resumeSession,
+} from "~/common/services/sessionService";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();

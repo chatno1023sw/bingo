@@ -7,36 +7,46 @@ import SettingRoute from "~/routes/setting";
 import StartRoute from "~/routes/start";
 import App from "~/root";
 
-const router = createHashRouter([
-  {
-    path: "/",
-    element: <App />,
-    children: [
-      {
-        index: true,
-        element: <StartRoute />,
-      },
-      {
-        path: "start",
-        element: <StartRoute />,
-      },
-      {
-        path: "game",
-        element: <GameRoute />,
-      },
-      {
-        path: "setting",
-        element: <SettingRoute />,
-      },
-    ],
-  },
-]);
+const hydrateSpa = () => {
+  const router = createHashRouter([
+    {
+      path: "/",
+      element: <App />,
+      children: [
+        {
+          index: true,
+          element: <StartRoute />,
+        },
+        {
+          path: "start",
+          element: <StartRoute />,
+        },
+        {
+          path: "game",
+          element: <GameRoute />,
+        },
+        {
+          path: "setting",
+          element: <SettingRoute />,
+        },
+      ],
+    },
+  ]);
 
-startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>,
-  );
-});
+  startTransition(() => {
+    hydrateRoot(
+      document,
+      <StrictMode>
+        <RouterProvider router={router} />
+      </StrictMode>,
+    );
+  });
+};
+
+if (import.meta.env.DEV) {
+  void import("~/entry.client.ssr.tsx").then(({ hydrateHashRouter }) => {
+    hydrateHashRouter();
+  });
+} else {
+  hydrateSpa();
+}

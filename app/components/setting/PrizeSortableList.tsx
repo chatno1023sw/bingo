@@ -91,7 +91,7 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-center pt-16">
           <ul
             className="mx-auto flex w-325 flex-wrap justify-start gap-4"
             data-testid="setting-prize-list"
