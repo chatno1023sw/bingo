@@ -53,7 +53,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <div className="flex w-14 items-center justify-center overflow-hidden rounded-lg bg-muted [aspect-ratio:4/3]">
+      <div className="flex aspect-4/3 w-14 items-center justify-center overflow-hidden rounded-lg bg-muted">
         {hasImage ? (
           <img
             src={resolvedImagePath ?? ""}

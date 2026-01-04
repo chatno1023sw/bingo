@@ -4,14 +4,17 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // GithubPageでホスティングする場合に必要なbasePathを設定
-const basePath = process.env.BASE_PATH ?? "/";
+// ローカル開発ではbaseを常に"/"に固定する
+export default defineConfig(({ command }) => {
+  const basePath = command === "serve" ? "/" : (process.env.BASE_PATH ?? "/");
 
-export default defineConfig({
-  base: basePath,
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-  server: {
-    host: true,
-    port: 5173,
-    strictPort: true,
-  },
+  return {
+    base: basePath,
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    server: {
+      host: true,
+      port: 5173,
+      strictPort: true,
+    },
+  };
 });
