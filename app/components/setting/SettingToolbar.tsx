@@ -42,61 +42,63 @@ export const SettingToolbar: FC<SettingToolbarProps> = ({
   onBack,
 }) => {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <header className="fixed top-0 left-0 z-100 w-full bg-background py-2 shadow">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            className="rounded bg-primary px-3 py-1.5 text-primary-foreground text-xs shadow-none hover:bg-primary/90 disabled:opacity-50"
+            onClick={onAddCard}
+            disabled={isMutating}
+          >
+            追加
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
+            onClick={onCsvImportClick}
+            disabled={isMutating}
+          >
+            CSV追加
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
+            onClick={onImageUploadClick}
+            disabled={isMutating || !hasPrizes}
+          >
+            画像追加
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
+            onClick={onResetSelections}
+            disabled={isMutating || !hasPrizes}
+          >
+            全未選出
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            className="rounded border border-destructive px-3 py-1.5 text-destructive text-xs shadow-none hover:bg-destructive/10 disabled:opacity-50"
+            onClick={onDeleteAll}
+            disabled={isMutating || !hasPrizes}
+          >
+            全削除
+          </Button>
+        </div>
         <Button
           type="button"
-          className="rounded bg-primary px-3 py-1.5 text-primary-foreground text-xs shadow-none hover:bg-primary/90 disabled:opacity-50"
-          onClick={onAddCard}
-          disabled={isMutating}
+          className="rounded bg-secondary px-3 py-1.5 text-secondary-foreground text-xs shadow-none hover:bg-secondary/80"
+          onClick={onBack}
+          disabled={isSaving || isMutating}
         >
-          追加
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
-          onClick={onCsvImportClick}
-          disabled={isMutating}
-        >
-          CSV追加
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
-          onClick={onImageUploadClick}
-          disabled={isMutating || !hasPrizes}
-        >
-          画像追加
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="rounded border border-border px-3 py-1.5 text-muted-foreground text-xs shadow-none hover:bg-muted disabled:opacity-50"
-          onClick={onResetSelections}
-          disabled={isMutating || !hasPrizes}
-        >
-          全未選出
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          className="rounded border border-destructive px-3 py-1.5 text-destructive text-xs shadow-none hover:bg-destructive/10 disabled:opacity-50"
-          onClick={onDeleteAll}
-          disabled={isMutating || !hasPrizes}
-        >
-          カード全削除
+          戻る
         </Button>
       </div>
-      <Button
-        type="button"
-        className="rounded bg-secondary px-3 py-1.5 text-secondary-foreground text-xs shadow-none hover:bg-secondary/80"
-        onClick={onBack}
-        disabled={isSaving || isMutating}
-      >
-        戻る
-      </Button>
     </header>
   );
 };
