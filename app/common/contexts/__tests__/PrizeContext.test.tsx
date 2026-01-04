@@ -34,6 +34,9 @@ const basePrizes: PrizeList = [
   },
 ];
 
+/**
+ * PrizeContext の動作確認用コンシューマです。
+ */
 const Consumer = () => {
   const { prizes, isLoading, togglePrize } = usePrizeManager();
   return (

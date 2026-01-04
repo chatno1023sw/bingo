@@ -14,6 +14,14 @@ export const storageKeys = {
   bgm: "bingo.v1.bgm",
 } as const satisfies Record<string, GameStorageKeys>;
 
+/**
+ * localStorage を取得します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: なし。
+ * - 戻り値: Storage が無い場合は null を返します。
+ * - Chrome DevTools MCP では localStorage の取得を確認します。
+ */
 const getStorage = (): Storage | null => {
   if (typeof globalThis === "undefined") {
     return null;
@@ -24,6 +32,14 @@ const getStorage = (): Storage | null => {
 
 /**
  * JSON を読み出し、存在しない・壊れている場合は fallback を返す。
+ */
+/**
+ * localStorage から JSON を読み取ります。
+ *
+ * - 副作用: localStorage を読み取ります。
+ * - 入力制約: `key` は GameStorageKeys を渡してください。
+ * - 戻り値: パース結果、失敗時は fallback を返します。
+ * - Chrome DevTools MCP では保存値の読み込みを確認します。
  */
 export const readStorageJson = <T>(key: GameStorageKeys, fallback: T): T => {
   const storage = getStorage();
@@ -47,6 +63,14 @@ export const readStorageJson = <T>(key: GameStorageKeys, fallback: T): T => {
 /**
  * JSON を保存する。localStorage が無い環境では何も行わない。
  */
+/**
+ * localStorage に JSON を保存します。
+ *
+ * - 副作用: localStorage に書き込みます。
+ * - 入力制約: `key` は GameStorageKeys を渡してください。
+ * - 戻り値: なし。
+ * - Chrome DevTools MCP では保存値を確認します。
+ */
 export const writeStorageJson = <T>(key: GameStorageKeys, value: T): void => {
   const storage = getStorage();
   if (!storage) {
@@ -58,6 +82,14 @@ export const writeStorageJson = <T>(key: GameStorageKeys, value: T): void => {
 /**
  * 指定キーを削除する。
  */
+/**
+ * localStorage のキーを削除します。
+ *
+ * - 副作用: localStorage から削除します。
+ * - 入力制約: `key` は GameStorageKeys を渡してください。
+ * - 戻り値: なし。
+ * - Chrome DevTools MCP では削除結果を確認します。
+ */
 export const removeStorageKey = (key: GameStorageKeys): void => {
   const storage = getStorage();
   if (!storage) {
@@ -68,6 +100,14 @@ export const removeStorageKey = (key: GameStorageKeys): void => {
 
 /**
  * `bingo.v1.` で始まるキーを全削除する。
+ */
+/**
+ * プレフィックス一致のキーを削除します。
+ *
+ * - 副作用: localStorage を走査して削除します。
+ * - 入力制約: なし。
+ * - 戻り値: なし。
+ * - Chrome DevTools MCP では削除対象が消えることを確認します。
  */
 export const clearVersionedStorage = (): void => {
   const storage = getStorage();

@@ -8,6 +8,9 @@ import {
   getAvailableNumbers,
 } from "../bingoEngine";
 
+/**
+ * テスト用の抽選履歴を生成します。
+ */
 const createHistory = (numbers: number[]): DrawHistoryEntry[] =>
   numbers.map((number, index) => ({
     number,
@@ -15,6 +18,9 @@ const createHistory = (numbers: number[]): DrawHistoryEntry[] =>
     drawnAt: new Date(2025, 0, 1, 0, 0, index).toISOString(),
   }));
 
+/**
+ * テスト用の GameState を生成します。
+ */
 const createState = (history: DrawHistoryEntry[] = []): GameState => ({
   currentNumber: history.length ? history[history.length - 1].number : null,
   drawHistory: history,
@@ -23,6 +29,9 @@ const createState = (history: DrawHistoryEntry[] = []): GameState => ({
   updatedAt: "2025-01-01T00:00:00.000Z",
 });
 
+/**
+ * 最新の履歴エントリを取得します。
+ */
 const latestEntry = (history: DrawHistoryEntry[]): DrawHistoryEntry => {
   const entry = history.at(-1);
   if (!entry) {

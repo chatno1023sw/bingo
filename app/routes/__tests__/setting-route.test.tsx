@@ -18,6 +18,9 @@ vi.mock("~/common/services/prizeService", () => ({
   togglePrize: vi.fn(),
 }));
 
+/**
+ * テスト用の景品一覧を生成します。
+ */
 const createPrizes = () => [
   {
     id: "p-1",

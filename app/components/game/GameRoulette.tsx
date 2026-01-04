@@ -1,12 +1,20 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
+/**
+ * react-custom-roulette の Wheel コンポーネント型。
+ */
 type WheelComponentType = typeof import("react-custom-roulette")["Wheel"];
 
 export type GameRouletteProps = {
+  /** ルーレットに表示する番号一覧 */
   numbers: number[];
+  /** 現在の当選番号 */
   currentNumber: number | null;
+  /** 回転状態 */
   spinning: boolean;
+  /** ラッパーの追加クラス */
   className?: string;
+  /** 代替表示の要素 */
   placeholder?: ReactNode;
 };
 
@@ -14,6 +22,11 @@ export type GameRouletteProps = {
  * Game 画面中央のルーレット演出。
  * react-custom-roulette は `mustStartSpinning` が true → false に遷移するときのみ回転するため、
  * 親コンポーネントからの `spinning` を監視して内部状態を更新する。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `numbers` は数値配列を渡してください。
+ * - 戻り値: ルーレット UI を返します。
+ * - Chrome DevTools MCP では回転演出の開始を確認します。
  */
 export const GameRoulette = ({
   numbers,

@@ -1,7 +1,9 @@
 import type { Prize, PrizeList } from "~/common/types";
 
 export type CsvParseResult = {
+  /** 正常に取り込めた景品一覧 */
   prizes: PrizeList;
+  /** スキップした行の情報 */
   skipped: Array<{ id: string; reason: string }>;
 };
 
@@ -15,6 +17,14 @@ export const PRIZE_CSV_HEADER = [
   "memo",
 ] as const;
 
+/**
+ * CSV 1 行を分割します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `line` は CSV の 1 行を渡してください。
+ * - 戻り値: 各カラムの配列を返します。
+ * - Chrome DevTools MCP では CSV の分割結果を確認します。
+ */
 const parseCsvLine = (line: string): string[] => {
   const result: string[] = [];
   let current = "";
@@ -40,18 +50,50 @@ const parseCsvLine = (line: string): string[] => {
   return result;
 };
 
+/**
+ * ヘッダー行を正規化します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `line` はヘッダー行を渡してください。
+ * - 戻り値: 正規化済みヘッダー配列を返します。
+ * - Chrome DevTools MCP ではヘッダー一致を確認します。
+ */
 const normalizeHeader = (line: string): string[] => parseCsvLine(line).map((value) => value.trim());
 
+/**
+ * CSV の真偽値を判定します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `value` は文字列を渡してください。
+ * - 戻り値: 真偽値を返します。
+ * - Chrome DevTools MCP では true/false の解釈を確認します。
+ */
 const parseBoolean = (value: string): boolean => {
   const normalized = value.trim().toLowerCase();
   return normalized === "true" || normalized === "1" || normalized === "yes";
 };
 
+/**
+ * 空文字列を null に変換します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `value` は文字列を渡してください。
+ * - 戻り値: 空なら null、それ以外は文字列を返します。
+ * - Chrome DevTools MCP では空値の扱いを確認します。
+ */
 const toNullable = (value: string): string | null => {
   const trimmed = value.trim();
   return trimmed.length === 0 ? null : trimmed;
 };
 
+/**
+ * CSV ヘッダーの妥当性を検証します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `values` はヘッダー配列を渡してください。
+ * - 戻り値: 妥当であれば true を返します。
+ * - Chrome DevTools MCP ではヘッダー不一致時の挙動を確認します。
+ */
 const validateHeader = (values: string[]): boolean => {
   if (values.length !== PRIZE_CSV_HEADER.length) {
     return false;
@@ -59,6 +101,14 @@ const validateHeader = (values: string[]): boolean => {
   return values.every((value, index) => value === PRIZE_CSV_HEADER[index]);
 };
 
+/**
+ * 景品 CSV を解析します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `input` は CSV 全文を渡してください。
+ * - 戻り値: 解析結果を返します。
+ * - Chrome DevTools MCP では CSV 取り込み結果を確認します。
+ */
 export const parsePrizesCsv = (input: string): CsvParseResult => {
   const lines = input
     .split(/\r?\n/)
@@ -125,6 +175,14 @@ export const parsePrizesCsv = (input: string): CsvParseResult => {
   return { prizes: normalized, skipped };
 };
 
+/**
+ * CSV フィールドをエスケープします。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `value` は文字列または null を渡してください。
+ * - 戻り値: エスケープ済み文字列を返します。
+ * - Chrome DevTools MCP ではクォート処理を確認します。
+ */
 const escapeCsvField = (value: string | null | undefined): string => {
   if (value == null) {
     return "";
@@ -134,6 +192,14 @@ const escapeCsvField = (value: string | null | undefined): string => {
   return needsQuote ? `"${normalized}"` : normalized;
 };
 
+/**
+ * 景品一覧から CSV を生成します。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `prizes` は PrizeList を渡してください。
+ * - 戻り値: CSV 文字列を返します。
+ * - Chrome DevTools MCP ではエクスポート結果を確認します。
+ */
 export const generatePrizesCsv = (prizes: PrizeList): string => {
   const header = PRIZE_CSV_HEADER.join(",");
   const rows = prizes

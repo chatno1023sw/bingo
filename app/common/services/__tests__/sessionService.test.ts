@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { BgmPreference, GameState, PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
-import { startSession, resumeSession } from "~/common/services/sessionService";
+import {
+  hasStoredPrizeSelection,
+  startSession,
+  resumeSession,
+} from "~/common/services/sessionService";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -33,6 +37,9 @@ class MemoryStorage implements Storage {
 
 const baseDate = new Date("2025-01-01T00:00:00.000Z");
 
+/**
+ * テスト用の景品一覧を生成します。
+ */
 const createStoredPrizes = (): PrizeList => [
   {
     id: "p-1",
@@ -54,6 +61,9 @@ const createStoredPrizes = (): PrizeList => [
   },
 ];
 
+/**
+ * テスト用にセッション情報を保存します。
+ */
 const storeEnvelope = (payload: {
   gameState: GameState;
   prizes: PrizeList;
@@ -64,6 +74,9 @@ const storeEnvelope = (payload: {
   localStorage.setItem(storageKeys.bgm, JSON.stringify(payload.bgm));
 };
 
+/**
+ * localStorage の JSON を読み取ります。
+ */
 const parseStoredJson = <T>(key: string): T => {
   const raw = localStorage.getItem(key);
   if (raw === null) {
@@ -165,5 +178,21 @@ describe("sessionService", () => {
     const result = await resumeSession();
 
     expect(result).toEqual(storedPayload);
+  });
+
+  it("hasStoredPrizeSelection returns true when any prize is selected", () => {
+    localStorage.setItem(storageKeys.prizes, JSON.stringify(createStoredPrizes()));
+
+    expect(hasStoredPrizeSelection()).toBe(true);
+  });
+
+  it("hasStoredPrizeSelection returns false when no selection exists", () => {
+    const storedPrizes = createStoredPrizes().map((prize) => ({
+      ...prize,
+      selected: false,
+    }));
+    localStorage.setItem(storageKeys.prizes, JSON.stringify(storedPrizes));
+
+    expect(hasStoredPrizeSelection()).toBe(false);
   });
 });

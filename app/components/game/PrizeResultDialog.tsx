@@ -5,8 +5,11 @@ import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
 
 export type PrizeResultDialogProps = {
+  /** ダイアログの表示状態 */
   open: boolean;
+  /** 当選した景品 */
   prize: Prize | null;
+  /** 閉じる操作 */
   onClose: () => void;
 };
 

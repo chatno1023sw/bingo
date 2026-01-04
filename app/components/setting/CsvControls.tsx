@@ -3,17 +3,34 @@ import type { CsvImportResult } from "~/common/types";
 import { Button } from "~/components/common/Button";
 
 export type CsvControlsProps = {
+  /** 操作無効フラグ */
   disabled?: boolean;
+  /** ファイル取り込み処理 */
   onFileImport: (file: File) => Promise<void>;
+  /** 手入力 CSV */
   manualCsv: string;
+  /** 手入力 CSV の更新 */
   onManualCsvChange: (value: string) => void;
+  /** 手入力 CSV の取り込み */
   onManualImport: () => Promise<void>;
+  /** CSV エクスポートの実行 */
   onExport: () => void;
+  /** 取り込み結果のサマリー */
   summary: CsvImportResult | null;
+  /** エラーメッセージ */
   error: string | null;
+  /** エクスポートプレビュー文字列 */
   exportText: string | null;
 };
 
+/**
+ * CSV 操作欄のコンポーネントです。
+ *
+ * - 副作用: ファイル選択時に `onFileImport` を呼び出します。
+ * - 入力制約: `onFileImport` は Promise を返す関数を渡してください。
+ * - 戻り値: CSV 操作 UI を返します。
+ * - Chrome DevTools MCP では CSV 取り込み操作を確認します。
+ */
 export const CsvControls: FC<CsvControlsProps> = ({
   disabled = false,
   onFileImport,
@@ -25,6 +42,14 @@ export const CsvControls: FC<CsvControlsProps> = ({
   error,
   exportText,
 }) => {
+  /**
+   * CSV ファイル選択時の処理です。
+   *
+   * - 副作用: `onFileImport` を呼び出します。
+   * - 入力制約: ファイルが選択されている必要があります。
+   * - 戻り値: Promise を返します。
+   * - Chrome DevTools MCP では選択後の反映を確認します。
+   */
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {

@@ -3,11 +3,17 @@ import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
 
 export type StartOverDialogProps = {
+  /** ダイアログの表示状態 */
   open: boolean;
+  /** ダイアログのタイトル */
   title?: string;
+  /** ダイアログの説明文 */
   description?: ReactNode;
+  /** ダイアログを閉じるときに呼び出されるコールバック関数 */
   onClose: () => void;
+  /** 確認ボタンが押されたときに呼び出されるコールバック関数 */
   onConfirm: () => void;
+  /** ボタンの無効化状態 */
   disabled?: boolean;
 };
 

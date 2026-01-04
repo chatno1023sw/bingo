@@ -39,6 +39,9 @@ vi.mock("~/common/utils/bingoEngine", () => ({
   NoAvailableNumbersError: class NoAvailableNumbersError extends Error {},
 }));
 
+/**
+ * テスト用のセッションデータを生成します。
+ */
 const createEnvelope = () => ({
   gameState: {
     currentNumber: 10,
@@ -71,6 +74,9 @@ const createEnvelope = () => ({
   },
 });
 
+/**
+ * テスト用の履歴表示データを生成します。
+ */
 const createHistoryView = () => [
   {
     number: 1,

@@ -1,8 +1,11 @@
 import type { FC } from "react";
 import { Button } from "~/components/common/Button";
 export type BgmToggleProps = {
+  /** BGM の有効状態 */
   enabled: boolean;
+  /** トグル操作 */
   onToggle: () => void;
+  /** 操作無効フラグ */
   disabled?: boolean;
 };
 

@@ -2,10 +2,15 @@ import type { FC } from "react";
 import { Button } from "~/components/common/Button";
 
 export type StartMenuProps = {
+  /** 最初から開始する操作 */
   onStart: () => void;
+  /** 続きから開始する操作 */
   onResumeRequest: () => void;
+  /** 設定画面へ遷移する操作 */
   onNavigateSetting: () => void;
+  /** 送信中フラグ */
   isSubmitting?: boolean;
+  /** 続きからを表示できるかどうか */
   canResume?: boolean;
 };
 
@@ -14,6 +19,10 @@ export type StartMenuProps = {
  *
  * - ボタンは縦並びにし、モックと同じ視線移動で操作できるようにします。
  * - 余白・角丸は design/image.png を参考に最小構成へ揃えています。
+ * - 副作用: ありません。
+ * - 入力制約: `onStart` などのハンドラを渡してください。
+ * - 戻り値: メニュー UI を返します。
+ * - Chrome DevTools MCP ではボタン操作を確認します。
  */
 export const StartMenu: FC<StartMenuProps> = ({
   onStart,
