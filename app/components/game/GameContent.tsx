@@ -74,7 +74,7 @@ export const GameContent: FC = () => {
                 "relative top-2",
               )}
               onClick={openResetDialog}
-              disabled={isLoading || isResetting}
+              disabled={isLoading || isResetting || session.historyView.length === 0}
             >
               クリア
             </Button>
