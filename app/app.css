@@ -32,6 +32,17 @@ body {
   @apply bg-background text-foreground;
 }
 
+#app-scroll-root {
+  min-width: 1440px;
+  min-height: 824px;
+}
+
+@media (max-width: 1439px) {
+  body {
+    overflow-x: auto;
+  }
+}
+
 * {
   font-family: "BIZ UDPゴシック", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
 }
