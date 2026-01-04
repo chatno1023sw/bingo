@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { BgmPreference, GameState, PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
-import { startSession, resumeSession } from "~/common/services/sessionService";
+import { hasStoredPrizeSelection, startSession, resumeSession } from "~/common/services/sessionService";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -174,5 +174,21 @@ describe("sessionService", () => {
     const result = await resumeSession();
 
     expect(result).toEqual(storedPayload);
+  });
+
+  it("hasStoredPrizeSelection returns true when any prize is selected", () => {
+    localStorage.setItem(storageKeys.prizes, JSON.stringify(createStoredPrizes()));
+
+    expect(hasStoredPrizeSelection()).toBe(true);
+  });
+
+  it("hasStoredPrizeSelection returns false when no selection exists", () => {
+    const storedPrizes = createStoredPrizes().map((prize) => ({
+      ...prize,
+      selected: false,
+    }));
+    localStorage.setItem(storageKeys.prizes, JSON.stringify(storedPrizes));
+
+    expect(hasStoredPrizeSelection()).toBe(false);
   });
 });

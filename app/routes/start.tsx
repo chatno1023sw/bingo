@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
+  hasStoredPrizeSelection,
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
@@ -59,7 +60,7 @@ export default function StartRoute() {
     if (isSubmitting) {
       return;
     }
-    if (hasStoredDrawHistory()) {
+    if (hasStoredGameState() || hasStoredDrawHistory() || hasStoredPrizeSelection()) {
       setStartOverDialogOpen(true);
       return;
     }

@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import StartRoute from "~/routes/start";
-import { resumeSession, startSession } from "~/common/services/sessionService";
+import {
+  hasStoredDrawHistory,
+  hasStoredGameState,
+  hasStoredPrizeSelection,
+  resumeSession,
+  startSession,
+} from "~/common/services/sessionService";
 
 const navigateMock = vi.fn();
 
@@ -16,6 +22,9 @@ vi.mock("react-router", async () => {
 vi.mock("~/common/services/sessionService", () => ({
   startSession: vi.fn(),
   resumeSession: vi.fn(),
+  hasStoredDrawHistory: vi.fn(),
+  hasStoredGameState: vi.fn(),
+  hasStoredPrizeSelection: vi.fn(),
 }));
 
 vi.mock("~/common/hooks/useBgmPreference", () => ({
@@ -49,6 +58,9 @@ const createEnvelope = () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   navigateMock.mockClear();
+  vi.mocked(hasStoredDrawHistory).mockReturnValue(false);
+  vi.mocked(hasStoredGameState).mockReturnValue(false);
+  vi.mocked(hasStoredPrizeSelection).mockReturnValue(false);
 });
 
 describe("start route client flow", () => {

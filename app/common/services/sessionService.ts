@@ -154,6 +154,19 @@ export const hasStoredDrawHistory = (): boolean => {
 };
 
 /**
+ * 保存済みの景品選出が存在するかを判定します。
+ *
+ * - 入力制約: 引数は受け取りません。
+ * - 副作用: localStorage から 景品一覧 を読み取ります。
+ * - 戻り値: selected が true の景品があれば true、それ以外は false です。
+ * - Chrome DevTools MCP では Start 画面で景品選出がある場合に確認ダイアログが開くことを確認します。
+ */
+export const hasStoredPrizeSelection = (): boolean => {
+  const storedPrizes = readStoredPrizes();
+  return storedPrizes.some((prize) => prize.selected);
+};
+
+/**
  * 保存済みのゲーム状態が存在するかを判定します。
  *
  * - 入力制約: 引数は受け取りません。
