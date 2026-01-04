@@ -2,10 +2,11 @@ import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { createHashRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
+import App from "~/root";
 import GameRoute from "~/routes/game";
 import SettingRoute from "~/routes/setting";
 import StartRoute from "~/routes/start";
-import App from "~/root";
+import { hydrateHashRouter } from "./entry.client.ssr";
 
 const hydrateSpa = () => {
   const router = createHashRouter([
@@ -44,9 +45,7 @@ const hydrateSpa = () => {
 };
 
 if (import.meta.env.DEV) {
-  void import("~/entry.client.ssr.tsx").then(({ hydrateHashRouter }) => {
-    hydrateHashRouter();
-  });
+  hydrateHashRouter();
 } else {
   hydrateSpa();
 }

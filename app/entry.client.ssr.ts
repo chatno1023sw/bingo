@@ -1,4 +1,4 @@
-import { StrictMode, startTransition, useLayoutEffect, useState } from "react";
+import { StrictMode, createElement, startTransition, useLayoutEffect, useState } from "react";
 import { hydrateRoot } from "react-dom/client";
 import {
   type UNSAFE_AssetsManifest as AssetsManifest,
@@ -319,9 +319,10 @@ function HashHydratedRouter(props: HashHydratedRouterProps) {
     ssrInfo.context.routeDiscovery,
     ssrInfo.context.isSpaMode,
   );
-  return (
-    <FrameworkContext.Provider
-      value={{
+  return createElement(
+    FrameworkContext.Provider,
+    {
+      value: {
         manifest: ssrInfo.manifest,
         routeModules: ssrInfo.routeModules,
         future: ssrInfo.context.future,
@@ -329,16 +330,17 @@ function HashHydratedRouter(props: HashHydratedRouterProps) {
         ssr: ssrInfo.context.ssr,
         isSpaMode: ssrInfo.context.isSpaMode,
         routeDiscovery: ssrInfo.context.routeDiscovery,
-      }}
-    >
-      <RemixErrorBoundary location={location}>
-        <RouterProvider
-          router={router}
-          unstable_useTransitions={props.unstable_useTransitions}
-          onError={props.onError}
-        />
-      </RemixErrorBoundary>
-    </FrameworkContext.Provider>
+      },
+    },
+    createElement(
+      RemixErrorBoundary,
+      { location },
+      createElement(RouterProvider, {
+        router,
+        unstable_useTransitions: props.unstable_useTransitions,
+        onError: props.onError,
+      }),
+    ),
   );
 }
 
@@ -352,11 +354,6 @@ function HashHydratedRouter(props: HashHydratedRouterProps) {
  */
 export const hydrateHashRouter = (): void => {
   startTransition(() => {
-    hydrateRoot(
-      document,
-      <StrictMode>
-        <HashHydratedRouter />
-      </StrictMode>,
-    );
+    hydrateRoot(document, createElement(StrictMode, null, createElement(HashHydratedRouter, null)));
   });
 };

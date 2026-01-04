@@ -1,5 +1,6 @@
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -10,6 +11,11 @@ export default defineConfig(({ command }) => {
 
   return {
     base: basePath,
+    resolve: {
+      alias: {
+        "entry-client-ssr": path.resolve(__dirname, "app/entry.client.ssr.ts"),
+      },
+    },
     plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
     server: {
       host: true,
