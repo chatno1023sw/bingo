@@ -38,7 +38,7 @@ export const StartMenu: FC<StartMenuProps> = ({
       <div className="flex w-48 flex-col gap-4">
         <Button
           type="button"
-          className="rounded-full bg-primary px-6 py-2 text-base text-primary-foreground shadow-sm hover:bg-primary/90"
+          className="rounded-full bg-primary px-6 py-2 text-base text-primary-foreground shadow-sm hover:bg-primary"
           onClick={onStart}
           disabled={isSubmitting}
         >
@@ -47,7 +47,7 @@ export const StartMenu: FC<StartMenuProps> = ({
         {canResume ? (
           <Button
             type="button"
-            className="rounded-full bg-primary px-6 py-2 text-base text-primary-foreground shadow-sm hover:bg-primary/90"
+            className="rounded-full bg-primary px-6 py-2 text-base text-primary-foreground shadow-sm hover:bg-primary"
             onClick={onResumeRequest}
             disabled={isSubmitting}
           >

@@ -47,7 +47,7 @@ export const SettingToolbar: FC<SettingToolbarProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
-            className="rounded bg-primary px-3 py-1.5 text-primary-foreground text-xs shadow-none hover:bg-primary/90 disabled:opacity-50"
+            className="rounded bg-primary px-3 py-1.5 text-primary-foreground text-xs shadow-none hover:bg-primary disabled:opacity-50"
             onClick={onAddCard}
             disabled={isMutating}
           >

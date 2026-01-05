@@ -17,7 +17,7 @@ export type CurrentNumberProps = {
  * - Chrome DevTools MCP では表示の切り替えを確認します。
  */
 export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
-  const display = value == null ? "--" : value.toString().padStart(2, "0");
+  const display = value == null ? "--" : value.toString();
 
   return (
     <div className="flex flex-col items-center gap-6 text-foreground">

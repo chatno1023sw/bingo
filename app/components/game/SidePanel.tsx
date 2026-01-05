@@ -147,9 +147,9 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
         </Button>
       </header>
-      <div className="no-scrollbar mt-4 flex-1 overflow-y-auto pr-1">
+      <div className="no-scrollbar mt-4 flex h-full w-full flex-1 items-center justify-center overflow-y-auto pr-1">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm">景品情報を読み込み中です...</p>
+          <p className="text-muted-foreground text-sm">景品情報を読み込み中...</p>
         ) : (
           <PrizeList
             prizes={prizes}
@@ -162,7 +162,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm hover:bg-primary/90 disabled:opacity-40"
+        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm hover:bg-primary disabled:opacity-40"
         onClick={handleRouletteStart}
         disabled={isLoading || prizes.length === 0}
       >
