@@ -1,4 +1,4 @@
-import type { GameState, DrawHistoryEntry } from "~/common/types";
+import type { DrawHistoryEntry, GameState } from "~/common/types";
 
 export const BINGO_MIN = 1;
 export const BINGO_MAX = 75;
