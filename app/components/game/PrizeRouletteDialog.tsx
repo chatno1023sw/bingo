@@ -1,4 +1,5 @@
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
 import { cn } from "~/lib/utils";
@@ -29,26 +30,55 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
-  const [isFlashing, setIsFlashing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectableRef = useRef<{ prize: Prize; index: number }[]>([]);
+  const prizesRef = useRef<Prize[]>([]);
+  const onCompleteRef = useRef<(prize: Prize) => void>(() => undefined);
+  const completeRoulette = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    const selectable = selectableRef.current;
+    if (selectable.length === 0) {
+      return;
+    }
+    const winnerIndex = selectable[Math.floor(Math.random() * selectable.length)].index;
+    setActiveIndex(winnerIndex);
+    setWinnerIndex(winnerIndex);
+    onCompleteRef.current(prizesRef.current[winnerIndex]);
+  }, []);
+
+  const { playDrumroll, stopDrumroll } = useBgmPlayers({
+    onDrumrollEnd: completeRoulette,
+  });
+
+  useEffect(() => {
+    prizesRef.current = prizes;
+  }, [prizes]);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (!open || prizes.length === 0) {
+      stopDrumroll();
       return;
     }
     const entries = prizes.slice(0, 25);
     const selectable = entries
       .map((prize, index) => ({ prize, index }))
       .filter(({ prize }) => !prize.selected);
+    selectableRef.current = selectable;
     if (selectable.length === 0) {
+      stopDrumroll();
       return;
     }
 
     setActiveIndex(selectable[0].index);
     setWinnerIndex(null);
-    setIsFlashing(false);
+    playDrumroll();
 
     intervalRef.current = setInterval(() => {
       setActiveIndex((prev) => {
@@ -66,36 +96,14 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       });
     }, 120);
 
-    timeoutRef.current = setTimeout(() => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      const winnerIndex = selectable[Math.floor(Math.random() * selectable.length)].index;
-      setActiveIndex(winnerIndex);
-      setWinnerIndex(winnerIndex);
-      setIsFlashing(true);
-      flashTimeoutRef.current = setTimeout(() => {
-        setIsFlashing(false);
-        onComplete(prizes[winnerIndex]);
-      }, 800);
-    }, 5000);
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      if (flashTimeoutRef.current) {
-        clearTimeout(flashTimeoutRef.current);
-        flashTimeoutRef.current = null;
-      }
+      stopDrumroll();
     };
-  }, [open, prizes, onComplete]);
+  }, [open, playDrumroll, prizes, stopDrumroll]);
 
   const entries = prizes.slice(0, 25);
   return (
@@ -109,7 +117,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       <div className="mt-6 grid grid-cols-5 gap-1.25">
         {entries.map((prize, index) => {
           const isActive = index === activeIndex;
-          const isWinner = isFlashing && index === winnerIndex;
+          const isWinner = index === winnerIndex;
           const isDisabled = prize.selected;
           return (
             <div key={prize.id} className="aspect-square">
