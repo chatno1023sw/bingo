@@ -1,11 +1,10 @@
 import { Loader2, X } from "lucide-react";
-import { type FC, useState } from "react";
+import type { FC } from "react";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
-import { BgmSidebar } from "~/components/common/BgmSidebar";
-import { BgmToggle } from "~/components/common/BgmToggle";
+import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
@@ -42,7 +41,6 @@ export const GameContent: FC = () => {
     handleReset,
     handleBackToStart,
   } = useGameSession();
-  const [bgmOpen, setBgmOpen] = useState(false);
   const { preference, isReady, setVolume } = useBgmPreference();
 
   const { playDrumroll } = useBgmPlayers({
@@ -100,14 +98,7 @@ export const GameContent: FC = () => {
               クリア
             </Button>
             <div className="relative flex items-center gap-3">
-              <div className="flex items-center">
-                <BgmToggle
-                  enabled={preference.volume > 0}
-                  onToggle={() => setBgmOpen((prev) => !prev)}
-                  disabled={!isReady}
-                />
-                <BgmSidebar open={bgmOpen} preference={preference} onVolumeChange={setVolume} />
-              </div>
+              <BgmControl preference={preference} isReady={isReady} onVolumeChange={setVolume} />
               <Button
                 type="button"
                 variant="secondary"
