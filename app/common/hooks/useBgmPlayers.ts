@@ -1,0 +1,98 @@
+import { Howl } from "howler";
+import { useCallback, useEffect, useRef } from "react";
+
+export type UseBgmPlayersOptions = {
+  /** ドラムロール終了時の処理 */
+  onDrumrollEnd?: () => void;
+};
+
+export type UseBgmPlayersResult = {
+  /** ドラムロールを再生 */
+  playDrumroll: () => void;
+  /** ドラムロールを停止 */
+  stopDrumroll: () => void;
+  /** シンバルを再生 */
+  playCymbal: () => void;
+};
+
+/**
+ * ドラムロール/シンバルの効果音を共通管理するフック。
+ *
+ * - 副作用: Howler インスタンスの生成と破棄を行います。
+ * - 入力制約: `onDrumrollEnd` は例外を投げない関数を渡してください。
+ * - 戻り値: ドラムロール/シンバルの再生操作を返します。
+ * - Chrome DevTools MCP では抽選開始時にドラムロール、終了時にシンバルが鳴ることを確認します。
+ */
+export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayersResult => {
+  const drumrollRef = useRef<Howl | null>(null);
+  const cymbalRef = useRef<Howl | null>(null);
+  const onDrumrollEndRef = useRef<(() => void) | null>(null);
+  const handleDrumrollEndRef = useRef<() => void>(() => undefined);
+
+  useEffect(() => {
+    onDrumrollEndRef.current = options.onDrumrollEnd ?? null;
+  }, [options.onDrumrollEnd]);
+
+  const playCymbal = useCallback(() => {
+    const cymbal = cymbalRef.current;
+    if (!cymbal) {
+      return;
+    }
+    cymbal.stop();
+    cymbal.seek(0);
+    cymbal.play();
+  }, []);
+
+  useEffect(() => {
+    handleDrumrollEndRef.current = () => {
+      onDrumrollEndRef.current?.();
+      playCymbal();
+    };
+  }, [playCymbal]);
+
+  useEffect(() => {
+    const drumroll = new Howl({
+      src: ["/drumroll.mp3"],
+      preload: true,
+      onend: () => handleDrumrollEndRef.current(),
+      onloaderror: () => handleDrumrollEndRef.current(),
+      onplayerror: () => handleDrumrollEndRef.current(),
+    });
+    const cymbal = new Howl({
+      src: ["/cymbal.mp3"],
+      preload: true,
+    });
+    drumrollRef.current = drumroll;
+    cymbalRef.current = cymbal;
+    return () => {
+      drumroll.unload();
+      cymbal.unload();
+      drumrollRef.current = null;
+      cymbalRef.current = null;
+    };
+  }, []);
+
+  const playDrumroll = useCallback(() => {
+    const drumroll = drumrollRef.current;
+    if (!drumroll) {
+      return;
+    }
+    drumroll.stop();
+    drumroll.seek(0);
+    drumroll.play();
+  }, []);
+
+  const stopDrumroll = useCallback(() => {
+    const drumroll = drumrollRef.current;
+    if (!drumroll) {
+      return;
+    }
+    drumroll.stop();
+  }, []);
+
+  return {
+    playDrumroll,
+    stopDrumroll,
+    playCymbal,
+  };
+};
