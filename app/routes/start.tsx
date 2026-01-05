@@ -31,8 +31,7 @@ export default function StartRoute() {
   const navigate = useNavigate();
   const { preference, isReady, setVolume } = useBgmPreference({
     storageKey: storageKeys.bgmStart,
-    resetOnLoad: true,
-    defaultVolume: 0,
+    defaultVolume: 0.2,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
