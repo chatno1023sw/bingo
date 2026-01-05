@@ -31,11 +31,11 @@ export const PrizeList: FC<PrizeListProps> = ({
   onToggleDisplay,
 }) => {
   if (prizes.length === 0) {
-    return <p className="text-muted-foreground text-sm">景品が登録されていません。</p>;
+    return <p className="text-muted-foreground text-sm">まだ景品が登録されてないよ</p>;
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="h-full w-full space-y-3">
       {prizes.map((prize) => (
         <PrizeListItem
           key={prize.id}

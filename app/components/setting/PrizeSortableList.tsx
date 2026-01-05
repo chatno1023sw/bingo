@@ -82,8 +82,10 @@ export const PrizeSortableList: FC<PrizeSortableListProps> = ({
 
   if (prizes.length === 0) {
     return (
-      <div className="rounded-3xl bg-card p-6 text-muted-foreground text-sm">
-        景品が登録されていません。
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <span className="rounded-3xl bg-card p-6 text-3xl text-muted-foreground">
+          景品が登録されてないよ
+        </span>
       </div>
     );
   }
