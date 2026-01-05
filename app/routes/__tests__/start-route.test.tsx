@@ -37,6 +37,15 @@ vi.mock("~/common/hooks/useBgmPreference", () => ({
   }),
 }));
 
+vi.mock("howler", () => ({
+  Howl: vi.fn().mockImplementation(() => ({
+    play: vi.fn(() => 1),
+    stop: vi.fn(),
+    volume: vi.fn(),
+    unload: vi.fn(),
+  })),
+}));
+
 /**
  * テスト用のセッションデータを生成します。
  */

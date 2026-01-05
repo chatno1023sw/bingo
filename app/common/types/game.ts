@@ -46,4 +46,8 @@ export type GameStateEnvelope = {
 /**
  * localStorage へ保存するキーを表す。
  */
-export type GameStorageKeys = "bingo.v1.gameState" | "bingo.v1.prizes" | "bingo.v1.bgm";
+export type GameStorageKeys =
+  | "bingo.v1.gameState"
+  | "bingo.v1.prizes"
+  | "bingo.v1.bgm"
+  | "bingo.v1.bgm.start";

@@ -2,7 +2,7 @@ declare module "howler" {
   /**
    * 再生終了時に呼び出されるコールバックです。
    */
-  export type HowlCallback = () => void;
+  export type HowlCallback = (...args: unknown[]) => void;
 
   /**
    * Howl の初期化オプションです。
@@ -12,6 +12,8 @@ declare module "howler" {
     src: string[];
     /** 事前読み込みフラグ */
     preload?: boolean;
+    /** ループ再生フラグ */
+    loop?: boolean;
     /** 再生終了時の処理 */
     onend?: HowlCallback;
     /** 読み込み失敗時の処理 */

@@ -1,7 +1,7 @@
-import { useState, type FC } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 import type { BgmPreference } from "~/common/types";
-import { BgmSidebar } from "~/components/common/BgmSidebar";
 import { BgmToggle } from "~/components/common/BgmToggle";
+import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
 
 export type BgmControlProps = {
@@ -30,14 +30,53 @@ export const BgmControl: FC<BgmControlProps> = ({
   className,
 }) => {
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      if (rootRef.current?.contains(target)) {
+        return;
+      }
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [open]);
+
   return (
-    <div className={cn("relative flex items-center", className)}>
+    <div ref={rootRef} className={cn("relative flex items-center", className)}>
       <BgmToggle
         enabled={preference.volume > 0}
         onToggle={() => setOpen((prev) => !prev)}
         disabled={!isReady}
       />
-      <BgmSidebar open={open} preference={preference} onVolumeChange={onVolumeChange} />
+      <div
+        className={cn(
+          "overflow-hidden transition-[width,opacity,margin] duration-200 ease-out",
+          open ? "ml-2 w-44 opacity-100" : "ml-0 w-0 opacity-0",
+        )}
+        aria-hidden={!open}
+      >
+        <Slider
+          value={[Math.round(preference.volume * 100)]}
+          min={0}
+          max={100}
+          step={1}
+          onValueChange={(value) => {
+            const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+            onVolumeChange(next);
+          }}
+        />
+      </div>
     </div>
   );
 };

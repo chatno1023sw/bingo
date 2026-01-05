@@ -5,6 +5,8 @@ import {
   getBgmPreference,
   saveBgmPreference,
 } from "~/common/services/bgmService";
+import { storageKeys } from "~/common/utils/storage";
+import type { GameStorageKeys } from "~/common/types";
 
 /**
  * エラーをメッセージ化します。
@@ -34,6 +36,15 @@ export type UseBgmPreferenceResult = {
   error: string | null;
 };
 
+export type UseBgmPreferenceOptions = {
+  /** 使用する保存キー */
+  storageKey?: GameStorageKeys;
+  /** 読み込み時に音量を 0 にリセットするか */
+  resetOnLoad?: boolean;
+  /** 初期音量 */
+  defaultVolume?: number;
+};
+
 /**
  * Start 画面などで BGM 設定を制御するカスタムフック。
  *
@@ -41,16 +52,30 @@ export type UseBgmPreferenceResult = {
  * - 初回マウント時に `getBgmPreference` で状態を復元し、オフラインでも動作します。
  * - Chrome DevTools MCP では `localStorage.getItem("bingo.v1.bgm")` を確認してトグル状態を検証します。
  */
-export const useBgmPreference = (): UseBgmPreferenceResult => {
+export const useBgmPreference = (options: UseBgmPreferenceOptions = {}): UseBgmPreferenceResult => {
   const [preference, setPreference] = useState<BgmPreference>(() => createDefaultBgmPreference());
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const storageKey = options.storageKey ?? storageKeys.bgm;
+  const defaultVolume = options.defaultVolume;
 
   useEffect(() => {
     let mounted = true;
-    getBgmPreference()
+    getBgmPreference(storageKey, defaultVolume)
       .then((pref) => {
         if (!mounted) {
+          return;
+        }
+        if (options.resetOnLoad && pref.volume !== 0) {
+          const resetPreference: BgmPreference = {
+            ...pref,
+            enabled: false,
+            volume: 0,
+            updatedAt: new Date().toISOString(),
+          };
+          setPreference(resetPreference);
+          void saveBgmPreference(resetPreference, storageKey);
+          setIsReady(true);
           return;
         }
         setPreference(pref);
@@ -60,7 +85,7 @@ export const useBgmPreference = (): UseBgmPreferenceResult => {
         if (!mounted) {
           return;
         }
-        setPreference(createDefaultBgmPreference());
+        setPreference(createDefaultBgmPreference(new Date().toISOString(), defaultVolume));
         setIsReady(true);
         setError(toErrorMessage(err));
       });
@@ -68,7 +93,7 @@ export const useBgmPreference = (): UseBgmPreferenceResult => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [defaultVolume, options.resetOnLoad, storageKey]);
 
   const toggle = useCallback(async () => {
     const next: BgmPreference = {
@@ -78,13 +103,13 @@ export const useBgmPreference = (): UseBgmPreferenceResult => {
     };
     setPreference(next);
     try {
-      await saveBgmPreference(next);
+      await saveBgmPreference(next, storageKey);
       setError(null);
     } catch (err) {
       setPreference(preference);
       setError(toErrorMessage(err));
     }
-  }, [preference]);
+  }, [preference, storageKey]);
 
   const setVolume = useCallback(
     async (volume: number) => {
@@ -97,14 +122,14 @@ export const useBgmPreference = (): UseBgmPreferenceResult => {
       };
       setPreference(next);
       try {
-        await saveBgmPreference(next);
+        await saveBgmPreference(next, storageKey);
         setError(null);
       } catch (err) {
         setPreference(preference);
         setError(toErrorMessage(err));
       }
     },
-    [preference],
+    [preference, storageKey],
   );
 
   return { preference, isReady, toggle, setVolume, error };

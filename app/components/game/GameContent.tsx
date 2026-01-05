@@ -41,7 +41,9 @@ export const GameContent: FC = () => {
     handleReset,
     handleBackToStart,
   } = useGameSession();
-  const { preference, isReady, setVolume } = useBgmPreference();
+  const { preference, isReady, setVolume } = useBgmPreference({
+    defaultVolume: 0.2,
+  });
 
   const { playDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
