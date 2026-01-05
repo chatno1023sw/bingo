@@ -28,6 +28,7 @@ vi.mock("~/common/hooks/useBgmPreference", () => ({
     preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
     isReady: true,
     toggle: vi.fn(),
+    setVolume: vi.fn(),
     error: null,
   }),
 }));
@@ -56,6 +57,7 @@ vi.mock("howler", () => ({
     }
     return {
       play: vi.fn(() => 1),
+      volume: vi.fn(),
       stop: vi.fn(),
       seek: vi.fn(),
       unload: vi.fn(),

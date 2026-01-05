@@ -32,6 +32,7 @@ vi.mock("~/common/hooks/useBgmPreference", () => ({
     preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
     isReady: true,
     toggle: vi.fn(),
+    setVolume: vi.fn(),
     error: null,
   }),
 }));

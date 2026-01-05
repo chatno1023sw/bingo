@@ -28,6 +28,8 @@ export type UseBgmPreferenceResult = {
   isReady: boolean;
   /** トグル実行関数 */
   toggle: () => Promise<void>;
+  /** 音量更新関数 */
+  setVolume: (volume: number) => Promise<void>;
   /** エラーメッセージ */
   error: string | null;
 };
@@ -84,5 +86,26 @@ export const useBgmPreference = (): UseBgmPreferenceResult => {
     }
   }, [preference]);
 
-  return { preference, isReady, toggle, error };
+  const setVolume = useCallback(
+    async (volume: number) => {
+      const enabled = volume > 0;
+      const next: BgmPreference = {
+        ...preference,
+        enabled,
+        volume,
+        updatedAt: new Date().toISOString(),
+      };
+      setPreference(next);
+      try {
+        await saveBgmPreference(next);
+        setError(null);
+      } catch (err) {
+        setPreference(preference);
+        setError(toErrorMessage(err));
+      }
+    },
+    [preference],
+  );
+
+  return { preference, isReady, toggle, setVolume, error };
 };

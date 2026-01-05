@@ -1,4 +1,5 @@
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
@@ -34,6 +35,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const selectableRef = useRef<{ prize: Prize; index: number }[]>([]);
   const prizesRef = useRef<Prize[]>([]);
   const onCompleteRef = useRef<(prize: Prize) => void>(() => undefined);
+  const { preference } = useBgmPreference();
   const completeRoulette = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -51,6 +53,8 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 
   const { playDrumroll, stopDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeRoulette,
+    enabled: preference.volume > 0,
+    volume: preference.volume,
   });
 
   useEffect(() => {

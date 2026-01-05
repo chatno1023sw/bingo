@@ -28,6 +28,7 @@ declare module "howler" {
     play(): number;
     stop(): void;
     seek(seek?: number): number;
+    volume(value: number): number;
     unload(): void;
   }
 }

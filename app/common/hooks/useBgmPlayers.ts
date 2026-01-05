@@ -4,6 +4,10 @@ import { useCallback, useEffect, useRef } from "react";
 export type UseBgmPlayersOptions = {
   /** ドラムロール終了時の処理 */
   onDrumrollEnd?: () => void;
+  /** BGM の有効状態 */
+  enabled?: boolean;
+  /** BGM の音量 */
+  volume?: number;
 };
 
 export type UseBgmPlayersResult = {
@@ -28,14 +32,39 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   const cymbalRef = useRef<Howl | null>(null);
   const onDrumrollEndRef = useRef<(() => void) | null>(null);
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
+  const enabledRef = useRef(true);
+  const volumeRef = useRef(1);
 
   useEffect(() => {
     onDrumrollEndRef.current = options.onDrumrollEnd ?? null;
   }, [options.onDrumrollEnd]);
 
+  const applyVolume = useCallback(() => {
+    const volume = enabledRef.current ? volumeRef.current : 0;
+    if (drumrollRef.current) {
+      drumrollRef.current.volume(volume);
+    }
+    if (cymbalRef.current) {
+      cymbalRef.current.volume(volume);
+    }
+  }, []);
+
+  useEffect(() => {
+    enabledRef.current = options.enabled ?? true;
+    applyVolume();
+  }, [applyVolume, options.enabled]);
+
+  useEffect(() => {
+    volumeRef.current = options.volume ?? 1;
+    applyVolume();
+  }, [applyVolume, options.volume]);
+
   const playCymbal = useCallback(() => {
     const cymbal = cymbalRef.current;
     if (!cymbal) {
+      return;
+    }
+    if (!enabledRef.current || volumeRef.current <= 0) {
       return;
     }
     cymbal.stop();
@@ -64,17 +93,21 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     });
     drumrollRef.current = drumroll;
     cymbalRef.current = cymbal;
+    applyVolume();
     return () => {
       drumroll.unload();
       cymbal.unload();
       drumrollRef.current = null;
       cymbalRef.current = null;
     };
-  }, []);
+  }, [applyVolume]);
 
   const playDrumroll = useCallback(() => {
     const drumroll = drumrollRef.current;
     if (!drumroll) {
+      return;
+    }
+    if (!enabledRef.current || volumeRef.current <= 0) {
       return;
     }
     drumroll.stop();

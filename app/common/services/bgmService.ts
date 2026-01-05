@@ -1,7 +1,7 @@
 import type { BgmPreference } from "~/common/types";
 import { readStorageJson, storageKeys, writeStorageJson } from "~/common/utils/storage";
 
-const DEFAULT_BGM_VOLUME = 0.6;
+const DEFAULT_BGM_VOLUME = 0.2;
 
 /**
  * BGM 設定のデフォルト値を生成します。
