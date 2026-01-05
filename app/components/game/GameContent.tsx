@@ -1,5 +1,6 @@
+import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import type { FC } from "react";
+import { useEffect, useRef, type FC } from "react";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useGameSession } from "~/common/hooks/useGameSession";
 import { Button } from "~/components/common/Button";
@@ -18,6 +19,9 @@ import { cn } from "~/lib/utils";
  * - Chrome DevTools MCP では抽選操作が動作することを確認します。
  */
 export const GameContent: FC = () => {
+  const drumrollHowlRef = useRef<Howl | null>(null);
+  const cymbalHowlRef = useRef<Howl | null>(null);
+  const completeAnimationRef = useRef<() => void>(() => undefined);
   const {
     session,
     isLoading,
@@ -33,10 +37,61 @@ export const GameContent: FC = () => {
     drawButtonLabel,
     openResetDialog,
     closeResetDialog,
-    handleDraw,
+    startDrawAnimation,
+    completeDrawAnimation,
     handleReset,
     handleBackToStart,
   } = useGameSession();
+
+  useEffect(() => {
+    completeAnimationRef.current = completeDrawAnimation;
+  }, [completeDrawAnimation]);
+
+  const handleDrawComplete = () => {
+    completeAnimationRef.current();
+    const cymbal = cymbalHowlRef.current;
+    if (cymbal) {
+      cymbal.stop();
+      cymbal.seek(0);
+      cymbal.play();
+    }
+  };
+
+  useEffect(() => {
+    const drumroll = new Howl({
+      src: ["/drumroll.mp3"],
+      preload: true,
+      onend: handleDrawComplete,
+      onstop: handleDrawComplete,
+      onloaderror: handleDrawComplete,
+      onplayerror: handleDrawComplete,
+    });
+    const cymbal = new Howl({
+      src: ["/cymbal.mp3"],
+      preload: true,
+    });
+    drumrollHowlRef.current = drumroll;
+    cymbalHowlRef.current = cymbal;
+    return () => {
+      drumroll.unload();
+      cymbal.unload();
+      drumrollHowlRef.current = null;
+      cymbalHowlRef.current = null;
+    };
+  }, []);
+
+  const handleDrawWithBgm = () => {
+    if (isButtonDisabled) {
+      return;
+    }
+    startDrawAnimation();
+    if (drumrollHowlRef.current) {
+      drumrollHowlRef.current.seek(0);
+      drumrollHowlRef.current.play();
+      return;
+    }
+    handleDrawComplete();
+  };
 
   if (isLoading) {
     return (
@@ -103,7 +158,7 @@ export const GameContent: FC = () => {
               <Button
                 type="button"
                 className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
-                onClick={handleDraw}
+                onClick={handleDrawWithBgm}
                 disabled={isButtonDisabled}
               >
                 {(isAnimating || isMutating) && <Loader2 className={"animate-spin"} />}

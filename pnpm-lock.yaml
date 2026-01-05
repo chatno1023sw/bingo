@@ -35,12 +35,18 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
+      howler:
+        specifier: ^2.2.4
+        version: 2.2.4
       isbot:
         specifier: ^5.1.32
         version: 5.1.32
       lucide-react:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.3)
+      node-domexception:
+        specifier: 1.0.0
+        version: 1.0.0
       papaparse:
         specifier: ^5.5.3
         version: 5.5.3
@@ -1881,6 +1887,9 @@ packages:
   hono@4.11.3:
     resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
+
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
 
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
@@ -4873,6 +4882,8 @@ snapshots:
       react-is: 16.13.1
 
   hono@4.11.3: {}
+
+  howler@2.2.4: {}
 
   html-encoding-sniffer@6.0.0:
     dependencies:
