@@ -50,4 +50,5 @@ export type GameStorageKeys =
   | "bingo.v1.gameState"
   | "bingo.v1.prizes"
   | "bingo.v1.bgm"
-  | "bingo.v1.bgm.start";
+  | "bingo.v1.bgm.start"
+  | "bingo.v1.se";

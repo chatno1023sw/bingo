@@ -1,4 +1,5 @@
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
+import { SoundProvider } from "~/common/contexts/SoundContext";
 import { SettingContent } from "~/components/setting/SettingContent";
 
 /**
@@ -13,9 +14,11 @@ export default function SettingRoute() {
   return (
     <main className="min-h-screen bg-background p-2 text-foreground">
       <div className="w-full bg-background p-3">
-        <PrizeProvider>
-          <SettingContent />
-        </PrizeProvider>
+        <SoundProvider enabled={false}>
+          <PrizeProvider>
+            <SettingContent />
+          </PrizeProvider>
+        </SoundProvider>
       </div>
     </main>
   );

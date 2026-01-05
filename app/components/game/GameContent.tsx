@@ -11,6 +11,7 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
+import { storageKeys } from "~/common/utils/storage";
 
 /**
  * Game 画面のメインコンテンツです。
@@ -42,6 +43,10 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
+    defaultVolume: 0.1,
+  });
+  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
+    storageKey: storageKeys.se,
     defaultVolume: 0.2,
   });
 
@@ -100,7 +105,13 @@ export const GameContent: FC = () => {
               クリア
             </Button>
             <div className="relative flex items-center gap-3">
-              <BgmControl preference={preference} isReady={isReady} onVolumeChange={setVolume} />
+              <BgmControl
+                preference={preference}
+                soundPreference={soundPreference}
+                isReady={isReady}
+                onVolumeChange={setVolume}
+                onSoundVolumeChange={setSoundVolume}
+              />
               <Button
                 type="button"
                 variant="secondary"

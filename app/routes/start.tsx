@@ -34,6 +34,10 @@ export default function StartRoute() {
     resetOnLoad: true,
     defaultVolume: 0,
   });
+  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
+    storageKey: storageKeys.se,
+    defaultVolume: 0.2,
+  });
 
   /**
    * セッション開始処理を実行します。
@@ -179,7 +183,13 @@ export default function StartRoute() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
-        <BgmControl preference={preference} isReady={isReady} onVolumeChange={setVolume} />
+        <BgmControl
+          preference={preference}
+          soundPreference={soundPreference}
+          isReady={isReady}
+          onVolumeChange={setVolume}
+          onSoundVolumeChange={setSoundVolume}
+        />
       </div>
       <div className="flex min-h-90 items-center justify-center">
         <StartMenu

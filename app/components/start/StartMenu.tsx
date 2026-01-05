@@ -63,8 +63,8 @@ export const StartMenu: FC<StartMenuProps> = ({
           設定
         </Button>
       </div>
-      <div className="absolute right-6 bottom-6 text-muted-foreground text-sm">
-        <span>Start画面BGM:魔王魂</span>
+      <div className="absolute right-6 bottom-6 text-muted-foreground text-xl">
+        <span>SE ・ BGM: 魔王魂</span>
       </div>
     </section>
   );

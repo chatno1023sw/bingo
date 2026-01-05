@@ -7,10 +7,14 @@ import { cn } from "~/lib/utils";
 export type BgmControlProps = {
   /** BGM 設定 */
   preference: BgmPreference;
+  /** ボタン効果音の設定 */
+  soundPreference: BgmPreference;
   /** 初期化完了フラグ */
   isReady: boolean;
   /** 音量変更 */
   onVolumeChange: (volume: number) => void;
+  /** 効果音の音量変更 */
+  onSoundVolumeChange: (volume: number) => void;
   /** 追加クラス */
   className?: string;
 };
@@ -25,8 +29,10 @@ export type BgmControlProps = {
  */
 export const BgmControl: FC<BgmControlProps> = ({
   preference,
+  soundPreference,
   isReady,
   onVolumeChange,
+  onSoundVolumeChange,
   className,
 }) => {
   const [open, setOpen] = useState(false);
@@ -62,20 +68,40 @@ export const BgmControl: FC<BgmControlProps> = ({
       <div
         className={cn(
           "overflow-hidden transition-[width,opacity,margin] duration-200 ease-out",
-          open ? "ml-2 w-44 opacity-100" : "ml-0 w-0 opacity-0",
+          open ? "ml-2 w-52 opacity-100" : "ml-0 w-0 opacity-0",
         )}
         aria-hidden={!open}
       >
-        <Slider
-          value={[Math.round(preference.volume * 100)]}
-          min={0}
-          max={100}
-          step={1}
-          onValueChange={(value) => {
-            const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-            onVolumeChange(next);
-          }}
-        />
+        <div className="flex flex-col gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-8 text-right">BGM</span>
+            <Slider
+              value={[Math.round(preference.volume * 100)]}
+              min={0}
+              max={100}
+              step={1}
+              disabled={!isReady}
+              onValueChange={(value) => {
+                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+                onVolumeChange(next);
+              }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-8 text-right">SE</span>
+            <Slider
+              value={[Math.round(soundPreference.volume * 100)]}
+              min={0}
+              max={100}
+              step={1}
+              disabled={!isReady}
+              onValueChange={(value) => {
+                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+                onSoundVolumeChange(next);
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
