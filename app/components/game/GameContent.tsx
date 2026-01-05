@@ -1,6 +1,6 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, type FC } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
@@ -12,7 +12,6 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
-import { storageKeys } from "~/common/utils/storage";
 
 /**
  * Game 画面のメインコンテンツです。
@@ -44,11 +43,7 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.05,
-  });
-  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
-    storageKey: storageKeys.se,
-    defaultVolume: 0.2,
+    defaultVolume: 0.4,
   });
 
   const { playDrumroll } = useBgmPlayers({
@@ -92,7 +87,7 @@ export const GameContent: FC = () => {
 
   useEffect(() => {
     const bgm = new Howl({
-      src: ["/maou_game_battle01.mp3"],
+      src: ["/game-bgm.mp3"],
       loop: true,
       preload: true,
       onplayerror: () => {
@@ -114,7 +109,7 @@ export const GameContent: FC = () => {
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume);
+    bgm.volume(preference.volume * 0.2);
     if (preference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
@@ -178,10 +173,9 @@ export const GameContent: FC = () => {
             <div className="relative flex items-center gap-3">
               <BgmControl
                 preference={preference}
-                soundPreference={soundPreference}
                 isReady={isReady}
                 onVolumeChange={setVolume}
-                onSoundVolumeChange={setSoundVolume}
+                showSoundSlider={false}
               />
               <Button
                 type="button"

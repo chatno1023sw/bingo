@@ -1,6 +1,7 @@
 import { Howl } from "howler";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
@@ -8,7 +9,6 @@ import {
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { storageKeys } from "~/common/utils/storage";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
@@ -145,7 +145,8 @@ export default function StartRoute() {
 
   useEffect(() => {
     const bgm = new Howl({
-      src: ["/maou_bgm_orchestra05.mp3"],
+      // maou_bgm_orchestra05.mp3
+      src: ["/start-bgm.mp3"],
       loop: true,
       preload: true,
       onplayerror: () => {

@@ -7,14 +7,16 @@ import { cn } from "~/lib/utils";
 export type BgmControlProps = {
   /** BGM 設定 */
   preference: BgmPreference;
-  /** ボタン効果音の設定 */
-  soundPreference: BgmPreference;
   /** 初期化完了フラグ */
   isReady: boolean;
   /** 音量変更 */
   onVolumeChange: (volume: number) => void;
+  /** 効果音の設定 */
+  soundPreference?: BgmPreference;
   /** 効果音の音量変更 */
-  onSoundVolumeChange: (volume: number) => void;
+  onSoundVolumeChange?: (volume: number) => void;
+  /** 効果音スライダーの表示 */
+  showSoundSlider?: boolean;
   /** 追加クラス */
   className?: string;
 };
@@ -29,10 +31,11 @@ export type BgmControlProps = {
  */
 export const BgmControl: FC<BgmControlProps> = ({
   preference,
-  soundPreference,
   isReady,
   onVolumeChange,
+  soundPreference,
   onSoundVolumeChange,
+  showSoundSlider = true,
   className,
 }) => {
   const [open, setOpen] = useState(false);
@@ -87,20 +90,22 @@ export const BgmControl: FC<BgmControlProps> = ({
               }}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-8 text-right">SE</span>
-            <Slider
-              value={[Math.round(soundPreference.volume * 100)]}
-              min={0}
-              max={100}
-              step={1}
-              disabled={!isReady}
-              onValueChange={(value) => {
-                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-                onSoundVolumeChange(next);
-              }}
-            />
-          </div>
+          {showSoundSlider && soundPreference && onSoundVolumeChange ? (
+            <div className="flex items-center gap-2">
+              <span className="w-8 text-right">SE</span>
+              <Slider
+                value={[Math.round(soundPreference.volume * 100)]}
+                min={0}
+                max={100}
+                step={1}
+                disabled={!isReady}
+                onValueChange={(value) => {
+                  const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+                  onSoundVolumeChange(next);
+                }}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
