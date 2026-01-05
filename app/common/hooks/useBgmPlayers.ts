@@ -34,6 +34,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
   const enabledRef = useRef(true);
   const volumeRef = useRef(1);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     onDrumrollEndRef.current = options.onDrumrollEnd ?? null;
@@ -74,6 +75,10 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
 
   useEffect(() => {
     handleDrumrollEndRef.current = () => {
+      if (!hasStartedRef.current) {
+        return;
+      }
+      hasStartedRef.current = false;
       onDrumrollEndRef.current?.();
       playCymbal();
     };
@@ -110,6 +115,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     if (!enabledRef.current || volumeRef.current <= 0) {
       return;
     }
+    hasStartedRef.current = true;
     drumroll.stop();
     drumroll.seek(0);
     drumroll.play();
@@ -120,6 +126,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     if (!drumroll) {
       return;
     }
+    hasStartedRef.current = false;
     drumroll.stop();
   }, []);
 

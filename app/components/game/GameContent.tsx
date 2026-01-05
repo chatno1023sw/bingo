@@ -1,5 +1,6 @@
+import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import type { FC } from "react";
+import { useCallback, useEffect, useRef, type FC } from "react";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
@@ -43,7 +44,7 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.1,
+    defaultVolume: 0.05,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
@@ -55,6 +56,76 @@ export const GameContent: FC = () => {
     enabled: preference.volume > 0,
     volume: preference.volume,
   });
+
+  const bgmRef = useRef<Howl | null>(null);
+  const bgmPlayingRef = useRef(false);
+  const bgmPendingRef = useRef(false);
+  const bgmUnlockAttachedRef = useRef(false);
+
+  const requestBgmPlay = useCallback(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.play();
+    bgmPlayingRef.current = true;
+  }, []);
+
+  const handleUserUnlock = useCallback(() => {
+    if (!bgmPendingRef.current) {
+      return;
+    }
+    bgmPendingRef.current = false;
+    bgmUnlockAttachedRef.current = false;
+    requestBgmPlay();
+  }, [requestBgmPlay]);
+
+  const attachUnlockListeners = useCallback(() => {
+    if (bgmUnlockAttachedRef.current) {
+      return;
+    }
+    bgmUnlockAttachedRef.current = true;
+    const handler = () => handleUserUnlock();
+    document.addEventListener("pointerdown", handler, { once: true });
+    document.addEventListener("keydown", handler, { once: true });
+  }, [handleUserUnlock]);
+
+  useEffect(() => {
+    const bgm = new Howl({
+      src: ["/maou_game_battle01.mp3"],
+      loop: true,
+      preload: true,
+      onplayerror: () => {
+        bgmPendingRef.current = true;
+        bgmPlayingRef.current = false;
+        attachUnlockListeners();
+      },
+    });
+    bgmRef.current = bgm;
+    return () => {
+      bgm.stop();
+      bgm.unload();
+      bgmRef.current = null;
+    };
+  }, [attachUnlockListeners]);
+
+  useEffect(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.volume(preference.volume);
+    if (preference.volume > 0) {
+      if (!bgmPlayingRef.current) {
+        requestBgmPlay();
+      }
+      return;
+    }
+    if (bgmPlayingRef.current) {
+      bgm.stop();
+      bgmPlayingRef.current = false;
+    }
+  }, [preference.volume, requestBgmPlay]);
 
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
