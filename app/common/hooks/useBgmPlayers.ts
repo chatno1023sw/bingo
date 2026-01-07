@@ -86,14 +86,14 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
 
   useEffect(() => {
     const drumroll = new Howl({
-      src: ["/drumroll.mp3"],
+      src: [`${import.meta.env.BASE_URL}drumroll.mp3`],
       preload: true,
       onend: () => handleDrumrollEndRef.current(),
       onloaderror: () => handleDrumrollEndRef.current(),
       onplayerror: () => handleDrumrollEndRef.current(),
     });
     const cymbal = new Howl({
-      src: ["/cymbal.mp3"],
+      src: [`${import.meta.env.BASE_URL}cymbal.mp3`],
       preload: true,
     });
     drumrollRef.current = drumroll;

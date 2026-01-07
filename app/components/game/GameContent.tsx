@@ -87,7 +87,7 @@ export const GameContent: FC = () => {
 
   useEffect(() => {
     const bgm = new Howl({
-      src: ["/game-bgm.mp3"],
+      src: [`${import.meta.env.BASE_URL}game-bgm.mp3`],
       loop: true,
       preload: true,
       onplayerror: () => {
