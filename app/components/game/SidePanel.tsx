@@ -126,7 +126,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
 
   return (
     <section
-      className={`flex h-full flex-col rounded-3xl border border-border bg-card p-4 text-foreground ${className}`}
+      className={`flex h-full w-full min-w-0 flex-col rounded-3xl border border-border bg-card p-4 text-foreground ${className}`}
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-5">
@@ -147,7 +147,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
         </Button>
       </header>
-      <div className="no-scrollbar mt-4 flex h-full w-full flex-1 items-center justify-center overflow-y-auto pr-1">
+      <div className="no-scrollbar mt-4 flex h-full w-full min-w-0 flex-1 items-center justify-center overflow-y-auto pr-1">
         {isLoading ? (
           <p className="text-muted-foreground text-sm">景品情報を読み込み中...</p>
         ) : (

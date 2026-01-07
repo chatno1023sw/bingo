@@ -9,7 +9,7 @@ export type Prize = {
   order: number;
   /** 賞名 */
   prizeName: string;
-  /** 賞品名 */
+  /** 景品名 */
   itemName: string;
   /** 画像参照パス */
   imagePath: string | null;

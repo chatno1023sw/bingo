@@ -8,6 +8,8 @@ export type UseBgmPlayersOptions = {
   enabled?: boolean;
   /** BGM の音量 */
   volume?: number;
+  /** 音声取得失敗時のフォールバック待機時間（ミリ秒） */
+  fallbackWaitMs?: number;
 };
 
 export type UseBgmPlayersResult = {
@@ -25,13 +27,19 @@ export type UseBgmPlayersResult = {
  * - 副作用: Howler インスタンスの生成と破棄を行います。
  * - 入力制約: `onDrumrollEnd` は例外を投げない関数を渡してください。
  * - 戻り値: ドラムロール/シンバルの再生操作を返します。
+ * - 音声が取得できない場合は指定時間後に抽選終了処理へ進みます。
  * - Chrome DevTools MCP では抽選開始時にドラムロール、終了時にシンバルが鳴ることを確認します。
  */
 export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayersResult => {
+  const OTHER_SE_VOLUME_SCALE = 0.9;
+  const ACCENT_SE_VOLUME_SCALE = 1.5;
+  const ACCENT_SE_MIN_VOLUME = 0.4;
   const drumrollRef = useRef<Howl | null>(null);
   const cymbalRef = useRef<Howl | null>(null);
   const onDrumrollEndRef = useRef<(() => void) | null>(null);
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
+  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fallbackWaitRef = useRef(5000);
   const enabledRef = useRef(true);
   const volumeRef = useRef(1);
   const hasStartedRef = useRef(false);
@@ -40,15 +48,43 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     onDrumrollEndRef.current = options.onDrumrollEnd ?? null;
   }, [options.onDrumrollEnd]);
 
+  useEffect(() => {
+    fallbackWaitRef.current = options.fallbackWaitMs ?? 5000;
+  }, [options.fallbackWaitMs]);
+
   const applyVolume = useCallback(() => {
-    const volume = enabledRef.current ? volumeRef.current : 0;
+    const baseVolume = enabledRef.current ? volumeRef.current : 0;
+    const normalVolume = baseVolume * OTHER_SE_VOLUME_SCALE;
+    const accentVolume = Math.min(
+      1,
+      Math.max(normalVolume * ACCENT_SE_VOLUME_SCALE, ACCENT_SE_MIN_VOLUME),
+    );
     if (drumrollRef.current) {
-      drumrollRef.current.volume(volume);
+      drumrollRef.current.volume(accentVolume);
     }
     if (cymbalRef.current) {
-      cymbalRef.current.volume(volume);
+      cymbalRef.current.volume(accentVolume);
     }
   }, []);
+
+  const clearFallbackTimeout = useCallback(() => {
+    if (!fallbackTimeoutRef.current) {
+      return;
+    }
+    clearTimeout(fallbackTimeoutRef.current);
+    fallbackTimeoutRef.current = null;
+  }, []);
+
+  const scheduleFallbackTimeout = useCallback(() => {
+    clearFallbackTimeout();
+    if (fallbackWaitRef.current <= 0) {
+      return;
+    }
+    fallbackTimeoutRef.current = setTimeout(() => {
+      fallbackTimeoutRef.current = null;
+      handleDrumrollEndRef.current();
+    }, fallbackWaitRef.current);
+  }, [clearFallbackTimeout]);
 
   useEffect(() => {
     enabledRef.current = options.enabled ?? true;
@@ -79,47 +115,58 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
         return;
       }
       hasStartedRef.current = false;
+      clearFallbackTimeout();
       onDrumrollEndRef.current?.();
       playCymbal();
     };
-  }, [playCymbal]);
+  }, [clearFallbackTimeout, playCymbal]);
 
   useEffect(() => {
     const drumroll = new Howl({
-      src: ["/drumroll.mp3"],
+      src: [`${import.meta.env.BASE_URL}drumroll.mp3`],
       preload: true,
       onend: () => handleDrumrollEndRef.current(),
-      onloaderror: () => handleDrumrollEndRef.current(),
-      onplayerror: () => handleDrumrollEndRef.current(),
+      onloaderror: () => {
+        if (fallbackWaitRef.current <= 0) {
+          handleDrumrollEndRef.current();
+        }
+      },
+      onplayerror: () => {
+        if (fallbackWaitRef.current <= 0) {
+          handleDrumrollEndRef.current();
+        }
+      },
     });
     const cymbal = new Howl({
-      src: ["/cymbal.mp3"],
+      src: [`${import.meta.env.BASE_URL}cymbal.mp3`],
       preload: true,
     });
     drumrollRef.current = drumroll;
     cymbalRef.current = cymbal;
     applyVolume();
     return () => {
+      clearFallbackTimeout();
       drumroll.unload();
       cymbal.unload();
       drumrollRef.current = null;
       cymbalRef.current = null;
     };
-  }, [applyVolume]);
+  }, [applyVolume, clearFallbackTimeout]);
 
   const playDrumroll = useCallback(() => {
     const drumroll = drumrollRef.current;
     if (!drumroll) {
       return;
     }
+    hasStartedRef.current = true;
+    scheduleFallbackTimeout();
     if (!enabledRef.current || volumeRef.current <= 0) {
       return;
     }
-    hasStartedRef.current = true;
     drumroll.stop();
     drumroll.seek(0);
     drumroll.play();
-  }, []);
+  }, [scheduleFallbackTimeout]);
 
   const stopDrumroll = useCallback(() => {
     const drumroll = drumrollRef.current;
@@ -127,8 +174,9 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
       return;
     }
     hasStartedRef.current = false;
+    clearFallbackTimeout();
     drumroll.stop();
-  }, []);
+  }, [clearFallbackTimeout]);
 
   return {
     playDrumroll,

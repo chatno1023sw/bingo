@@ -31,7 +31,7 @@ export default function StartRoute() {
   const navigate = useNavigate();
   const { preference, isReady, setVolume } = useBgmPreference({
     storageKey: storageKeys.bgmStart,
-    defaultVolume: 0.2,
+    defaultVolume: 0.1,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
@@ -145,7 +145,7 @@ export default function StartRoute() {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_orchestra05.mp3
-      src: ["/start-bgm.mp3"],
+      src: [`${import.meta.env.BASE_URL}start-bgm.mp3`],
       loop: true,
       preload: true,
       onplayerror: () => {

@@ -5,6 +5,7 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
+import { storageKeys } from "~/common/utils/storage";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
@@ -43,13 +44,17 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.4,
+    defaultVolume: 0.1,
+  });
+  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
+    storageKey: storageKeys.se,
+    defaultVolume: 0.2,
   });
 
   const { playDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
-    enabled: preference.volume > 0,
-    volume: preference.volume,
+    enabled: soundPreference.volume > 0,
+    volume: soundPreference.volume,
   });
 
   const bgmRef = useRef<Howl | null>(null);
@@ -87,7 +92,7 @@ export const GameContent: FC = () => {
 
   useEffect(() => {
     const bgm = new Howl({
-      src: ["/game-bgm.mp3"],
+      src: [`${import.meta.env.BASE_URL}game-bgm.mp3`],
       loop: true,
       preload: true,
       onplayerror: () => {
@@ -173,9 +178,10 @@ export const GameContent: FC = () => {
             <div className="relative flex items-center gap-3">
               <BgmControl
                 preference={preference}
+                soundPreference={soundPreference}
                 isReady={isReady}
                 onVolumeChange={setVolume}
-                showSoundSlider={false}
+                onSoundVolumeChange={setSoundVolume}
               />
               <Button
                 type="button"
@@ -189,7 +195,7 @@ export const GameContent: FC = () => {
             </div>
           </header>
           <div className="flex flex-1 gap-6 overflow-hidden px-6 pb-6">
-            <HistoryPanel recent={session.historyView} className="flex-[0_0_420px]" />
+            <HistoryPanel recent={session.historyView} className="flex-[0_0_30vw]" />
             <section className="flex flex-1 flex-col items-center justify-center gap-8">
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
@@ -207,7 +213,7 @@ export const GameContent: FC = () => {
               <p className="text-muted-foreground text-xs">残り {availableNumbers.length} / 75</p>
             </section>
 
-            <SidePanel className="flex-[0_0_420px]" />
+            <SidePanel className="flex-[0_0_30vw]" />
           </div>
         </div>
       </main>

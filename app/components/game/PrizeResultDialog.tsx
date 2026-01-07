@@ -16,7 +16,7 @@ export type PrizeResultDialogProps = {
 /**
  * 景品ルーレットの結果表示ダイアログ。
  *
- * - 当選した景品の画像・賞名・賞品名を表示します。
+ * - 当選した景品の画像・賞名・景品名を表示します。
  * - `open` が false の場合は描画せず、CommonDialog の Portal への描画も行いません。
  * - Chrome DevTools MCP では結果ダイアログが自動表示されることを確認します。
  */

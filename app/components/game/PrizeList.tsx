@@ -9,7 +9,7 @@ export type PrizeListProps = {
   disabled?: boolean;
   /** 選出状態の切り替え */
   onToggle: (id: string, nextSelected: boolean) => void;
-  /** 賞品名表示に切り替える ID 集合 */
+  /** 景品名表示に切り替える ID 集合 */
   itemNameOverrides: Set<string>;
   /** 表示名切り替え操作 */
   onToggleDisplay: (id: string) => void;
@@ -35,7 +35,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   }
 
   return (
-    <ul className="h-full w-full space-y-3">
+    <ul className="h-full w-full min-w-0 space-y-3">
       {prizes.map((prize) => (
         <PrizeListItem
           key={prize.id}

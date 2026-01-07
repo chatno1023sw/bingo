@@ -9,12 +9,13 @@ import { cn } from "~/lib/utils";
 let primarySe: Howl | null = null;
 let cancelSe: Howl | null = null;
 let hoverSe: Howl | null = null;
+const OTHER_SE_VOLUME_SCALE = 0.9;
 
 const getPrimarySe = (): Howl => {
   if (!primarySe) {
     primarySe = new Howl({
       // maou_se_system23.mp3
-      src: ["/button-se.mp3"],
+      src: [`${import.meta.env.BASE_URL}button-se.mp3`],
       preload: true,
     });
   }
@@ -25,7 +26,7 @@ const getCancelSe = (): Howl => {
   if (!cancelSe) {
     cancelSe = new Howl({
       // maou_se_system18.mp3
-      src: ["/button-cancel-se.mp3"],
+      src: [`${import.meta.env.BASE_URL}button-cancel-se.mp3`],
       preload: true,
     });
   }
@@ -36,7 +37,7 @@ const getHoverSe = (): Howl => {
   if (!hoverSe) {
     hoverSe = new Howl({
       // maou_se_system48.mp3
-      src: ["/hover-se.mp3"],
+      src: [`${import.meta.env.BASE_URL}hover-se.mp3`],
       preload: true,
     });
   }
@@ -69,7 +70,7 @@ const playButtonSe = (isCancel: boolean) => {
     return;
   }
   const sound = isCancel ? getCancelSe() : getPrimarySe();
-  sound.volume(preference.volume);
+  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
   sound.stop();
   sound.play();
 };
@@ -83,7 +84,7 @@ const playHoverSe = () => {
     return;
   }
   const sound = getHoverSe();
-  sound.volume(preference.volume);
+  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
   sound.stop();
   sound.play();
 };

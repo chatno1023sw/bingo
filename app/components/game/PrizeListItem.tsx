@@ -49,7 +49,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   return (
     <li
       className={cn(
-        "flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition",
+        "flex w-full min-w-0 items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition",
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
@@ -64,11 +64,11 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
           <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
         )}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <button
           type="button"
           className={cn(
-            "w-full cursor-pointer text-left text-3xl focus:outline-none",
+            "line-clamp-2 w-full min-w-0 cursor-pointer break-all text-left text-3xl focus:outline-none",
             prize.selected ? "text-muted-foreground line-through" : "text-foreground",
           )}
           onClick={() => onToggleDisplay(prize.id)}
