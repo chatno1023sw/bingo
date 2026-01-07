@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
+    "build:local": "BASE_PATH=./ react-router build && node ./scripts/copy-local.mjs",
+    "build:all": "react-router build && BASE_PATH=./ react-router build && node ./scripts/copy-local.mjs",
     "dev": "react-router dev",
     "start": "node ./scripts/serve-client.mjs",
     "typecheck": "react-router typegen && tsc",
