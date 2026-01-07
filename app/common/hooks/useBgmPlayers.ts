@@ -118,8 +118,16 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
       src: [`${import.meta.env.BASE_URL}drumroll.mp3`],
       preload: true,
       onend: () => handleDrumrollEndRef.current(),
-      onloaderror: () => handleDrumrollEndRef.current(),
-      onplayerror: () => handleDrumrollEndRef.current(),
+      onloaderror: () => {
+        if (fallbackWaitRef.current <= 0) {
+          handleDrumrollEndRef.current();
+        }
+      },
+      onplayerror: () => {
+        if (fallbackWaitRef.current <= 0) {
+          handleDrumrollEndRef.current();
+        }
+      },
     });
     const cymbal = new Howl({
       src: [`${import.meta.env.BASE_URL}cymbal.mp3`],
@@ -142,11 +150,11 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     if (!drumroll) {
       return;
     }
+    hasStartedRef.current = true;
+    scheduleFallbackTimeout();
     if (!enabledRef.current || volumeRef.current <= 0) {
       return;
     }
-    hasStartedRef.current = true;
-    scheduleFallbackTimeout();
     drumroll.stop();
     drumroll.seek(0);
     drumroll.play();
