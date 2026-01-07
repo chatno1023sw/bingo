@@ -35,7 +35,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   }
 
   return (
-    <ul className="h-full w-full space-y-3">
+    <ul className="h-full w-full min-w-0 space-y-3">
       {prizes.map((prize) => (
         <PrizeListItem
           key={prize.id}
