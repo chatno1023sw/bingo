@@ -66,8 +66,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:local
-      - run: tar -czf local-build.tar.gz local
+      - run: zip -r local-build.zip local
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: local-build.tar.gz
+          files: local-build.zip
