@@ -14,7 +14,7 @@ export type PrizeSortableItemProps = {
   id: string;
   /** 賞名 */
   name: string;
-  /** 賞品名 */
+  /** 景品名 */
   detail: string;
   /** 画像参照パス */
   imagePath: string | null;

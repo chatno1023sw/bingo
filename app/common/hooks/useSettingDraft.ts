@@ -255,8 +255,8 @@ export const useSettingDraft = ({
     type CsvRow = {
       /** 賞名 */
       賞名?: string;
-      /** 賞品名 */
-      賞品名?: string;
+      /** 景品名 */
+      景品名?: string;
       /** 選出フラグ */
       選出?: string;
     };
@@ -275,7 +275,7 @@ export const useSettingDraft = ({
           `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
         order: draftPrizes.length + index,
         prizeName: row.賞名?.trim() ?? "",
-        itemName: row.賞品名?.trim() ?? "",
+        itemName: row.景品名?.trim() ?? "",
         imagePath: null,
         selected: normalizeSelected(row.選出),
         memo: null,

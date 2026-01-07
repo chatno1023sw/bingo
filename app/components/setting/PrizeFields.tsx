@@ -4,7 +4,7 @@ import type { Prize } from "~/common/types";
 export type PrizeFieldsProps = {
   /** 賞名 */
   name: string;
-  /** 賞品名 */
+  /** 景品名 */
   detail: string;
   /** 選出フラグ */
   selected: boolean;
@@ -54,7 +54,7 @@ export const PrizeFields: FC<PrizeFieldsProps> = ({
         />
       </label>
       <label className="flex items-center gap-3">
-        <span className="w-20">賞品名</span>
+        <span className="w-20">景品名</span>
         <input
           className="h-8 w-full rounded border border-input bg-background px-2 text-foreground text-sm"
           value={detail}
@@ -71,7 +71,7 @@ export const PrizeFields: FC<PrizeFieldsProps> = ({
               onUpdate({ itemName: nextValue });
             }
           }}
-          placeholder="賞品名を入力"
+          placeholder="景品名を入力"
           disabled={disabled}
         />
       </label>
