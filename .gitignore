@@ -9,7 +9,6 @@ mcp.config.json
 
 # React Router
 /.react-router/
-/build/
 
 .vscode
 .idea/
