@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { Howl } from "howler";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
@@ -7,6 +9,8 @@ import {
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
+import { storageKeys } from "~/common/utils/storage";
+import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
 
@@ -20,14 +24,19 @@ export default function StartRoute() {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
+  const bgmRef = useRef<Howl | null>(null);
+  const bgmPlayingRef = useRef(false);
+  const bgmPendingRef = useRef(false);
+  const bgmUnlockAttachedRef = useRef(false);
   const navigate = useNavigate();
-  // const {
-  //   preference,
-  //   isReady: isBgmReady,
-  //   toggle: toggleBgm,
-  //   error: bgmError,
-  // } = useBgmPreference();
-  // const bgmDisabled = !isBgmReady || isSubmitting;
+  const { preference, isReady, setVolume } = useBgmPreference({
+    storageKey: storageKeys.bgmStart,
+    defaultVolume: 0.2,
+  });
+  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
+    storageKey: storageKeys.se,
+    defaultVolume: 0.2,
+  });
 
   /**
    * セッション開始処理を実行します。
@@ -105,15 +114,82 @@ export default function StartRoute() {
     setCanResume(hasStoredGameState());
   }, []);
 
+  const requestBgmPlay = useCallback(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.play();
+    bgmPlayingRef.current = true;
+  }, []);
+
+  const handleUserUnlock = useCallback(() => {
+    if (!bgmPendingRef.current) {
+      return;
+    }
+    bgmPendingRef.current = false;
+    bgmUnlockAttachedRef.current = false;
+    requestBgmPlay();
+  }, [requestBgmPlay]);
+
+  const attachUnlockListeners = useCallback(() => {
+    if (bgmUnlockAttachedRef.current) {
+      return;
+    }
+    bgmUnlockAttachedRef.current = true;
+    const handler = () => handleUserUnlock();
+    document.addEventListener("pointerdown", handler, { once: true });
+    document.addEventListener("keydown", handler, { once: true });
+  }, [handleUserUnlock]);
+
+  useEffect(() => {
+    const bgm = new Howl({
+      // maou_bgm_orchestra05.mp3
+      src: ["/start-bgm.mp3"],
+      loop: true,
+      preload: true,
+      onplayerror: () => {
+        bgmPendingRef.current = true;
+        bgmPlayingRef.current = false;
+        attachUnlockListeners();
+      },
+    });
+    bgmRef.current = bgm;
+    return () => {
+      bgm.stop();
+      bgm.unload();
+      bgmRef.current = null;
+    };
+  }, [attachUnlockListeners]);
+
+  useEffect(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.volume(preference.volume);
+    if (preference.volume > 0) {
+      if (!bgmPlayingRef.current) {
+        requestBgmPlay();
+      }
+      return;
+    }
+    if (bgmPlayingRef.current) {
+      bgm.stop();
+      bgmPlayingRef.current = false;
+    }
+  }, [preference.volume, requestBgmPlay]);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
-        {/* todo: あとで実装したい */}
-        {/* <BgmToggle
-          enabled={preference.enabled}
-          onToggle={() => toggleBgm()}
-          disabled={bgmDisabled}
-        /> */}
+        <BgmControl
+          preference={preference}
+          soundPreference={soundPreference}
+          isReady={isReady}
+          onVolumeChange={setVolume}
+          onSoundVolumeChange={setSoundVolume}
+        />
       </div>
       <div className="flex min-h-90 items-center justify-center">
         <StartMenu

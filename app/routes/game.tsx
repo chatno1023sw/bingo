@@ -1,3 +1,4 @@
+import { SoundProvider } from "~/common/contexts/SoundContext";
 import { GameContent } from "~/components/game/GameContent";
 
 /**
@@ -9,5 +10,9 @@ import { GameContent } from "~/components/game/GameContent";
  * - Chrome DevTools MCP では Game 画面が表示されることを確認します。
  */
 export default function GameRoute() {
-  return <GameContent />;
+  return (
+    <SoundProvider enabled={false}>
+      <GameContent />
+    </SoundProvider>
+  );
 }

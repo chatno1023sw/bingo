@@ -84,8 +84,10 @@ export type UseGameSessionResult = {
   openResetDialog: () => void;
   /** リセットダイアログを閉じる */
   closeResetDialog: () => void;
-  /** 抽選実行 */
-  handleDraw: () => void;
+  /** 抽選演出を開始 */
+  startDrawAnimation: () => void;
+  /** 抽選演出を完了して抽選結果を確定 */
+  completeDrawAnimation: () => void;
   /** 抽選リセット */
   handleReset: () => Promise<void>;
   /** Start 画面へ戻る */
@@ -112,7 +114,7 @@ export const useGameSession = (): UseGameSessionResult => {
   const [displayNumber, setDisplayNumber] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const animationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const drawActiveRef = useRef(false);
 
   const availableNumbers = session?.availableNumbers ?? [];
   const isButtonDisabled =
@@ -158,9 +160,6 @@ export const useGameSession = (): UseGameSessionResult => {
     return () => {
       if (animationIntervalRef.current) {
         clearInterval(animationIntervalRef.current);
-      }
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
       }
     };
   }, []);
@@ -234,31 +233,45 @@ export const useGameSession = (): UseGameSessionResult => {
   };
 
   /**
-   * 抽選演出と抽選実行を開始します。
+   * 抽選演出を開始します。
    *
-   * - 副作用: タイマーを起動して抽選を実行します。
+   * - 副作用: 抽選演出のタイマーを起動します。
    * - 入力制約: 抽選可能な番号が存在する必要があります。
    * - 戻り値: なし。
-   * - Chrome DevTools MCP では演出と結果更新を確認します。
+   * - Chrome DevTools MCP では演出開始を確認します。
    */
-  const handleDraw = () => {
+  const startDrawAnimation = () => {
     if (isAnimating || isMutating || isResetting || availableNumbers.length === 0) {
       return;
     }
     const pool = availableNumbers.length > 0 ? availableNumbers : NUMBER_POOL;
     setIsAnimating(true);
+    drawActiveRef.current = true;
     animationIntervalRef.current = setInterval(() => {
       const random = pool[Math.floor(Math.random() * pool.length)];
       setDisplayNumber(random);
     }, 120);
-    animationTimeoutRef.current = setTimeout(() => {
-      if (animationIntervalRef.current) {
-        clearInterval(animationIntervalRef.current);
-        animationIntervalRef.current = null;
-      }
-      setIsAnimating(false);
-      void performDraw();
-    }, 3000);
+  };
+
+  /**
+   * 抽選演出を終了して抽選結果を確定します。
+   *
+   * - 副作用: 抽選演出タイマーを停止し、抽選結果を保存します。
+   * - 入力制約: 抽選演出中である必要があります。
+   * - 戻り値: なし。
+   * - Chrome DevTools MCP では抽選結果の反映を確認します。
+   */
+  const completeDrawAnimation = () => {
+    if (!drawActiveRef.current) {
+      return;
+    }
+    drawActiveRef.current = false;
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+    }
+    setIsAnimating(false);
+    void performDraw();
   };
 
   /**
@@ -295,7 +308,8 @@ export const useGameSession = (): UseGameSessionResult => {
     drawButtonLabel,
     openResetDialog: () => setResetOpen(true),
     closeResetDialog: () => setResetOpen(false),
-    handleDraw,
+    startDrawAnimation,
+    completeDrawAnimation,
     handleReset,
     handleBackToStart,
   };
