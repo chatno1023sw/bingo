@@ -5,6 +5,7 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
+import { storageKeys } from "~/common/utils/storage";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
@@ -44,6 +45,10 @@ export const GameContent: FC = () => {
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
     defaultVolume: 0.4,
+  });
+  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
+    storageKey: storageKeys.se,
+    defaultVolume: 0.2,
   });
 
   const { playDrumroll } = useBgmPlayers({
@@ -173,9 +178,10 @@ export const GameContent: FC = () => {
             <div className="relative flex items-center gap-3">
               <BgmControl
                 preference={preference}
+                soundPreference={soundPreference}
                 isReady={isReady}
                 onVolumeChange={setVolume}
-                showSoundSlider={false}
+                onSoundVolumeChange={setSoundVolume}
               />
               <Button
                 type="button"

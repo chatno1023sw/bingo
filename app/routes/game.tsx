@@ -11,7 +11,7 @@ import { GameContent } from "~/components/game/GameContent";
  */
 export default function GameRoute() {
   return (
-    <SoundProvider enabled={false}>
+    <SoundProvider enabled>
       <GameContent />
     </SoundProvider>
   );
