@@ -86,7 +86,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
                 <div key={`history-row-${rowKey}`} className="flex flex-col gap-3">
                   {row.labelCount > 0 ? (
                     <div className="flex flex-col gap-1">
-                      <span className="text-muted-foreground text-xs">{`${row.labelCount}件目`}</span>
+                      <span className="text-muted-foreground text-xs">{`${row.labelCount}`}</span>
                       <div className="h-px w-full bg-border" />
                     </div>
                   ) : null}
