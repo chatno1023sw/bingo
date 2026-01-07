@@ -1,7 +1,11 @@
+import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import type { FC } from "react";
+import { type FC, useCallback, useEffect, useRef } from "react";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
+import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
+import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
+import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
@@ -33,10 +37,98 @@ export const GameContent: FC = () => {
     drawButtonLabel,
     openResetDialog,
     closeResetDialog,
-    handleDraw,
+    startDrawAnimation,
+    completeDrawAnimation,
     handleReset,
     handleBackToStart,
   } = useGameSession();
+  const { preference, isReady, setVolume } = useBgmPreference({
+    defaultVolume: 0.4,
+  });
+
+  const { playDrumroll } = useBgmPlayers({
+    onDrumrollEnd: completeDrawAnimation,
+    enabled: preference.volume > 0,
+    volume: preference.volume,
+  });
+
+  const bgmRef = useRef<Howl | null>(null);
+  const bgmPlayingRef = useRef(false);
+  const bgmPendingRef = useRef(false);
+  const bgmUnlockAttachedRef = useRef(false);
+
+  const requestBgmPlay = useCallback(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.play();
+    bgmPlayingRef.current = true;
+  }, []);
+
+  const handleUserUnlock = useCallback(() => {
+    if (!bgmPendingRef.current) {
+      return;
+    }
+    bgmPendingRef.current = false;
+    bgmUnlockAttachedRef.current = false;
+    requestBgmPlay();
+  }, [requestBgmPlay]);
+
+  const attachUnlockListeners = useCallback(() => {
+    if (bgmUnlockAttachedRef.current) {
+      return;
+    }
+    bgmUnlockAttachedRef.current = true;
+    const handler = () => handleUserUnlock();
+    document.addEventListener("pointerdown", handler, { once: true });
+    document.addEventListener("keydown", handler, { once: true });
+  }, [handleUserUnlock]);
+
+  useEffect(() => {
+    const bgm = new Howl({
+      src: ["/game-bgm.mp3"],
+      loop: true,
+      preload: true,
+      onplayerror: () => {
+        bgmPendingRef.current = true;
+        bgmPlayingRef.current = false;
+        attachUnlockListeners();
+      },
+    });
+    bgmRef.current = bgm;
+    return () => {
+      bgm.stop();
+      bgm.unload();
+      bgmRef.current = null;
+    };
+  }, [attachUnlockListeners]);
+
+  useEffect(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    bgm.volume(preference.volume * 0.2);
+    if (preference.volume > 0) {
+      if (!bgmPlayingRef.current) {
+        requestBgmPlay();
+      }
+      return;
+    }
+    if (bgmPlayingRef.current) {
+      bgm.stop();
+      bgmPlayingRef.current = false;
+    }
+  }, [preference.volume, requestBgmPlay]);
+
+  const handleDrawWithBgm = () => {
+    if (isButtonDisabled) {
+      return;
+    }
+    startDrawAnimation();
+    playDrumroll();
+  };
 
   if (isLoading) {
     return (
@@ -78,13 +170,13 @@ export const GameContent: FC = () => {
             >
               クリア
             </Button>
-            <div className="flex items-center gap-2">
-              {/* todo: あとで音を出す設定を入れたい */}
-              {/* <BgmToggle
-                enabled={preference.enabled}
-                onToggle={() => toggleBgm()}
-                disabled={bgmDisabled}
-              /> */}
+            <div className="relative flex items-center gap-3">
+              <BgmControl
+                preference={preference}
+                isReady={isReady}
+                onVolumeChange={setVolume}
+                showSoundSlider={false}
+              />
               <Button
                 type="button"
                 variant="secondary"
@@ -103,7 +195,7 @@ export const GameContent: FC = () => {
               <Button
                 type="button"
                 className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
-                onClick={handleDraw}
+                onClick={handleDrawWithBgm}
                 disabled={isButtonDisabled}
               >
                 {(isAnimating || isMutating) && <Loader2 className={"animate-spin"} />}

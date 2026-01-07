@@ -1,7 +1,7 @@
-import type { BgmPreference } from "~/common/types";
+import type { BgmPreference, GameStorageKeys } from "~/common/types";
 import { readStorageJson, storageKeys, writeStorageJson } from "~/common/utils/storage";
 
-const DEFAULT_BGM_VOLUME = 0.6;
+const DEFAULT_BGM_VOLUME = 0;
 
 /**
  * BGM 設定のデフォルト値を生成します。
@@ -13,9 +13,10 @@ const DEFAULT_BGM_VOLUME = 0.6;
  */
 export const createDefaultBgmPreference = (
   timestamp: string = new Date().toISOString(),
+  volume: number = DEFAULT_BGM_VOLUME,
 ): BgmPreference => ({
   enabled: true,
-  volume: DEFAULT_BGM_VOLUME,
+  volume,
   updatedAt: timestamp,
 });
 
@@ -27,11 +28,14 @@ export const createDefaultBgmPreference = (
  * - 戻り値: BgmPreference を返します。
  * - Chrome DevTools MCP では localStorage の値を確認します。
  */
-export const getBgmPreference = async (): Promise<BgmPreference> => {
-  const stored = readStorageJson<BgmPreference | null>(storageKeys.bgm, null);
+export const getBgmPreference = async (
+  storageKey: GameStorageKeys = storageKeys.bgm,
+  defaultVolume?: number,
+): Promise<BgmPreference> => {
+  const stored = readStorageJson<BgmPreference | null>(storageKey, null);
   if (!stored) {
-    const fallback = createDefaultBgmPreference();
-    writeStorageJson(storageKeys.bgm, fallback);
+    const fallback = createDefaultBgmPreference(new Date().toISOString(), defaultVolume);
+    writeStorageJson(storageKey, fallback);
     return fallback;
   }
   return stored;
@@ -45,6 +49,9 @@ export const getBgmPreference = async (): Promise<BgmPreference> => {
  * - 戻り値: Promise を返します。
  * - Chrome DevTools MCP では保存値を確認します。
  */
-export const saveBgmPreference = async (preference: BgmPreference): Promise<void> => {
-  writeStorageJson(storageKeys.bgm, preference);
+export const saveBgmPreference = async (
+  preference: BgmPreference,
+  storageKey: GameStorageKeys = storageKeys.bgm,
+): Promise<void> => {
+  writeStorageJson(storageKey, preference);
 };
