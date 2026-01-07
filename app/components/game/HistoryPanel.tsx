@@ -34,11 +34,11 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
         {recent.length === 0 ? (
           <div className="text-muted-foreground text-sm">まだ抽選結果されてないよ</div>
         ) : (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-3">
             {recent.map((entry) => (
               <div
                 key={entry.sequence}
-                className="flex aspect-square min-h-30 items-center justify-center rounded border border-border text-6xl"
+                className="flex aspect-square min-h-24 items-center justify-center rounded border border-border text-[clamp(24px,5vw,84px)]"
               >
                 {entry.number}
               </div>
