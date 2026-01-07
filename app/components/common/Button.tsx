@@ -9,6 +9,7 @@ import { cn } from "~/lib/utils";
 let primarySe: Howl | null = null;
 let cancelSe: Howl | null = null;
 let hoverSe: Howl | null = null;
+const OTHER_SE_VOLUME_SCALE = 0.9;
 
 const getPrimarySe = (): Howl => {
   if (!primarySe) {
@@ -69,7 +70,7 @@ const playButtonSe = (isCancel: boolean) => {
     return;
   }
   const sound = isCancel ? getCancelSe() : getPrimarySe();
-  sound.volume(preference.volume);
+  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
   sound.stop();
   sound.play();
 };
@@ -83,7 +84,7 @@ const playHoverSe = () => {
     return;
   }
   const sound = getHoverSe();
-  sound.volume(preference.volume);
+  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
   sound.stop();
   sound.play();
 };

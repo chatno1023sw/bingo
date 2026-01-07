@@ -44,7 +44,7 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.4,
+    defaultVolume: 0.1,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,

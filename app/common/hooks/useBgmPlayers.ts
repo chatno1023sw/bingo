@@ -31,6 +31,9 @@ export type UseBgmPlayersResult = {
  * - Chrome DevTools MCP では抽選開始時にドラムロール、終了時にシンバルが鳴ることを確認します。
  */
 export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayersResult => {
+  const OTHER_SE_VOLUME_SCALE = 0.9;
+  const ACCENT_SE_VOLUME_SCALE = 1.5;
+  const ACCENT_SE_MIN_VOLUME = 0.4;
   const drumrollRef = useRef<Howl | null>(null);
   const cymbalRef = useRef<Howl | null>(null);
   const onDrumrollEndRef = useRef<(() => void) | null>(null);
@@ -50,12 +53,17 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   }, [options.fallbackWaitMs]);
 
   const applyVolume = useCallback(() => {
-    const volume = enabledRef.current ? volumeRef.current : 0;
+    const baseVolume = enabledRef.current ? volumeRef.current : 0;
+    const normalVolume = baseVolume * OTHER_SE_VOLUME_SCALE;
+    const accentVolume = Math.min(
+      1,
+      Math.max(normalVolume * ACCENT_SE_VOLUME_SCALE, ACCENT_SE_MIN_VOLUME),
+    );
     if (drumrollRef.current) {
-      drumrollRef.current.volume(volume);
+      drumrollRef.current.volume(accentVolume);
     }
     if (cymbalRef.current) {
-      cymbalRef.current.volume(volume);
+      cymbalRef.current.volume(accentVolume);
     }
   }, []);
 

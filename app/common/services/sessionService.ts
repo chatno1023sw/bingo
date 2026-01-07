@@ -6,7 +6,7 @@ export type SessionStartOptions = {
   resetPrizes?: boolean;
 };
 
-const DEFAULT_BGM_VOLUME = 0.4;
+const DEFAULT_BGM_VOLUME = 0.1;
 
 /**
  * 初期のゲーム状態を生成します。
