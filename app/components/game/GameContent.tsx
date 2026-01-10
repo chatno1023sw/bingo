@@ -159,6 +159,11 @@ export const GameContent: FC = () => {
     if (!bgm) {
       return;
     }
+    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
+    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
+      bgmPlayingRef.current = true;
+      return;
+    }
     bgm.play();
     bgmPlayingRef.current = true;
   }, []);
@@ -379,7 +384,18 @@ export const GameContent: FC = () => {
     setVoiceVolume(defaults.voiceVolume);
     setDrumrollVolumeScale(defaults.drumrollVolumeScale);
     setCymbalVolumeScale(defaults.cymbalVolumeScale);
-  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
+    requestBgmPlay();
+  }, [acknowledgeAudioNotice, requestBgmPlay, setVolume, setSoundVolume]);
+
+  const handleGameBgmVolumeChange = useCallback(
+    async (volume: number) => {
+      await setVolume(volume);
+      if (volume > 0) {
+        requestBgmPlay();
+      }
+    },
+    [requestBgmPlay, setVolume],
+  );
 
   if (isLoading) {
     return (
@@ -429,7 +445,7 @@ export const GameContent: FC = () => {
                 preference={preference}
                 soundPreference={soundPreference}
                 isReady={isReady}
-                onVolumeChange={setVolume}
+                onVolumeChange={handleGameBgmVolumeChange}
                 onSoundVolumeChange={setSoundVolume}
                 extraSliders={extraSoundSliders}
                 useDialog

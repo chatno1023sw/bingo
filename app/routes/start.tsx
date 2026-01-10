@@ -40,8 +40,15 @@ export default function StartRoute() {
   const bgmPendingRef = useRef(false);
   const bgmUnlockAttachedRef = useRef(false);
   const navigate = useNavigate();
-  const { preference, isReady, setVolume } = useBgmPreference({
+  const {
+    preference,
+    isReady,
+    setVolume: setStartBgmVolume,
+  } = useBgmPreference({
     storageKey: storageKeys.bgmStart,
+    defaultVolume: audioSettings.bgm.defaultVolume,
+  });
+  const { setVolume: setGameBgmVolume } = useBgmPreference({
     defaultVolume: audioSettings.bgm.defaultVolume,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
@@ -141,6 +148,11 @@ export default function StartRoute() {
     if (!bgm) {
       return;
     }
+    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
+    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
+      bgmPlayingRef.current = true;
+      return;
+    }
     bgm.play();
     bgmPlayingRef.current = true;
   }, []);
@@ -202,19 +214,37 @@ export default function StartRoute() {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  const syncBgmVolume = useCallback(
+    async (volume: number) => {
+      await Promise.all([setStartBgmVolume(volume), setGameBgmVolume(volume)]);
+    },
+    [setGameBgmVolume, setStartBgmVolume],
+  );
+
   const handleMuteAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
-    void setVolume(0);
+    void syncBgmVolume(0);
     void setSoundVolume(0);
     muteSoundDetailPreference();
-  }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
+  }, [acknowledgeAudioNotice, setSoundVolume, syncBgmVolume]);
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
-    void setVolume(audioSettings.bgm.defaultVolume);
+    void syncBgmVolume(audioSettings.bgm.defaultVolume);
     void setSoundVolume(audioSettings.se.defaultVolume);
     resetSoundDetailPreference();
-  }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
+    requestBgmPlay();
+  }, [acknowledgeAudioNotice, requestBgmPlay, setSoundVolume, syncBgmVolume]);
+
+  const handleStartBgmVolumeChange = useCallback(
+    (volume: number) => {
+      void syncBgmVolume(volume);
+      if (volume > 0) {
+        requestBgmPlay();
+      }
+    },
+    [requestBgmPlay, syncBgmVolume],
+  );
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
@@ -223,7 +253,7 @@ export default function StartRoute() {
           preference={preference}
           soundPreference={soundPreference}
           isReady={isReady}
-          onVolumeChange={setVolume}
+          onVolumeChange={handleStartBgmVolumeChange}
           onSoundVolumeChange={setSoundVolume}
           useDialog
         />
