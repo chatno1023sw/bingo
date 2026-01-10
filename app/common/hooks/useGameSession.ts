@@ -300,7 +300,7 @@ export const useGameSession = (options: UseGameSessionOptions = {}): UseGameSess
       options.onNavigateToStart();
       return;
     }
-    navigate("/start");
+    navigate("/");
   };
 
   const drawButtonLabel =
