@@ -30,8 +30,12 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
   useEffect(() => {
     if (isDrawing) {
       isFirstState.setIsFirst(false);
+      return;
     }
-  }, [isDrawing, isFirstState]);
+    if (value != null && isFirstState.isFirst) {
+      isFirstState.setIsFirst(false);
+    }
+  }, [isDrawing, isFirstState, value]);
   const display = isFirstState.isFirst ? "--" : value == null ? "" : value.toString();
   const bingoLetter = value == null ? null : bingoNumberRanges.getLetter(value);
   const letterStyles = {

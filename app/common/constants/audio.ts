@@ -32,11 +32,13 @@ export const audioPaths = {
  * - 戻り値: 音量や遅延などの設定値を返します。
  * - Chrome DevTools MCP では音量バランスと再生タイミングを確認します。
  */
+const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
+
 export const audioSettings = {
   bgm: {
     defaultVolume: 0.1,
-    startVolumeScale: 0.5,
-    gameVolumeScale: 0.2,
+    startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
+    gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
   },
   se: {
     defaultVolume: 0.2,

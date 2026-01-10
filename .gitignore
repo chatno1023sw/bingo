@@ -3,9 +3,13 @@ Thumbs.db
 .env
 /node_modules/
 mcp.config.json
-.codex
-.specify/scripts
-.specify/templates
+.codex/
+.specify/
+.pnpm-store/
+.react-router/
+.serena/
+.specify/
+
 
 # React Router
 /.react-router/

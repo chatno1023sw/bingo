@@ -41,6 +41,8 @@ export type CommonDialogProps = {
   closeButtonAriaLabel?: string;
   /** 閉じるボタンの無効化 */
   closeDisabled?: boolean;
+  /** オーバーレイ操作で閉じるのを無効化するかどうか */
+  preventOutsideClose?: boolean;
 };
 
 /**
@@ -66,6 +68,7 @@ export const CommonDialog: FC<CommonDialogProps> = ({
   showCloseButton = false,
   closeButtonAriaLabel = "閉じる",
   closeDisabled = false,
+  preventOutsideClose = false,
 }) => {
   if (!open) {
     return null;
@@ -85,7 +88,16 @@ export const CommonDialog: FC<CommonDialogProps> = ({
         }
       }}
     >
-      <DialogContent className={contentClassName}>
+      <DialogContent
+        className={contentClassName}
+        onInteractOutside={
+          preventOutsideClose
+            ? (event) => {
+                event.preventDefault();
+              }
+            : undefined
+        }
+      >
         {showCloseButton ? (
           <DialogClose asChild>
             <Button

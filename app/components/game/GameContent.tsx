@@ -12,7 +12,19 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
+import {
+  getSoundDetailPreference,
+  muteSoundDetailPreference,
+  resetSoundDetailPreference,
+  saveSoundDetailPreference,
+} from "~/common/services/soundDetailPreferenceService";
+import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
+import {
+  hasAudioNoticeAcknowledged,
+  markAudioNoticeAcknowledged,
+} from "~/common/utils/audioNoticeState";
 import { storageKeys } from "~/common/utils/storage";
+import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
@@ -57,16 +69,18 @@ export const GameContent: FC = () => {
     storageKey: storageKeys.se,
     defaultVolume: audioSettings.se.defaultVolume,
   });
-  const [voiceVolume, setVoiceVolume] = useState<number>(audioSettings.number.voiceVolume);
+  const initialSoundDetailRef = useRef(getSoundDetailPreference());
+  const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
   const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
-    audioSettings.se.drumrollVolumeScale,
+    initialSoundDetailRef.current.drumrollVolumeScale,
   );
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
-    audioSettings.se.cymbalVolumeScale,
+    initialSoundDetailRef.current.cymbalVolumeScale,
   );
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -146,6 +160,11 @@ export const GameContent: FC = () => {
     if (!bgm) {
       return;
     }
+    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
+    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
+      bgmPlayingRef.current = true;
+      return;
+    }
     bgm.play();
     bgmPlayingRef.current = true;
   }, []);
@@ -206,6 +225,12 @@ export const GameContent: FC = () => {
       bgmPlayingRef.current = false;
     }
   }, [preference.volume, requestBgmPlay]);
+
+  useEffect(() => {
+    if (consumeGameBgmUnlock()) {
+      requestBgmPlay();
+    }
+  }, [requestBgmPlay]);
 
   const clearBingoBackgroundSequence = useCallback(() => {
     for (const timerId of bingoLetterTimersRef.current) {
@@ -290,6 +315,19 @@ export const GameContent: FC = () => {
     clearBingoBackgroundSequence();
   }, [clearBingoBackgroundSequence, isAnimating]);
 
+  useEffect(() => {
+    saveSoundDetailPreference({
+      voiceVolume,
+      drumrollVolumeScale,
+      cymbalVolumeScale,
+    });
+  }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
+
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
+    setAudioNoticeOpen(false);
+  }, []);
+
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
@@ -330,6 +368,37 @@ export const GameContent: FC = () => {
       step: 0.01,
     },
   ];
+
+  const handleMuteAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(0);
+    void setSoundVolume(0);
+    const muted = muteSoundDetailPreference();
+    setVoiceVolume(muted.voiceVolume);
+    setDrumrollVolumeScale(muted.drumrollVolumeScale);
+    setCymbalVolumeScale(muted.cymbalVolumeScale);
+  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
+
+  const handleEnableAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(audioSettings.bgm.defaultVolume);
+    void setSoundVolume(audioSettings.se.defaultVolume);
+    const defaults = resetSoundDetailPreference();
+    setVoiceVolume(defaults.voiceVolume);
+    setDrumrollVolumeScale(defaults.drumrollVolumeScale);
+    setCymbalVolumeScale(defaults.cymbalVolumeScale);
+    requestBgmPlay();
+  }, [acknowledgeAudioNotice, requestBgmPlay, setVolume, setSoundVolume]);
+
+  const handleGameBgmVolumeChange = useCallback(
+    async (volume: number) => {
+      await setVolume(volume);
+      if (volume > 0) {
+        requestBgmPlay();
+      }
+    },
+    [requestBgmPlay, setVolume],
+  );
 
   if (isLoading) {
     return (
@@ -379,7 +448,7 @@ export const GameContent: FC = () => {
                 preference={preference}
                 soundPreference={soundPreference}
                 isReady={isReady}
-                onVolumeChange={setVolume}
+                onVolumeChange={handleGameBgmVolumeChange}
                 onSoundVolumeChange={setSoundVolume}
                 extraSliders={extraSoundSliders}
                 useDialog
@@ -428,6 +497,12 @@ export const GameContent: FC = () => {
         onClose={closeResetDialog}
         onConfirm={handleReset}
         disabled={isResetting}
+      />
+      <AudioNoticeDialog
+        open={audioNoticeOpen}
+        onClose={acknowledgeAudioNotice}
+        onMuteAll={handleMuteAllAudio}
+        onEnableAll={handleEnableAllAudio}
       />
     </PrizeProvider>
   );

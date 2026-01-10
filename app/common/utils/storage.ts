@@ -14,6 +14,7 @@ export const storageKeys = {
   bgm: "bingo.v1.bgm",
   bgmStart: "bingo.v1.bgm.start",
   se: "bingo.v1.se",
+  soundDetail: "bingo.v1.soundDetail",
 } as const satisfies Record<string, GameStorageKeys>;
 
 /**

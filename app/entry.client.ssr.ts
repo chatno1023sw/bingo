@@ -30,6 +30,7 @@ type ReactRouterContext = {
   routeDiscovery: ServerBuild["routeDiscovery"];
   ssr: boolean;
   isSpaMode: boolean;
+  trailingSlashAware?: boolean;
   stream?: ReadableStream<Uint8Array>;
   state?: HydrationState;
 };
@@ -214,6 +215,7 @@ const createHydratedHashRouter = ({
       ssrInfo.routeModules,
       ssrInfo.context.ssr,
       ssrInfo.context.basename,
+      ssrInfo.context.trailingSlashAware ?? false,
     ),
     patchRoutesOnNavigation: getPatchRoutesOnNavigationFunction(
       ssrInfo.manifest,

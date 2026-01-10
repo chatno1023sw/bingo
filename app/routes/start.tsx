@@ -2,6 +2,10 @@ import { Howl } from "howler";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
+import {
+  muteSoundDetailPreference,
+  resetSoundDetailPreference,
+} from "~/common/services/soundDetailPreferenceService";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
@@ -11,8 +15,14 @@ import {
   startSession,
 } from "~/common/services/sessionService";
 import { storageKeys } from "~/common/utils/storage";
+import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
+import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
+import {
+  hasAudioNoticeAcknowledged,
+  markAudioNoticeAcknowledged,
+} from "~/common/utils/audioNoticeState";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
 
 /**
@@ -23,15 +33,25 @@ import { StartOverDialog } from "~/components/start/StartOverDialog";
  */
 export default function StartRoute() {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
+  const [shouldResumeBgm, setShouldResumeBgm] = useState(() => consumeStartBgmUnlock());
+  const [isBgmReady, setIsBgmReady] = useState(false);
   const bgmRef = useRef<Howl | null>(null);
   const bgmPlayingRef = useRef(false);
   const bgmPendingRef = useRef(false);
   const bgmUnlockAttachedRef = useRef(false);
   const navigate = useNavigate();
-  const { preference, isReady, setVolume } = useBgmPreference({
+  const {
+    preference,
+    isReady,
+    setVolume: setStartBgmVolume,
+  } = useBgmPreference({
     storageKey: storageKeys.bgmStart,
+    defaultVolume: audioSettings.bgm.defaultVolume,
+  });
+  const { setVolume: setGameBgmVolume } = useBgmPreference({
     defaultVolume: audioSettings.bgm.defaultVolume,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
@@ -47,10 +67,17 @@ export default function StartRoute() {
    * - 戻り値: Promise を返します。
    * - Chrome DevTools MCP では Start→Game の遷移を確認します。
    */
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
+    setAudioNoticeOpen(false);
+  }, []);
+
   const handleStart = async () => {
+    acknowledgeAudioNotice();
     setIsSubmitting(true);
     try {
       await startSession();
+      markGameBgmUnlock();
       setIsSubmitting(false);
       navigate("/game");
     } catch {
@@ -86,12 +113,14 @@ export default function StartRoute() {
    * - Chrome DevTools MCP では続きからの遷移を確認します。
    */
   const handleResumeConfirm = async () => {
+    acknowledgeAudioNotice();
     setIsSubmitting(true);
     try {
       const resumed = await resumeSession();
       if (!resumed) {
         await startSession();
       }
+      markGameBgmUnlock();
       setIsSubmitting(false);
       navigate("/game");
     } catch {
@@ -118,6 +147,11 @@ export default function StartRoute() {
   const requestBgmPlay = useCallback(() => {
     const bgm = bgmRef.current;
     if (!bgm) {
+      return;
+    }
+    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
+    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
+      bgmPlayingRef.current = true;
       return;
     }
     bgm.play();
@@ -156,10 +190,12 @@ export default function StartRoute() {
       },
     });
     bgmRef.current = bgm;
+    setIsBgmReady(true);
     return () => {
       bgm.stop();
       bgm.unload();
       bgmRef.current = null;
+      setIsBgmReady(false);
     };
   }, [attachUnlockListeners]);
 
@@ -181,6 +217,56 @@ export default function StartRoute() {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  useEffect(() => {
+    if (!shouldResumeBgm) {
+      return;
+    }
+    if (!isBgmReady) {
+      return;
+    }
+    if (audioNoticeOpen) {
+      return;
+    }
+    if (preference.volume <= 0) {
+      setShouldResumeBgm(false);
+      return;
+    }
+    requestBgmPlay();
+    setShouldResumeBgm(false);
+  }, [audioNoticeOpen, isBgmReady, preference.volume, requestBgmPlay, shouldResumeBgm]);
+
+  const syncBgmVolume = useCallback(
+    async (volume: number) => {
+      await Promise.all([setStartBgmVolume(volume), setGameBgmVolume(volume)]);
+    },
+    [setGameBgmVolume, setStartBgmVolume],
+  );
+
+  const handleMuteAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void syncBgmVolume(0);
+    void setSoundVolume(0);
+    muteSoundDetailPreference();
+  }, [acknowledgeAudioNotice, setSoundVolume, syncBgmVolume]);
+
+  const handleEnableAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void syncBgmVolume(audioSettings.bgm.defaultVolume);
+    void setSoundVolume(audioSettings.se.defaultVolume);
+    resetSoundDetailPreference();
+    requestBgmPlay();
+  }, [acknowledgeAudioNotice, requestBgmPlay, setSoundVolume, syncBgmVolume]);
+
+  const handleStartBgmVolumeChange = useCallback(
+    (volume: number) => {
+      void syncBgmVolume(volume);
+      if (volume > 0) {
+        requestBgmPlay();
+      }
+    },
+    [requestBgmPlay, syncBgmVolume],
+  );
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
@@ -188,7 +274,7 @@ export default function StartRoute() {
           preference={preference}
           soundPreference={soundPreference}
           isReady={isReady}
-          onVolumeChange={setVolume}
+          onVolumeChange={handleStartBgmVolumeChange}
           onSoundVolumeChange={setSoundVolume}
           useDialog
         />
@@ -210,6 +296,12 @@ export default function StartRoute() {
           void handleStart();
         }}
         disabled={isSubmitting}
+      />
+      <AudioNoticeDialog
+        open={audioNoticeOpen}
+        onClose={acknowledgeAudioNotice}
+        onMuteAll={handleMuteAllAudio}
+        onEnableAll={handleEnableAllAudio}
       />
     </main>
   );
