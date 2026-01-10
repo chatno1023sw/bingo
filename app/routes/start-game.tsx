@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { AudioPreferenceProvider } from "~/common/contexts/AudioPreferenceContext";
+import { AudioUnlockProvider } from "~/common/contexts/AudioUnlockContext";
 import { AudioNoticeProvider } from "~/common/contexts/AudioNoticeContext";
 import { SoundProvider } from "~/common/contexts/SoundContext";
 import { GameContent } from "~/components/game/GameContent";
@@ -20,16 +21,18 @@ export default function StartGameRoute() {
   return (
     <AudioPreferenceProvider>
       <AudioNoticeProvider>
-        {activeView === views.start ? (
-          <StartView
-            onShowGame={() => setActiveView(views.game)}
-            onNavigateSetting={() => navigate("/setting")}
-          />
-        ) : (
-          <SoundProvider enabled>
-            <GameContent onNavigateStart={() => setActiveView(views.start)} />
-          </SoundProvider>
-        )}
+        <AudioUnlockProvider>
+          {activeView === views.start ? (
+            <StartView
+              onShowGame={() => setActiveView(views.game)}
+              onNavigateSetting={() => navigate("/setting")}
+            />
+          ) : (
+            <SoundProvider enabled>
+              <GameContent onNavigateStart={() => setActiveView(views.start)} />
+            </SoundProvider>
+          )}
+        </AudioUnlockProvider>
       </AudioNoticeProvider>
     </AudioPreferenceProvider>
   );

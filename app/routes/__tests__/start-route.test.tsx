@@ -53,6 +53,17 @@ vi.mock("~/common/contexts/AudioNoticeContext", () => ({
   }),
 }));
 
+const requestGameBgmPlayMock = vi.fn();
+
+vi.mock("~/common/contexts/AudioUnlockContext", () => ({
+  useAudioUnlock: () => ({
+    requestGameBgmPlay: requestGameBgmPlayMock,
+    registerGameBgmHandler: vi.fn(),
+  }),
+}));
+
+const mockResumeAudioContext = vi.fn();
+
 vi.mock("howler", () => ({
   Howl: vi.fn().mockImplementation(() => ({
     play: vi.fn(() => 1),
@@ -60,6 +71,12 @@ vi.mock("howler", () => ({
     volume: vi.fn(),
     unload: vi.fn(),
   })),
+  Howler: {
+    ctx: {
+      state: "suspended",
+      resume: mockResumeAudioContext,
+    },
+  },
 }));
 
 /**

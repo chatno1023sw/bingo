@@ -1,4 +1,4 @@
-import { Howl } from "howler";
+import { Howl, Howler } from "howler";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import {
@@ -19,6 +19,7 @@ import {
 } from "~/common/services/soundDetailPreferenceService";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 
 export type StartViewProps = {
   /** Game ビューへ切り替える */
@@ -42,10 +43,10 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const { setVolume: setGameBgmVolume } = gameBgm;
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
+  const { requestGameBgmPlay } = useAudioUnlock();
 
   const resumeAudioContext = useCallback(() => {
-    const howler = (globalThis as { Howler?: { ctx?: AudioContext } }).Howler;
-    const ctx = howler?.ctx;
+    const ctx = Howler.ctx;
     if (!ctx || typeof ctx.resume !== "function") {
       return;
     }
@@ -73,6 +74,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   };
 
   const triggerStart = () => {
+    requestGameBgmPlay();
     resumeAudioContext();
     void handleStart();
   };
@@ -91,6 +93,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const handleResumeConfirm = async () => {
     acknowledgeAudioNotice();
     setIsSubmitting(true);
+    requestGameBgmPlay();
     resumeAudioContext();
     try {
       const resumed = await resumeSession();

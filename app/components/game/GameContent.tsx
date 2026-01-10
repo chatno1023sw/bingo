@@ -28,6 +28,7 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -64,6 +65,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     handleBackToStart,
   } = useGameSession({ onNavigateToStart: onNavigateStart });
   const { gameBgm, sound } = useAudioPreferences();
+  const { registerGameBgmHandler } = useAudioUnlock();
   const { preference, isReady, setVolume } = gameBgm;
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const initialSoundDetailRef = useRef(getSoundDetailPreference());
@@ -228,6 +230,14 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
       requestBgmPlay();
     }
   }, [requestBgmPlay]);
+
+  useEffect(() => {
+    return registerGameBgmHandler(() => {
+      if (preference.volume > 0) {
+        requestBgmPlay();
+      }
+    });
+  }, [preference.volume, registerGameBgmHandler, requestBgmPlay]);
 
   const clearBingoBackgroundSequence = useCallback(() => {
     for (const timerId of bingoLetterTimersRef.current) {
