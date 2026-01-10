@@ -19,6 +19,10 @@ import {
   saveSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
 import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
+import {
+  hasAudioNoticeAcknowledged,
+  markAudioNoticeAcknowledged,
+} from "~/common/utils/audioNoticeState";
 import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
@@ -76,7 +80,7 @@ export const GameContent: FC = () => {
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(true);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -320,6 +324,7 @@ export const GameContent: FC = () => {
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
   const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
     setAudioNoticeOpen(false);
   }, []);
 

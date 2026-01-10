@@ -18,8 +18,12 @@ import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
-import { StartOverDialog } from "~/components/start/StartOverDialog";
 import { markGameBgmUnlock } from "~/common/utils/audioUnlock";
+import {
+  hasAudioNoticeAcknowledged,
+  markAudioNoticeAcknowledged,
+} from "~/common/utils/audioNoticeState";
+import { StartOverDialog } from "~/components/start/StartOverDialog";
 
 /**
  * Start 画面のルートコンポーネント。
@@ -29,7 +33,7 @@ import { markGameBgmUnlock } from "~/common/utils/audioUnlock";
  */
 export default function StartRoute() {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(true);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const bgmRef = useRef<Howl | null>(null);
@@ -62,6 +66,7 @@ export default function StartRoute() {
    * - Chrome DevTools MCP では Start→Game の遷移を確認します。
    */
   const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
     setAudioNoticeOpen(false);
   }, []);
 
