@@ -43,6 +43,18 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
+  const resumeAudioContext = useCallback(() => {
+    const howler = (globalThis as { Howler?: { ctx?: AudioContext } }).Howler;
+    const ctx = howler?.ctx;
+    if (!ctx || typeof ctx.resume !== "function") {
+      return;
+    }
+    if (ctx.state === "running") {
+      return;
+    }
+    void ctx.resume();
+  }, []);
+
   const acknowledgeAudioNotice = useCallback(() => {
     markAcknowledged();
   }, [markAcknowledged]);
@@ -60,6 +72,11 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     }
   };
 
+  const triggerStart = () => {
+    resumeAudioContext();
+    void handleStart();
+  };
+
   const handleStartRequest = () => {
     if (isSubmitting) {
       return;
@@ -68,12 +85,13 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
       setStartOverDialogOpen(true);
       return;
     }
-    void handleStart();
+    triggerStart();
   };
 
   const handleResumeConfirm = async () => {
     acknowledgeAudioNotice();
     setIsSubmitting(true);
+    resumeAudioContext();
     try {
       const resumed = await resumeSession();
       if (!resumed) {
@@ -249,7 +267,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
         onClose={() => setStartOverDialogOpen(false)}
         onConfirm={() => {
           setStartOverDialogOpen(false);
-          void handleStart();
+          triggerStart();
         }}
         disabled={isSubmitting}
       />
