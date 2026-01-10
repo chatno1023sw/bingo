@@ -93,7 +93,7 @@ export const GameContent: FC = () => {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_acoustic02.mp3
-      src: [`${import.meta.env.BASE_URL}game-bgm.mp3`],
+      src: [`${import.meta.env.BASE_URL}bgm/game.mp3`],
       loop: true,
       preload: true,
       onplayerror: () => {

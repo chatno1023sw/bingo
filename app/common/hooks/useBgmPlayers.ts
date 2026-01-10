@@ -123,7 +123,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
 
   useEffect(() => {
     const drumroll = new Howl({
-      src: [`${import.meta.env.BASE_URL}drumroll.mp3`],
+      src: [`${import.meta.env.BASE_URL}se/drumroll.mp3`],
       preload: true,
       onend: () => handleDrumrollEndRef.current(),
       onloaderror: () => {
@@ -138,7 +138,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
       },
     });
     const cymbal = new Howl({
-      src: [`${import.meta.env.BASE_URL}cymbal.mp3`],
+      src: [`${import.meta.env.BASE_URL}se/cymbal.mp3`],
       preload: true,
     });
     drumrollRef.current = drumroll;

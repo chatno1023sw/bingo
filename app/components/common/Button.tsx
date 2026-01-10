@@ -15,7 +15,7 @@ const getPrimarySe = (): Howl => {
   if (!primarySe) {
     primarySe = new Howl({
       // maou_se_system23.mp3
-      src: [`${import.meta.env.BASE_URL}button-se.mp3`],
+      src: [`${import.meta.env.BASE_URL}se/button-se.mp3`],
       preload: true,
     });
   }
@@ -26,7 +26,7 @@ const getCancelSe = (): Howl => {
   if (!cancelSe) {
     cancelSe = new Howl({
       // maou_se_system18.mp3
-      src: [`${import.meta.env.BASE_URL}button-cancel-se.mp3`],
+      src: [`${import.meta.env.BASE_URL}se/button-cancel-se.mp3`],
       preload: true,
     });
   }
@@ -37,7 +37,7 @@ const getHoverSe = (): Howl => {
   if (!hoverSe) {
     hoverSe = new Howl({
       // maou_se_system48.mp3
-      src: [`${import.meta.env.BASE_URL}hover-se.mp3`],
+      src: [`${import.meta.env.BASE_URL}se/hover-se.mp3`],
       preload: true,
     });
   }

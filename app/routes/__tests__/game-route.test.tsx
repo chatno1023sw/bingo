@@ -173,7 +173,7 @@ describe("game route client flow", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "抽選を開始！" }));
     await act(async () => {
-      howlOptionsBySrc.get("/drumroll.mp3")?.onend?.();
+      howlOptionsBySrc.get("/se/drumroll.mp3")?.onend?.();
     });
     await act(async () => {});
 

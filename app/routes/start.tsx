@@ -145,7 +145,7 @@ export default function StartRoute() {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_orchestra05.mp3
-      src: [`${import.meta.env.BASE_URL}start-bgm.mp3`],
+      src: [`${import.meta.env.BASE_URL}bgm/start.mp3`],
       loop: true,
       preload: true,
       onplayerror: () => {
