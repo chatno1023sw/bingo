@@ -17,13 +17,39 @@ vi.mock("~/common/services/sessionService", () => ({
   hasStoredPrizeSelection: vi.fn(),
 }));
 
-vi.mock("~/common/hooks/useBgmPreference", () => ({
-  useBgmPreference: () => ({
-    preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
-    isReady: true,
-    toggle: vi.fn(),
-    setVolume: vi.fn(),
-    error: null,
+const mockSetVolume = vi.fn();
+const mockSetSoundVolume = vi.fn();
+
+vi.mock("~/common/contexts/AudioPreferenceContext", () => ({
+  useAudioPreferences: () => ({
+    startBgm: {
+      preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
+      isReady: true,
+      toggle: vi.fn(),
+      setVolume: mockSetVolume,
+      error: null,
+    },
+    gameBgm: {
+      preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
+      isReady: true,
+      toggle: vi.fn(),
+      setVolume: mockSetVolume,
+      error: null,
+    },
+    sound: {
+      preference: { enabled: true, volume: 0.5, updatedAt: "2025-01-01T00:00:00.000Z" },
+      isReady: true,
+      toggle: vi.fn(),
+      setVolume: mockSetSoundVolume,
+      error: null,
+    },
+  }),
+}));
+
+vi.mock("~/common/contexts/AudioNoticeContext", () => ({
+  useAudioNotice: () => ({
+    acknowledged: false,
+    markAcknowledged: vi.fn(),
   }),
 }));
 
@@ -93,11 +119,6 @@ describe("start route client flow", () => {
 vi.mock("~/common/utils/audioUnlock", () => ({
   consumeStartBgmUnlock: vi.fn(() => false),
   markGameBgmUnlock: vi.fn(),
-}));
-
-vi.mock("~/common/utils/audioNoticeState", () => ({
-  hasAudioNoticeAcknowledged: vi.fn(() => true),
-  markAudioNoticeAcknowledged: vi.fn(),
 }));
 
 vi.mock("~/common/services/soundDetailPreferenceService", () => ({

@@ -19,10 +19,7 @@ import {
   saveSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
 import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
-import {
-  hasAudioNoticeAcknowledged,
-  markAudioNoticeAcknowledged,
-} from "~/common/utils/audioNoticeState";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
@@ -80,7 +77,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
+  const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -324,9 +321,8 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
   const acknowledgeAudioNotice = useCallback(() => {
-    markAudioNoticeAcknowledged();
-    setAudioNoticeOpen(false);
-  }, []);
+    markAcknowledged();
+  }, [markAcknowledged]);
 
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
@@ -499,7 +495,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
         disabled={isResetting}
       />
       <AudioNoticeDialog
-        open={audioNoticeOpen}
+        open={!audioNoticeAcknowledged}
         onClose={acknowledgeAudioNotice}
         onMuteAll={handleMuteAllAudio}
         onEnableAll={handleEnableAllAudio}

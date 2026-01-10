@@ -11,16 +11,13 @@ import {
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
-import {
-  hasAudioNoticeAcknowledged,
-  markAudioNoticeAcknowledged,
-} from "~/common/utils/audioNoticeState";
 import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
 import {
   muteSoundDetailPreference,
   resetSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 
 export type StartViewProps = {
@@ -32,7 +29,6 @@ export type StartViewProps = {
 
 export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting }) => {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const [shouldResumeBgm, setShouldResumeBgm] = useState(() => consumeStartBgmUnlock());
@@ -45,11 +41,11 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const { preference: startBgmPreference, isReady, setVolume: setStartBgmVolume } = startBgm;
   const { setVolume: setGameBgmVolume } = gameBgm;
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
+  const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
   const acknowledgeAudioNotice = useCallback(() => {
-    markAudioNoticeAcknowledged();
-    setAudioNoticeOpen(false);
-  }, []);
+    markAcknowledged();
+  }, [markAcknowledged]);
 
   const handleStart = async () => {
     acknowledgeAudioNotice();
@@ -178,7 +174,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     if (!isBgmReady) {
       return;
     }
-    if (audioNoticeOpen) {
+    if (!audioNoticeAcknowledged) {
       return;
     }
     if (startBgmPreference.volume <= 0) {
@@ -187,7 +183,13 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     }
     requestBgmPlay();
     setShouldResumeBgm(false);
-  }, [audioNoticeOpen, isBgmReady, startBgmPreference.volume, requestBgmPlay, shouldResumeBgm]);
+  }, [
+    audioNoticeAcknowledged,
+    isBgmReady,
+    startBgmPreference.volume,
+    requestBgmPlay,
+    shouldResumeBgm,
+  ]);
 
   const syncBgmVolume = useCallback(
     async (volume: number) => {
@@ -252,7 +254,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
         disabled={isSubmitting}
       />
       <AudioNoticeDialog
-        open={audioNoticeOpen}
+        open={!audioNoticeAcknowledged}
         onClose={acknowledgeAudioNotice}
         onMuteAll={handleMuteAllAudio}
         onEnableAll={handleEnableAllAudio}
