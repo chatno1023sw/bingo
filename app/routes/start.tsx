@@ -19,6 +19,7 @@ import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
+import { markGameBgmUnlock } from "~/common/utils/audioUnlock";
 
 /**
  * Start 画面のルートコンポーネント。
@@ -69,6 +70,7 @@ export default function StartRoute() {
     setIsSubmitting(true);
     try {
       await startSession();
+      markGameBgmUnlock();
       setIsSubmitting(false);
       navigate("/game");
     } catch {
@@ -111,6 +113,7 @@ export default function StartRoute() {
       if (!resumed) {
         await startSession();
       }
+      markGameBgmUnlock();
       setIsSubmitting(false);
       navigate("/game");
     } catch {

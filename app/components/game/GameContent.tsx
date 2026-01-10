@@ -18,6 +18,7 @@ import {
   resetSoundDetailPreference,
   saveSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
+import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
 import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
@@ -220,6 +221,12 @@ export const GameContent: FC = () => {
       bgmPlayingRef.current = false;
     }
   }, [preference.volume, requestBgmPlay]);
+
+  useEffect(() => {
+    if (consumeGameBgmUnlock()) {
+      requestBgmPlay();
+    }
+  }, [requestBgmPlay]);
 
   const clearBingoBackgroundSequence = useCallback(() => {
     for (const timerId of bingoLetterTimersRef.current) {
