@@ -16,7 +16,11 @@
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-button-foreground: hsl(var(--button-foreground));
+  --color-red-100: hsl(0 93% 94%);
+  --color-yellow-100: hsl(48 100% 93%);
   --color-green-100: hsl(141 84% 93%);
+  --color-sky-100: hsl(204 94% 94%);
+  --color-violet-100: hsl(250 95% 94%);
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-accent: hsl(var(--accent));
@@ -86,6 +90,22 @@ body {
   border-color: hsl(var(--border));
   color: hsl(var(--muted-foreground));
   box-shadow: none;
+}
+
+.number-outline-white {
+  text-shadow:
+    -1px 0 0 #ffffff,
+    1px 0 0 #ffffff,
+    0 -1px 0 #ffffff,
+    0 1px 0 #ffffff;
+}
+
+.number-outline-black {
+  text-shadow:
+    -1px 0 0 #000000,
+    1px 0 0 #000000,
+    0 -1px 0 #000000,
+    0 1px 0 #000000;
 }
 
 @keyframes roulette-flash {

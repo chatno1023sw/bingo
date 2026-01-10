@@ -21,11 +21,11 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
   const display = value == null ? "" : value.toString();
   const bingoLetter = value == null ? null : bingoNumberRanges.getLetter(value);
   const letterStyles = {
-    B: "text-red-100",
-    I: "text-yellow-100",
-    N: "text-green-100",
-    G: "text-sky-100",
-    O: "text-violet-100",
+    B: "bg-red-300",
+    I: "bg-yellow-300",
+    N: "bg-green-300",
+    G: "bg-sky-300",
+    O: "bg-violet-300",
   } as const;
 
   return (
@@ -36,10 +36,11 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
           isDrawing ? "opacity-50" : "opacity-100",
         )}
       >
+        <span className="relative z-10 inline-block">{display}</span>
         {!isDrawing && bingoLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute inset-0 flex items-center justify-center font-black text-[40rem] leading-none",
+              "pointer-events-none absolute -right-10 -bottom-5 z-20 flex h-30 w-30 items-center justify-center rounded-full border-2 border-secondary font-black text-[5rem] text-white leading-none",
               letterStyles[bingoLetter],
             )}
             aria-hidden
@@ -47,7 +48,6 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
             {bingoLetter}
           </span>
         ) : null}
-        <span className="relative z-10">{display}</span>
       </div>
     </div>
   );
