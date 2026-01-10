@@ -1,7 +1,6 @@
+import { audioSettings } from "~/common/constants/audio";
 import type { BgmPreference, GameStorageKeys } from "~/common/types";
 import { readStorageJson, storageKeys, writeStorageJson } from "~/common/utils/storage";
-
-const DEFAULT_BGM_VOLUME = 0;
 
 /**
  * BGM 設定のデフォルト値を生成します。
@@ -13,7 +12,7 @@ const DEFAULT_BGM_VOLUME = 0;
  */
 export const createDefaultBgmPreference = (
   timestamp: string = new Date().toISOString(),
-  volume: number = DEFAULT_BGM_VOLUME,
+  volume: number = audioSettings.bgm.defaultVolume,
 ): BgmPreference => ({
   enabled: true,
   volume,
@@ -34,7 +33,10 @@ export const getBgmPreference = async (
 ): Promise<BgmPreference> => {
   const stored = readStorageJson<BgmPreference | null>(storageKey, null);
   if (!stored) {
-    const fallback = createDefaultBgmPreference(new Date().toISOString(), defaultVolume);
+    const fallback = createDefaultBgmPreference(
+      new Date().toISOString(),
+      defaultVolume ?? audioSettings.bgm.defaultVolume,
+    );
     writeStorageJson(storageKey, fallback);
     return fallback;
   }
