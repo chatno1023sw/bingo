@@ -41,7 +41,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   const onCymbalEndRef = useRef<(() => void) | null>(null);
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
   const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fallbackWaitRef = useRef(audioSettings.se.fallbackWaitMs);
+  const fallbackWaitRef = useRef<number>(audioSettings.se.fallbackWaitMs);
   const enabledRef = useRef(true);
   const volumeRef = useRef(1);
   const hasStartedRef = useRef(false);
@@ -63,10 +63,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     const normalVolume = baseVolume * audioSettings.se.baseVolumeScale;
     const accentVolume = Math.min(
       1,
-      Math.max(
-        normalVolume * audioSettings.se.accentVolumeScale,
-        audioSettings.se.accentMinVolume,
-      ),
+      Math.max(normalVolume * audioSettings.se.accentVolumeScale, audioSettings.se.accentMinVolume),
     );
     if (drumrollRef.current) {
       drumrollRef.current.volume(accentVolume);

@@ -114,7 +114,7 @@ export const GameContent: FC = () => {
       pendingNumberRef.current = null;
       announceTimerRef.current = null;
     }, ANNOUNCE_DELAY_MS);
-  }, [playNumberVoice]);
+  }, [playNumberVoice, ANNOUNCE_DELAY_MS]);
 
   const { playDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
