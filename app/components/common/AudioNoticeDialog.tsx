@@ -36,6 +36,7 @@ export const AudioNoticeDialog: FC<AudioNoticeDialogProps> = ({
       <CommonDialog
         open={open}
         onClose={onClose}
+        preventOutsideClose
         title="このゲームは音が流れるよ！"
         description="スピーカーの音量に気をつけてね。操作に合わせて賑やかなサウンドが再生されます。"
         contentClassName="w-[min(92vw,520px)]"
