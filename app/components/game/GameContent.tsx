@@ -12,7 +12,12 @@ import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
+import {
+  markAudioNoticeAcknowledged,
+  shouldShowAudioNotice,
+} from "~/common/services/audioNoticeService";
 import { storageKeys } from "~/common/utils/storage";
+import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
@@ -67,6 +72,7 @@ export const GameContent: FC = () => {
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => shouldShowAudioNotice());
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -290,6 +296,15 @@ export const GameContent: FC = () => {
     clearBingoBackgroundSequence();
   }, [clearBingoBackgroundSequence, isAnimating]);
 
+  useEffect(() => {
+    setAudioNoticeOpen(shouldShowAudioNotice());
+  }, []);
+
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
+    setAudioNoticeOpen(false);
+  }, []);
+
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
@@ -330,6 +345,24 @@ export const GameContent: FC = () => {
       step: 0.01,
     },
   ];
+
+  const handleMuteAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(0);
+    void setSoundVolume(0);
+    setVoiceVolume(0);
+    setDrumrollVolumeScale(0);
+    setCymbalVolumeScale(0);
+  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
+
+  const handleEnableAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(audioSettings.bgm.defaultVolume);
+    void setSoundVolume(audioSettings.se.defaultVolume);
+    setVoiceVolume(audioSettings.number.voiceVolume);
+    setDrumrollVolumeScale(audioSettings.se.drumrollVolumeScale);
+    setCymbalVolumeScale(audioSettings.se.cymbalVolumeScale);
+  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
 
   if (isLoading) {
     return (
@@ -428,6 +461,12 @@ export const GameContent: FC = () => {
         onClose={closeResetDialog}
         onConfirm={handleReset}
         disabled={isResetting}
+      />
+      <AudioNoticeDialog
+        open={audioNoticeOpen}
+        onClose={acknowledgeAudioNotice}
+        onMuteAll={handleMuteAllAudio}
+        onEnableAll={handleEnableAllAudio}
       />
     </PrizeProvider>
   );

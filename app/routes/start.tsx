@@ -2,6 +2,10 @@ import { Howl } from "howler";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
+import {
+  markAudioNoticeAcknowledged,
+  shouldShowAudioNotice,
+} from "~/common/services/audioNoticeService";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
@@ -11,6 +15,7 @@ import {
   startSession,
 } from "~/common/services/sessionService";
 import { storageKeys } from "~/common/utils/storage";
+import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
@@ -23,6 +28,7 @@ import { StartOverDialog } from "~/components/start/StartOverDialog";
  */
 export default function StartRoute() {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => shouldShowAudioNotice());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const bgmRef = useRef<Howl | null>(null);
@@ -39,6 +45,10 @@ export default function StartRoute() {
     defaultVolume: audioSettings.se.defaultVolume,
   });
 
+  useEffect(() => {
+    setAudioNoticeOpen(shouldShowAudioNotice());
+  }, []);
+
   /**
    * セッション開始処理を実行します。
    *
@@ -47,7 +57,13 @@ export default function StartRoute() {
    * - 戻り値: Promise を返します。
    * - Chrome DevTools MCP では Start→Game の遷移を確認します。
    */
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAudioNoticeAcknowledged();
+    setAudioNoticeOpen(false);
+  }, []);
+
   const handleStart = async () => {
+    acknowledgeAudioNotice();
     setIsSubmitting(true);
     try {
       await startSession();
@@ -86,6 +102,7 @@ export default function StartRoute() {
    * - Chrome DevTools MCP では続きからの遷移を確認します。
    */
   const handleResumeConfirm = async () => {
+    acknowledgeAudioNotice();
     setIsSubmitting(true);
     try {
       const resumed = await resumeSession();
@@ -181,6 +198,18 @@ export default function StartRoute() {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  const handleMuteAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(0);
+    void setSoundVolume(0);
+  }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
+
+  const handleEnableAllAudio = useCallback(() => {
+    acknowledgeAudioNotice();
+    void setVolume(audioSettings.bgm.defaultVolume);
+    void setSoundVolume(audioSettings.se.defaultVolume);
+  }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
@@ -210,6 +239,12 @@ export default function StartRoute() {
           void handleStart();
         }}
         disabled={isSubmitting}
+      />
+      <AudioNoticeDialog
+        open={audioNoticeOpen}
+        onClose={acknowledgeAudioNotice}
+        onMuteAll={handleMuteAllAudio}
+        onEnableAll={handleEnableAllAudio}
       />
     </main>
   );
