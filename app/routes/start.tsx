@@ -18,7 +18,7 @@ import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { StartMenu } from "~/components/start/StartMenu";
-import { markGameBgmUnlock } from "~/common/utils/audioUnlock";
+import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
 import {
   hasAudioNoticeAcknowledged,
   markAudioNoticeAcknowledged,
@@ -36,6 +36,8 @@ export default function StartRoute() {
   const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
+  const [shouldResumeBgm, setShouldResumeBgm] = useState(() => consumeStartBgmUnlock());
+  const [isBgmReady, setIsBgmReady] = useState(false);
   const bgmRef = useRef<Howl | null>(null);
   const bgmPlayingRef = useRef(false);
   const bgmPendingRef = useRef(false);
@@ -188,10 +190,12 @@ export default function StartRoute() {
       },
     });
     bgmRef.current = bgm;
+    setIsBgmReady(true);
     return () => {
       bgm.stop();
       bgm.unload();
       bgmRef.current = null;
+      setIsBgmReady(false);
     };
   }, [attachUnlockListeners]);
 
@@ -212,6 +216,24 @@ export default function StartRoute() {
       bgmPlayingRef.current = false;
     }
   }, [preference.volume, requestBgmPlay]);
+
+  useEffect(() => {
+    if (!shouldResumeBgm) {
+      return;
+    }
+    if (!isBgmReady) {
+      return;
+    }
+    if (audioNoticeOpen) {
+      return;
+    }
+    if (preference.volume <= 0) {
+      setShouldResumeBgm(false);
+      return;
+    }
+    requestBgmPlay();
+    setShouldResumeBgm(false);
+  }, [audioNoticeOpen, isBgmReady, preference.volume, requestBgmPlay, shouldResumeBgm]);
 
   const syncBgmVolume = useCallback(
     async (volume: number) => {

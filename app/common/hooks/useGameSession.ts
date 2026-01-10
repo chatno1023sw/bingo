@@ -8,6 +8,7 @@ import {
   getAvailableNumbers,
   NoAvailableNumbersError,
 } from "~/common/utils/bingoEngine";
+import { markStartBgmUnlock } from "~/common/utils/audioUnlock";
 
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
@@ -289,6 +290,7 @@ export const useGameSession = (): UseGameSessionResult => {
    * - Chrome DevTools MCP では遷移を確認します。
    */
   const handleBackToStart = () => {
+    markStartBgmUnlock();
     navigate("/start");
   };
 
