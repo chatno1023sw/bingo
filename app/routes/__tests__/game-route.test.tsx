@@ -1,9 +1,10 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import GameRoute from "~/routes/game";
 import { audioPaths } from "~/common/constants/audio";
 import { resumeSession, startSession, persistSessionState } from "~/common/services/sessionService";
 import { getHistoryView } from "~/common/services/historyService";
 import { drawNextNumber, getAvailableNumbers } from "~/common/utils/bingoEngine";
+import { SoundProvider } from "~/common/contexts/SoundContext";
+import { GameContent } from "~/components/game/GameContent";
 
 const navigateMock = vi.fn();
 const howlOptionsBySrc = new Map<
@@ -125,7 +126,11 @@ describe("game route client flow", () => {
     vi.mocked(getHistoryView).mockResolvedValue(createHistoryView());
     vi.mocked(getAvailableNumbers).mockReturnValue([2, 3]);
 
-    render(<GameRoute />);
+    render(
+      <SoundProvider enabled>
+        <GameContent />
+      </SoundProvider>,
+    );
 
     expect(screen.getByText("読み込み中...")).toBeInTheDocument();
     expect(await screen.findByText("残り 2 / 75")).toBeInTheDocument();
@@ -168,7 +173,11 @@ describe("game route client flow", () => {
       ]);
     vi.mocked(getAvailableNumbers).mockReturnValueOnce([2, 3]).mockReturnValueOnce([3]);
 
-    render(<GameRoute />);
+    render(
+      <SoundProvider enabled>
+        <GameContent />
+      </SoundProvider>,
+    );
 
     await screen.findByText("残り 2 / 75");
 

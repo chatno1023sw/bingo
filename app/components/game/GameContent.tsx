@@ -33,6 +33,11 @@ import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
 
+export type GameContentProps = {
+  /** Start ビューへ戻る */
+  onNavigateStart?: () => void;
+};
+
 /**
  * Game 画面のメインコンテンツです。
  *
@@ -41,7 +46,7 @@ import { cn } from "~/lib/utils";
  * - 戻り値: ゲーム画面の JSX を返します。
  * - Chrome DevTools MCP では抽選操作が動作することを確認します。
  */
-export const GameContent: FC = () => {
+export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const {
     session,
     isLoading,
@@ -61,7 +66,7 @@ export const GameContent: FC = () => {
     completeDrawAnimation,
     handleReset,
     handleBackToStart,
-  } = useGameSession();
+  } = useGameSession({ onNavigateToStart: onNavigateStart });
   const { preference, isReady, setVolume } = useBgmPreference({
     defaultVolume: audioSettings.bgm.defaultVolume,
   });
