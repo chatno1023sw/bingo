@@ -1,12 +1,13 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   audioPaths,
   audioSettings,
   buildNumberVoicePath,
   resolveAudioPath,
 } from "~/common/constants/audio";
+import type { BingoLetter } from "~/common/constants/bingo";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
@@ -63,12 +64,16 @@ export const GameContent: FC = () => {
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
     audioSettings.se.cymbalVolumeScale,
   );
+  const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
+  const [isFirst, setIsFirst] = useState(true);
+  const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
   const pendingNumberRef = useRef<number | null>(null);
   const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastAnnouncedRef = useRef<number | null>(null);
+  const bingoLetterTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
 
   const playNumberVoice = useCallback(
@@ -123,7 +128,7 @@ export const GameContent: FC = () => {
     }, ANNOUNCE_DELAY_MS);
   }, [playNumberVoice, ANNOUNCE_DELAY_MS]);
 
-  const { playDrumroll } = useBgmPlayers({
+  const { playDrumroll, getDrumrollDurationMs } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
     enabled: soundPreference.volume > 0,
     volume: soundPreference.volume,
@@ -202,8 +207,44 @@ export const GameContent: FC = () => {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  const clearBingoBackgroundSequence = useCallback(() => {
+    for (const timerId of bingoLetterTimersRef.current) {
+      clearTimeout(timerId);
+    }
+    bingoLetterTimersRef.current = [];
+    setBingoBackgroundLetter(null);
+  }, []);
+
+  const startBingoBackgroundSequence = useCallback(
+    (durationMs: number) => {
+      clearBingoBackgroundSequence();
+      const letters: BingoLetter[] = ["B", "I", "N", "G", "O"];
+      if (durationMs <= 0) {
+        setBingoBackgroundLetter(letters[0]);
+        return;
+      }
+      const segmentMs = durationMs / letters.length;
+      setBingoBackgroundLetter(letters[0]);
+      letters.slice(1).forEach((letter, index) => {
+        const timerId = setTimeout(
+          () => {
+            setBingoBackgroundLetter(letter);
+          },
+          Math.round(segmentMs * (index + 1)),
+        );
+        bingoLetterTimersRef.current.push(timerId);
+      });
+      const endTimerId = setTimeout(() => {
+        setBingoBackgroundLetter(null);
+      }, Math.round(durationMs));
+      bingoLetterTimersRef.current.push(endTimerId);
+    },
+    [clearBingoBackgroundSequence],
+  );
+
   useEffect(() => {
     return () => {
+      clearBingoBackgroundSequence();
       if (announceTimerRef.current) {
         clearTimeout(announceTimerRef.current);
         announceTimerRef.current = null;
@@ -214,7 +255,7 @@ export const GameContent: FC = () => {
         numberVoiceRef.current = null;
       }
     };
-  }, []);
+  }, [clearBingoBackgroundSequence]);
 
   useEffect(() => {
     if (!pendingAnnounceRef.current) {
@@ -242,6 +283,13 @@ export const GameContent: FC = () => {
     tryAnnounceNumber();
   }, [session?.gameState.currentNumber, tryAnnounceNumber]);
 
+  useEffect(() => {
+    if (isAnimating) {
+      return;
+    }
+    clearBingoBackgroundSequence();
+  }, [clearBingoBackgroundSequence, isAnimating]);
+
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
@@ -250,6 +298,10 @@ export const GameContent: FC = () => {
     pendingNumberRef.current = null;
     startDrawAnimation();
     playDrumroll();
+    const drumrollDurationMs = getDrumrollDurationMs();
+    const sequenceDurationMs =
+      drumrollDurationMs > 0 ? drumrollDurationMs : audioSettings.se.fallbackWaitMs;
+    startBingoBackgroundSequence(sequenceDurationMs);
   };
 
   const extraSoundSliders = [
@@ -314,7 +366,10 @@ export const GameContent: FC = () => {
                 "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
                 "relative top-2",
               )}
-              onClick={openResetDialog}
+              onClick={() => {
+                isFirstState.setIsFirst(true);
+                openResetDialog();
+              }}
               disabled={isLoading || isResetting || session.historyView.length === 0}
             >
               クリア
@@ -340,13 +395,18 @@ export const GameContent: FC = () => {
               </Button>
             </div>
           </header>
-          <div className="flex flex-1 gap-6 overflow-hidden px-6 pb-6">
+          <div className="flex flex-1 overflow-hidden px-6 pb-6">
             <HistoryPanel recent={session.historyView} className="flex-[0_0_30vw]" />
             <section className="flex flex-1 flex-col items-center justify-center gap-8">
-              <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
+              <CurrentNumber
+                value={displayNumber}
+                isDrawing={isAnimating || isMutating}
+                backgroundLetter={bingoBackgroundLetter}
+                isFirstState={isFirstState}
+              />
               <Button
                 type="button"
-                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
+                className="mt-12.5 flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
                 onClick={handleDrawWithBgm}
                 disabled={isButtonDisabled}
               >
