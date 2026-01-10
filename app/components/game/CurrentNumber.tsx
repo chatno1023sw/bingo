@@ -39,7 +39,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
         {!isDrawing && bingoLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute inset-0 flex items-center justify-center font-black text-[40rem] text-primary/20 leading-none",
+              "pointer-events-none absolute inset-0 flex items-center justify-center font-black text-[40rem] leading-none",
               letterStyles[bingoLetter],
             )}
             aria-hidden
