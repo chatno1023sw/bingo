@@ -51,6 +51,65 @@ export const GameContent: FC = () => {
     defaultVolume: 0.2,
   });
 
+  const numberVoiceRef = useRef<Howl | null>(null);
+  const pendingAnnounceRef = useRef(false);
+  const pendingNumberRef = useRef<number | null>(null);
+  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAnnouncedRef = useRef<number | null>(null);
+  const ANNOUNCE_DELAY_MS = 350;
+
+  const playNumberVoice = useCallback(
+    (number: number) => {
+      if (soundPreference.volume <= 0) {
+        return;
+      }
+      if (numberVoiceRef.current) {
+        numberVoiceRef.current.stop();
+        numberVoiceRef.current.unload();
+        numberVoiceRef.current = null;
+      }
+      const voice = new Howl({
+        src: [`${import.meta.env.BASE_URL}number/${number}.wav`],
+        preload: true,
+        volume: 1,
+        onend: () => {
+          voice.unload();
+          if (numberVoiceRef.current === voice) {
+            numberVoiceRef.current = null;
+          }
+        },
+      });
+      numberVoiceRef.current = voice;
+      voice.play();
+    },
+    [soundPreference.volume],
+  );
+
+  const tryAnnounceNumber = useCallback(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    const number = pendingNumberRef.current;
+    if (number === null) {
+      return;
+    }
+    if (lastAnnouncedRef.current === number) {
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      return;
+    }
+    if (announceTimerRef.current) {
+      clearTimeout(announceTimerRef.current);
+    }
+    announceTimerRef.current = setTimeout(() => {
+      playNumberVoice(number);
+      lastAnnouncedRef.current = number;
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      announceTimerRef.current = null;
+    }, ANNOUNCE_DELAY_MS);
+  }, [playNumberVoice]);
+
   const { playDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
     enabled: soundPreference.volume > 0,
@@ -128,10 +187,52 @@ export const GameContent: FC = () => {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  useEffect(() => {
+    return () => {
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+        announceTimerRef.current = null;
+      }
+      if (numberVoiceRef.current) {
+        numberVoiceRef.current.stop();
+        numberVoiceRef.current.unload();
+        numberVoiceRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    if (drawError) {
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+        announceTimerRef.current = null;
+      }
+    }
+  }, [drawError]);
+
+  useEffect(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    const currentNumber = session?.gameState.currentNumber ?? null;
+    if (currentNumber === null) {
+      return;
+    }
+    pendingNumberRef.current = currentNumber;
+    tryAnnounceNumber();
+  }, [session?.gameState.currentNumber, tryAnnounceNumber]);
+
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
     }
+    pendingAnnounceRef.current = soundPreference.volume > 0;
+    pendingNumberRef.current = null;
     startDrawAnimation();
     playDrumroll();
   };

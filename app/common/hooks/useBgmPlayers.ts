@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef } from "react";
 export type UseBgmPlayersOptions = {
   /** ドラムロール終了時の処理 */
   onDrumrollEnd?: () => void;
+  /** シンバル終了時の処理 */
+  onCymbalEnd?: () => void;
   /** BGM の有効状態 */
   enabled?: boolean;
   /** BGM の音量 */
@@ -26,6 +28,7 @@ export type UseBgmPlayersResult = {
  *
  * - 副作用: Howler インスタンスの生成と破棄を行います。
  * - 入力制約: `onDrumrollEnd` は例外を投げない関数を渡してください。
+ * - 入力制約: `onCymbalEnd` は例外を投げない関数を渡してください。
  * - 戻り値: ドラムロール/シンバルの再生操作を返します。
  * - 音声が取得できない場合は指定時間後に抽選終了処理へ進みます。
  * - Chrome DevTools MCP では抽選開始時にドラムロール、終了時にシンバルが鳴ることを確認します。
@@ -34,9 +37,11 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   const OTHER_SE_VOLUME_SCALE = 0.9;
   const ACCENT_SE_VOLUME_SCALE = 1.5;
   const ACCENT_SE_MIN_VOLUME = 0.4;
+  const CYMBAL_VOLUME_SCALE = 0.6;
   const drumrollRef = useRef<Howl | null>(null);
   const cymbalRef = useRef<Howl | null>(null);
   const onDrumrollEndRef = useRef<(() => void) | null>(null);
+  const onCymbalEndRef = useRef<(() => void) | null>(null);
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
   const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fallbackWaitRef = useRef(5000);
@@ -47,6 +52,10 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   useEffect(() => {
     onDrumrollEndRef.current = options.onDrumrollEnd ?? null;
   }, [options.onDrumrollEnd]);
+
+  useEffect(() => {
+    onCymbalEndRef.current = options.onCymbalEnd ?? null;
+  }, [options.onCymbalEnd]);
 
   useEffect(() => {
     fallbackWaitRef.current = options.fallbackWaitMs ?? 5000;
@@ -63,7 +72,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
       drumrollRef.current.volume(accentVolume);
     }
     if (cymbalRef.current) {
-      cymbalRef.current.volume(accentVolume);
+      cymbalRef.current.volume(accentVolume * CYMBAL_VOLUME_SCALE);
     }
   }, []);
 
@@ -140,6 +149,9 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     const cymbal = new Howl({
       src: [`${import.meta.env.BASE_URL}se/cymbal.mp3`],
       preload: true,
+      onend: () => {
+        onCymbalEndRef.current?.();
+      },
     });
     drumrollRef.current = drumroll;
     cymbalRef.current = cymbal;
