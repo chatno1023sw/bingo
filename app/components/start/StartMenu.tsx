@@ -63,9 +63,14 @@ export const StartMenu: FC<StartMenuProps> = ({
           設定
         </Button>
       </div>
-      <div className="absolute right-6 bottom-6 text-muted-foreground text-xl">
-        <span>SE ・ BGM: 魔王魂</span>
+      <div className="absolute right-0 bottom-0 text-muted-foreground text-xl">
+        <div className="flex flex-col items-end pr-8">
+          <span>BGM:魔王魂</span>
+          <span>VOICEVOX:ずんだもん</span>
+        </div>
       </div>
+      <div className="absolute right-32 bottom-14 text-muted-foreground text-xl"></div>
+      <div className="absolute right-6 bottom-6 text-muted-foreground text-xl"></div>
     </section>
   );
 };
