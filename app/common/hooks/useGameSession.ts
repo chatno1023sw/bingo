@@ -115,6 +115,7 @@ export const useGameSession = (): UseGameSessionResult => {
   const [isAnimating, setIsAnimating] = useState(false);
   const animationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const drawActiveRef = useRef(false);
+  const lastSyncedNumberRef = useRef<number | null>(null);
 
   const availableNumbers = session?.availableNumbers ?? [];
   const isButtonDisabled =
@@ -153,7 +154,11 @@ export const useGameSession = (): UseGameSessionResult => {
     if (isAnimating) {
       return;
     }
+    if (currentNumber === lastSyncedNumberRef.current) {
+      return;
+    }
     setDisplayNumber(currentNumber);
+    lastSyncedNumberRef.current = currentNumber;
   }, [isAnimating, currentNumber]);
 
   useEffect(() => {
@@ -245,6 +250,7 @@ export const useGameSession = (): UseGameSessionResult => {
       return;
     }
     const pool = availableNumbers.length > 0 ? availableNumbers : NUMBER_POOL;
+    setDisplayNumber(null);
     setIsAnimating(true);
     drawActiveRef.current = true;
     animationIntervalRef.current = setInterval(() => {

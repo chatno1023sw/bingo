@@ -69,8 +69,6 @@ export const StartMenu: FC<StartMenuProps> = ({
           <span>VOICEVOX:ずんだもん</span>
         </div>
       </div>
-      <div className="absolute right-32 bottom-14 text-muted-foreground text-xl"></div>
-      <div className="absolute right-6 bottom-6 text-muted-foreground text-xl"></div>
     </section>
   );
 };

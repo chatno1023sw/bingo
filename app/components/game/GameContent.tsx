@@ -340,13 +340,13 @@ export const GameContent: FC = () => {
               </Button>
             </div>
           </header>
-          <div className="flex flex-1 gap-6 overflow-hidden px-6 pb-6">
+          <div className="flex flex-1 overflow-hidden px-6 pb-6">
             <HistoryPanel recent={session.historyView} className="flex-[0_0_30vw]" />
             <section className="flex flex-1 flex-col items-center justify-center gap-8">
               <CurrentNumber value={displayNumber} isDrawing={isAnimating || isMutating} />
               <Button
                 type="button"
-                className="flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
+                className="mt-12.5 flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
                 onClick={handleDrawWithBgm}
                 disabled={isButtonDisabled}
               >

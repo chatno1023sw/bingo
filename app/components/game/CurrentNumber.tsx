@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { bingoNumberRanges } from "~/common/constants/bingo";
 import { cn } from "~/lib/utils";
 
 export type CurrentNumberProps = {
@@ -17,17 +18,36 @@ export type CurrentNumberProps = {
  * - Chrome DevTools MCP では表示の切り替えを確認します。
  */
 export const CurrentNumber: FC<CurrentNumberProps> = ({ value, isDrawing }) => {
-  const display = value == null ? "--" : value.toString();
+  const display = value == null ? "" : value.toString();
+  const bingoLetter = value == null ? null : bingoNumberRanges.getLetter(value);
+  const letterStyles = {
+    B: "text-red-100",
+    I: "text-yellow-100",
+    N: "text-green-100",
+    G: "text-sky-100",
+    O: "text-violet-100",
+  } as const;
 
   return (
     <div className="flex flex-col items-center gap-6 text-foreground">
       <div
         className={cn(
-          "flex h-112 w-md items-center justify-center rounded border border-border bg-card font-bold text-[15rem] transition",
+          "relative flex h-112 w-md items-center justify-center rounded bg-card font-bold text-[20rem] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
       >
-        {display}
+        {!isDrawing && bingoLetter ? (
+          <span
+            className={cn(
+              "pointer-events-none absolute inset-0 flex items-center justify-center font-black text-[40rem] text-primary/20 leading-none",
+              letterStyles[bingoLetter],
+            )}
+            aria-hidden
+          >
+            {bingoLetter}
+          </span>
+        ) : null}
+        <span className="relative z-10">{display}</span>
       </div>
     </div>
   );
