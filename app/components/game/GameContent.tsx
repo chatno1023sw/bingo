@@ -8,9 +8,9 @@ import {
   resolveAudioPath,
 } from "~/common/constants/audio";
 import type { BingoLetter } from "~/common/constants/bingo";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
 import {
   getSoundDetailPreference,
@@ -23,7 +23,6 @@ import {
   hasAudioNoticeAcknowledged,
   markAudioNoticeAcknowledged,
 } from "~/common/utils/audioNoticeState";
-import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
@@ -67,13 +66,9 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     handleReset,
     handleBackToStart,
   } = useGameSession({ onNavigateToStart: onNavigateStart });
-  const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
-    storageKey: storageKeys.se,
-    defaultVolume: audioSettings.se.defaultVolume,
-  });
+  const { gameBgm, sound } = useAudioPreferences();
+  const { preference, isReady, setVolume } = gameBgm;
+  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const initialSoundDetailRef = useRef(getSoundDetailPreference());
   const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
   const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(

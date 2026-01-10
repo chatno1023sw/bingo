@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { AudioPreferenceProvider } from "~/common/contexts/AudioPreferenceContext";
 import { SoundProvider } from "~/common/contexts/SoundContext";
 import { GameContent } from "~/components/game/GameContent";
 import { StartView } from "~/components/start/StartView";
@@ -15,18 +16,18 @@ export default function StartGameRoute() {
   const [activeView, setActiveView] = useState<ActiveView>(views.start);
   const navigate = useNavigate();
 
-  if (activeView === views.start) {
-    return (
-      <StartView
-        onShowGame={() => setActiveView(views.game)}
-        onNavigateSetting={() => navigate("/setting")}
-      />
-    );
-  }
-
   return (
-    <SoundProvider enabled>
-      <GameContent onNavigateStart={() => setActiveView(views.start)} />
-    </SoundProvider>
+    <AudioPreferenceProvider>
+      {activeView === views.start ? (
+        <StartView
+          onShowGame={() => setActiveView(views.game)}
+          onNavigateSetting={() => navigate("/setting")}
+        />
+      ) : (
+        <SoundProvider enabled>
+          <GameContent onNavigateStart={() => setActiveView(views.start)} />
+        </SoundProvider>
+      )}
+    </AudioPreferenceProvider>
   );
 }

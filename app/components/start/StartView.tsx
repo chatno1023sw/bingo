@@ -1,7 +1,6 @@
 import { Howl } from "howler";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
@@ -9,7 +8,6 @@ import {
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
-import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
@@ -23,6 +21,7 @@ import {
   muteSoundDetailPreference,
   resetSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 
 export type StartViewProps = {
   /** Game ビューへ切り替える */
@@ -42,21 +41,10 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const bgmPlayingRef = useRef(false);
   const bgmPendingRef = useRef(false);
   const bgmUnlockAttachedRef = useRef(false);
-  const {
-    preference,
-    isReady,
-    setVolume: setStartBgmVolume,
-  } = useBgmPreference({
-    storageKey: storageKeys.bgmStart,
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { setVolume: setGameBgmVolume } = useBgmPreference({
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
-    storageKey: storageKeys.se,
-    defaultVolume: audioSettings.se.defaultVolume,
-  });
+  const { startBgm, gameBgm, sound } = useAudioPreferences();
+  const { preference: startBgmPreference, isReady, setVolume: setStartBgmVolume } = startBgm;
+  const { setVolume: setGameBgmVolume } = gameBgm;
+  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
 
   const acknowledgeAudioNotice = useCallback(() => {
     markAudioNoticeAcknowledged();
@@ -170,8 +158,8 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume * audioSettings.bgm.startVolumeScale);
-    if (preference.volume > 0) {
+    bgm.volume(startBgmPreference.volume * audioSettings.bgm.startVolumeScale);
+    if (startBgmPreference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
       }
@@ -181,7 +169,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
       bgm.stop();
       bgmPlayingRef.current = false;
     }
-  }, [preference.volume, requestBgmPlay]);
+  }, [startBgmPreference.volume, requestBgmPlay]);
 
   useEffect(() => {
     if (!shouldResumeBgm) {
@@ -193,13 +181,13 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     if (audioNoticeOpen) {
       return;
     }
-    if (preference.volume <= 0) {
+    if (startBgmPreference.volume <= 0) {
       setShouldResumeBgm(false);
       return;
     }
     requestBgmPlay();
     setShouldResumeBgm(false);
-  }, [audioNoticeOpen, isBgmReady, preference.volume, requestBgmPlay, shouldResumeBgm]);
+  }, [audioNoticeOpen, isBgmReady, startBgmPreference.volume, requestBgmPlay, shouldResumeBgm]);
 
   const syncBgmVolume = useCallback(
     async (volume: number) => {
@@ -237,7 +225,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
         <BgmControl
-          preference={preference}
+          preference={startBgmPreference}
           soundPreference={soundPreference}
           isReady={isReady}
           onVolumeChange={handleStartBgmVolumeChange}
