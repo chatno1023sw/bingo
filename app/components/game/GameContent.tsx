@@ -16,6 +16,12 @@ import {
   markAudioNoticeAcknowledged,
   shouldShowAudioNotice,
 } from "~/common/services/audioNoticeService";
+import {
+  getSoundDetailPreference,
+  muteSoundDetailPreference,
+  resetSoundDetailPreference,
+  saveSoundDetailPreference,
+} from "~/common/services/soundDetailPreferenceService";
 import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
@@ -62,12 +68,13 @@ export const GameContent: FC = () => {
     storageKey: storageKeys.se,
     defaultVolume: audioSettings.se.defaultVolume,
   });
-  const [voiceVolume, setVoiceVolume] = useState<number>(audioSettings.number.voiceVolume);
+  const initialSoundDetailRef = useRef(getSoundDetailPreference());
+  const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
   const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
-    audioSettings.se.drumrollVolumeScale,
+    initialSoundDetailRef.current.drumrollVolumeScale,
   );
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
-    audioSettings.se.cymbalVolumeScale,
+    initialSoundDetailRef.current.cymbalVolumeScale,
   );
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
@@ -300,6 +307,14 @@ export const GameContent: FC = () => {
     setAudioNoticeOpen(shouldShowAudioNotice());
   }, []);
 
+  useEffect(() => {
+    saveSoundDetailPreference({
+      voiceVolume,
+      drumrollVolumeScale,
+      cymbalVolumeScale,
+    });
+  }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
+
   const acknowledgeAudioNotice = useCallback(() => {
     markAudioNoticeAcknowledged();
     setAudioNoticeOpen(false);
@@ -350,18 +365,20 @@ export const GameContent: FC = () => {
     acknowledgeAudioNotice();
     void setVolume(0);
     void setSoundVolume(0);
-    setVoiceVolume(0);
-    setDrumrollVolumeScale(0);
-    setCymbalVolumeScale(0);
+    const muted = muteSoundDetailPreference();
+    setVoiceVolume(muted.voiceVolume);
+    setDrumrollVolumeScale(muted.drumrollVolumeScale);
+    setCymbalVolumeScale(muted.cymbalVolumeScale);
   }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
     void setVolume(audioSettings.bgm.defaultVolume);
     void setSoundVolume(audioSettings.se.defaultVolume);
-    setVoiceVolume(audioSettings.number.voiceVolume);
-    setDrumrollVolumeScale(audioSettings.se.drumrollVolumeScale);
-    setCymbalVolumeScale(audioSettings.se.cymbalVolumeScale);
+    const defaults = resetSoundDetailPreference();
+    setVoiceVolume(defaults.voiceVolume);
+    setDrumrollVolumeScale(defaults.drumrollVolumeScale);
+    setCymbalVolumeScale(defaults.cymbalVolumeScale);
   }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
 
   if (isLoading) {

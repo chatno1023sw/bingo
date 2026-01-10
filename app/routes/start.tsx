@@ -6,6 +6,10 @@ import {
   markAudioNoticeAcknowledged,
   shouldShowAudioNotice,
 } from "~/common/services/audioNoticeService";
+import {
+  muteSoundDetailPreference,
+  resetSoundDetailPreference,
+} from "~/common/services/soundDetailPreferenceService";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
@@ -202,12 +206,14 @@ export default function StartRoute() {
     acknowledgeAudioNotice();
     void setVolume(0);
     void setSoundVolume(0);
+    muteSoundDetailPreference();
   }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
     void setVolume(audioSettings.bgm.defaultVolume);
     void setSoundVolume(audioSettings.se.defaultVolume);
+    resetSoundDetailPreference();
   }, [acknowledgeAudioNotice, setSoundVolume, setVolume]);
 
   return (
