@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, type FC, type PropsWithChildren } from "react";
 
-const AUDIO_NOTICE_ACK_KEY = "bingo.v1.audioNoticeAck";
+export const AUDIO_NOTICE_ACK_KEY = "bingo.v1.audioNoticeAck";
+export const AUDIO_NOTICE_INIT_PATH_KEY = "bingo.v1.audioNoticeInitialPath";
 
 const getSessionStorage = (): Storage | null => {
   if (typeof window === "undefined") {
