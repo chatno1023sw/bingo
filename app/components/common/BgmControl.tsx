@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type FC } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import type { BgmPreference } from "~/common/types";
 import { BgmToggle } from "~/components/common/BgmToggle";
+import { CommonDialog } from "~/components/common/CommonDialog";
 import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
 
@@ -17,6 +18,8 @@ export type BgmControlProps = {
   onSoundVolumeChange?: (volume: number) => void;
   /** 効果音スライダーの表示 */
   showSoundSlider?: boolean;
+  /** ダイアログ表示で音量調整を行う */
+  useDialog?: boolean;
   /** 追加クラス */
   className?: string;
 };
@@ -36,12 +39,16 @@ export const BgmControl: FC<BgmControlProps> = ({
   soundPreference,
   onSoundVolumeChange,
   showSoundSlider = true,
+  useDialog = false,
   className,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (useDialog) {
+      return;
+    }
     if (!open) {
       return;
     }
@@ -59,7 +66,57 @@ export const BgmControl: FC<BgmControlProps> = ({
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, [open]);
+  }, [open, useDialog]);
+
+  const sliderLayout = {
+    container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
+    row: cn(
+      "flex items-center gap-3",
+      useDialog ? "justify-start" : "gap-2",
+    ),
+    label: useDialog
+      ? "min-w-28 text-right text-xl whitespace-nowrap"
+      : "w-8 text-right text-xl",
+    sliderWrap: "flex w-full",
+  } as const;
+  const sliderContent = (
+    <div className={cn(sliderLayout.container, "pt-8 text-xs")}>
+      <div className={sliderLayout.row}>
+        <span className={sliderLayout.label}>BGM</span>
+        <div className={sliderLayout.sliderWrap}>
+          <Slider
+            value={[Math.round(preference.volume * 100)]}
+            min={0}
+            max={100}
+            step={1}
+            disabled={!isReady}
+            onValueChange={(value) => {
+              const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+              onVolumeChange(next);
+            }}
+          />
+        </div>
+      </div>
+      {showSoundSlider && soundPreference && onSoundVolumeChange ? (
+        <div className={sliderLayout.row}>
+          <span className={sliderLayout.label}>ボタン音量</span>
+          <div className={sliderLayout.sliderWrap}>
+            <Slider
+              value={[Math.round(soundPreference.volume * 100)]}
+              min={0}
+              max={100}
+              step={1}
+              disabled={!isReady}
+              onValueChange={(value) => {
+                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
+                onSoundVolumeChange(next);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <div ref={rootRef} className={cn("relative flex items-center", className)}>
@@ -68,46 +125,27 @@ export const BgmControl: FC<BgmControlProps> = ({
         onToggle={() => setOpen((prev) => !prev)}
         disabled={!isReady}
       />
-      <div
-        className={cn(
-          "overflow-hidden transition-[width,opacity,margin] duration-200 ease-out",
-          open ? "ml-2 w-52 opacity-100" : "ml-0 w-0 opacity-0",
-        )}
-        aria-hidden={!open}
-      >
-        <div className="flex flex-col gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-8 text-right">BGM</span>
-            <Slider
-              value={[Math.round(preference.volume * 100)]}
-              min={0}
-              max={100}
-              step={1}
-              disabled={!isReady}
-              onValueChange={(value) => {
-                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-                onVolumeChange(next);
-              }}
-            />
-          </div>
-          {showSoundSlider && soundPreference && onSoundVolumeChange ? (
-            <div className="flex items-center gap-2">
-              <span className="w-8 text-right">SE</span>
-              <Slider
-                value={[Math.round(soundPreference.volume * 100)]}
-                min={0}
-                max={100}
-                step={1}
-                disabled={!isReady}
-                onValueChange={(value) => {
-                  const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-                  onSoundVolumeChange(next);
-                }}
-              />
-            </div>
-          ) : null}
+      {useDialog ? (
+        <CommonDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          title="音量設定"
+          contentClassName="w-[min(92vw,420px)]"
+          showCloseButton
+        >
+          <div className="mt-2 space-y-3">{sliderContent}</div>
+        </CommonDialog>
+      ) : (
+        <div
+          className={cn(
+            "overflow-hidden transition-[width,opacity,margin] duration-200 ease-out",
+            open ? "ml-2 w-52 opacity-100" : "ml-0 w-0 opacity-0",
+          )}
+          aria-hidden={!open}
+        >
+          {sliderContent}
         </div>
-      </div>
+      )}
     </div>
   );
 };

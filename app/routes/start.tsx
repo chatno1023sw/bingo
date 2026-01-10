@@ -190,6 +190,7 @@ export default function StartRoute() {
           isReady={isReady}
           onVolumeChange={setVolume}
           onSoundVolumeChange={setSoundVolume}
+          useDialog
         />
       </div>
       <div className="flex min-h-90 items-center justify-center">
