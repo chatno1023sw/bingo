@@ -38,9 +38,9 @@ export const AudioNoticeDialog: FC<AudioNoticeDialogProps> = ({
         onClose={onClose}
         preventOutsideClose
         title="このゲームは音が流れるよ！"
-        description="スピーカーの音量に気をつけてね。操作に合わせて賑やかなサウンドが再生されます。"
+        description="スピーカーの音量に気をつけてね。操作に合わせて音が流れるよ！"
         contentClassName="w-[min(92vw,520px)]"
-        headerClassName="space-y-4 text-center"
+        headerClassName="space-y-4 text-center pt-10"
         titleClassName="text-3xl"
         showCloseButton
         closeButtonAriaLabel="音量注意ダイアログを閉じる"
@@ -64,16 +64,7 @@ export const AudioNoticeDialog: FC<AudioNoticeDialogProps> = ({
             </Button>
           </>
         }
-      >
-        <div className="mt-4 space-y-4 text-left text-base text-muted-foreground leading-relaxed">
-          <p>Start 画面と Game 画面の音量調節で変えられるすべての音に影響するよ。</p>
-          <ul className="list-disc space-y-1 pl-5 text-muted-foreground text-sm">
-            <li>音なし: BGM と効果音、番号読み上げをすべてミュートします。</li>
-            <li>音あり: BGM と効果音をおすすめの音量に戻します。</li>
-            <li>× ボタン: 今回だけ閉じて、あとでまた設定できます。</li>
-          </ul>
-        </div>
-      </CommonDialog>
+      />
     </SoundProvider>
   );
 };
