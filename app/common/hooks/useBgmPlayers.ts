@@ -24,6 +24,8 @@ export type UseBgmPlayersResult = {
   playDrumroll: () => void;
   /** ドラムロールを停止 */
   stopDrumroll: () => void;
+  /** ドラムロールの再生時間（ミリ秒）を取得 */
+  getDrumrollDurationMs: () => number;
   /** シンバルを再生 */
   playCymbal: () => void;
 };
@@ -126,6 +128,15 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     cymbal.play();
   }, []);
 
+  const getDrumrollDurationMs = useCallback(() => {
+    const drumroll = drumrollRef.current as (Howl & { duration?: () => number }) | null;
+    const durationSeconds = drumroll?.duration?.() ?? 0;
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+      return 0;
+    }
+    return durationSeconds * 1000;
+  }, []);
+
   useEffect(() => {
     handleDrumrollEndRef.current = () => {
       if (!hasStartedRef.current) {
@@ -201,6 +212,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   return {
     playDrumroll,
     stopDrumroll,
+    getDrumrollDurationMs,
     playCymbal,
   };
 };
