@@ -1,5 +1,6 @@
 import { Howl } from "howler";
 import { useCallback, useEffect, useRef } from "react";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 
 export type UseBgmPlayersOptions = {
   /** ドラムロール終了時の処理 */
@@ -34,17 +35,13 @@ export type UseBgmPlayersResult = {
  * - Chrome DevTools MCP では抽選開始時にドラムロール、終了時にシンバルが鳴ることを確認します。
  */
 export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayersResult => {
-  const OTHER_SE_VOLUME_SCALE = 0.9;
-  const ACCENT_SE_VOLUME_SCALE = 1.5;
-  const ACCENT_SE_MIN_VOLUME = 0.4;
-  const CYMBAL_VOLUME_SCALE = 0.6;
   const drumrollRef = useRef<Howl | null>(null);
   const cymbalRef = useRef<Howl | null>(null);
   const onDrumrollEndRef = useRef<(() => void) | null>(null);
   const onCymbalEndRef = useRef<(() => void) | null>(null);
   const handleDrumrollEndRef = useRef<() => void>(() => undefined);
   const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fallbackWaitRef = useRef(5000);
+  const fallbackWaitRef = useRef(audioSettings.se.fallbackWaitMs);
   const enabledRef = useRef(true);
   const volumeRef = useRef(1);
   const hasStartedRef = useRef(false);
@@ -58,21 +55,24 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   }, [options.onCymbalEnd]);
 
   useEffect(() => {
-    fallbackWaitRef.current = options.fallbackWaitMs ?? 5000;
+    fallbackWaitRef.current = options.fallbackWaitMs ?? audioSettings.se.fallbackWaitMs;
   }, [options.fallbackWaitMs]);
 
   const applyVolume = useCallback(() => {
     const baseVolume = enabledRef.current ? volumeRef.current : 0;
-    const normalVolume = baseVolume * OTHER_SE_VOLUME_SCALE;
+    const normalVolume = baseVolume * audioSettings.se.baseVolumeScale;
     const accentVolume = Math.min(
       1,
-      Math.max(normalVolume * ACCENT_SE_VOLUME_SCALE, ACCENT_SE_MIN_VOLUME),
+      Math.max(
+        normalVolume * audioSettings.se.accentVolumeScale,
+        audioSettings.se.accentMinVolume,
+      ),
     );
     if (drumrollRef.current) {
       drumrollRef.current.volume(accentVolume);
     }
     if (cymbalRef.current) {
-      cymbalRef.current.volume(accentVolume * CYMBAL_VOLUME_SCALE);
+      cymbalRef.current.volume(accentVolume * audioSettings.se.cymbalVolumeScale);
     }
   }, []);
 
@@ -132,7 +132,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
 
   useEffect(() => {
     const drumroll = new Howl({
-      src: [`${import.meta.env.BASE_URL}se/drumroll.mp3`],
+      src: [resolveAudioPath(audioPaths.se.drumroll)],
       preload: true,
       onend: () => handleDrumrollEndRef.current(),
       onloaderror: () => {
@@ -147,7 +147,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
       },
     });
     const cymbal = new Howl({
-      src: [`${import.meta.env.BASE_URL}se/cymbal.mp3`],
+      src: [resolveAudioPath(audioPaths.se.cymbal)],
       preload: true,
       onend: () => {
         onCymbalEndRef.current?.();

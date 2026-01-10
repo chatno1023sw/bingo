@@ -1,5 +1,6 @@
 import { Howl } from "howler";
 import type { FC, MouseEventHandler, ReactNode } from "react";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import { useSoundEnabled } from "~/common/contexts/SoundContext";
 import { getSoundEffectPreference } from "~/common/services/soundEffectService";
 import type { ButtonProps } from "~/components/ui/button";
@@ -9,13 +10,12 @@ import { cn } from "~/lib/utils";
 let primarySe: Howl | null = null;
 let cancelSe: Howl | null = null;
 let hoverSe: Howl | null = null;
-const OTHER_SE_VOLUME_SCALE = 0.9;
 
 const getPrimarySe = (): Howl => {
   if (!primarySe) {
     primarySe = new Howl({
       // maou_se_system23.mp3
-      src: [`${import.meta.env.BASE_URL}se/button-se.mp3`],
+      src: [resolveAudioPath(audioPaths.se.button)],
       preload: true,
     });
   }
@@ -26,7 +26,7 @@ const getCancelSe = (): Howl => {
   if (!cancelSe) {
     cancelSe = new Howl({
       // maou_se_system18.mp3
-      src: [`${import.meta.env.BASE_URL}se/button-cancel-se.mp3`],
+      src: [resolveAudioPath(audioPaths.se.buttonCancel)],
       preload: true,
     });
   }
@@ -37,7 +37,7 @@ const getHoverSe = (): Howl => {
   if (!hoverSe) {
     hoverSe = new Howl({
       // maou_se_system48.mp3
-      src: [`${import.meta.env.BASE_URL}se/hover-se.mp3`],
+      src: [resolveAudioPath(audioPaths.se.hover)],
       preload: true,
     });
   }
@@ -70,7 +70,7 @@ const playButtonSe = (isCancel: boolean) => {
     return;
   }
   const sound = isCancel ? getCancelSe() : getPrimarySe();
-  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
+  sound.volume(preference.volume * audioSettings.se.baseVolumeScale);
   sound.stop();
   sound.play();
 };
@@ -84,7 +84,7 @@ const playHoverSe = () => {
     return;
   }
   const sound = getHoverSe();
-  sound.volume(preference.volume * OTHER_SE_VOLUME_SCALE);
+  sound.volume(preference.volume * audioSettings.se.baseVolumeScale);
   sound.stop();
   sound.play();
 };

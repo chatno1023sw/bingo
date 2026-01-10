@@ -1,6 +1,12 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
 import { type FC, useCallback, useEffect, useRef } from "react";
+import {
+  audioPaths,
+  audioSettings,
+  buildNumberVoicePath,
+  resolveAudioPath,
+} from "~/common/constants/audio";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
@@ -44,11 +50,11 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.1,
+    defaultVolume: audioSettings.bgm.defaultVolume,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
-    defaultVolume: 0.2,
+    defaultVolume: audioSettings.se.defaultVolume,
   });
 
   const numberVoiceRef = useRef<Howl | null>(null);
@@ -56,7 +62,7 @@ export const GameContent: FC = () => {
   const pendingNumberRef = useRef<number | null>(null);
   const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastAnnouncedRef = useRef<number | null>(null);
-  const ANNOUNCE_DELAY_MS = 350;
+  const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
 
   const playNumberVoice = useCallback(
     (number: number) => {
@@ -69,9 +75,9 @@ export const GameContent: FC = () => {
         numberVoiceRef.current = null;
       }
       const voice = new Howl({
-        src: [`${import.meta.env.BASE_URL}number/${number}.wav`],
+        src: [resolveAudioPath(buildNumberVoicePath(number))],
         preload: true,
-        volume: 1,
+        volume: audioSettings.number.voiceVolume,
         onend: () => {
           voice.unload();
           if (numberVoiceRef.current === voice) {
@@ -152,7 +158,7 @@ export const GameContent: FC = () => {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_acoustic02.mp3
-      src: [`${import.meta.env.BASE_URL}bgm/game.mp3`],
+      src: [resolveAudioPath(audioPaths.bgm.game)],
       loop: true,
       preload: true,
       onplayerror: () => {
@@ -174,7 +180,7 @@ export const GameContent: FC = () => {
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume * 0.2);
+    bgm.volume(preference.volume * audioSettings.bgm.gameVolumeScale);
     if (preference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
