@@ -13,10 +13,6 @@ import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
 import {
-  markAudioNoticeAcknowledged,
-  shouldShowAudioNotice,
-} from "~/common/services/audioNoticeService";
-import {
   getSoundDetailPreference,
   muteSoundDetailPreference,
   resetSoundDetailPreference,
@@ -79,7 +75,7 @@ export const GameContent: FC = () => {
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => shouldShowAudioNotice());
+  const [audioNoticeOpen, setAudioNoticeOpen] = useState(true);
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -309,10 +305,6 @@ export const GameContent: FC = () => {
   }, [clearBingoBackgroundSequence, isAnimating]);
 
   useEffect(() => {
-    setAudioNoticeOpen(shouldShowAudioNotice());
-  }, []);
-
-  useEffect(() => {
     saveSoundDetailPreference({
       voiceVolume,
       drumrollVolumeScale,
@@ -321,7 +313,6 @@ export const GameContent: FC = () => {
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
   const acknowledgeAudioNotice = useCallback(() => {
-    markAudioNoticeAcknowledged();
     setAudioNoticeOpen(false);
   }, []);
 
