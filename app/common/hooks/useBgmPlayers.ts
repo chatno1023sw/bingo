@@ -11,6 +11,10 @@ export type UseBgmPlayersOptions = {
   enabled?: boolean;
   /** BGM の音量 */
   volume?: number;
+  /** ドラムロール音量の倍率 */
+  drumrollVolumeScale?: number;
+  /** シンバル音量の倍率 */
+  cymbalVolumeScale?: number;
   /** 音声取得失敗時のフォールバック待機時間（ミリ秒） */
   fallbackWaitMs?: number;
 };
@@ -44,6 +48,8 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
   const fallbackWaitRef = useRef<number>(audioSettings.se.fallbackWaitMs);
   const enabledRef = useRef(true);
   const volumeRef = useRef(1);
+  const drumrollVolumeScaleRef = useRef<number>(audioSettings.se.drumrollVolumeScale);
+  const cymbalVolumeScaleRef = useRef<number>(audioSettings.se.cymbalVolumeScale);
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
@@ -60,16 +66,14 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
 
   const applyVolume = useCallback(() => {
     const baseVolume = enabledRef.current ? volumeRef.current : 0;
-    const normalVolume = baseVolume * audioSettings.se.baseVolumeScale;
-    const accentVolume = Math.min(
-      1,
-      Math.max(normalVolume * audioSettings.se.accentVolumeScale, audioSettings.se.accentMinVolume),
-    );
+    const masterVolume = baseVolume * audioSettings.se.baseVolumeScale;
+    const drumrollVolume = Math.min(1, Math.max(0, masterVolume * drumrollVolumeScaleRef.current));
+    const cymbalVolume = Math.min(1, Math.max(0, masterVolume * cymbalVolumeScaleRef.current));
     if (drumrollRef.current) {
-      drumrollRef.current.volume(accentVolume);
+      drumrollRef.current.volume(drumrollVolume);
     }
     if (cymbalRef.current) {
-      cymbalRef.current.volume(accentVolume * audioSettings.se.cymbalVolumeScale);
+      cymbalRef.current.volume(cymbalVolume);
     }
   }, []);
 
@@ -101,6 +105,13 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     volumeRef.current = options.volume ?? 1;
     applyVolume();
   }, [applyVolume, options.volume]);
+
+  useEffect(() => {
+    drumrollVolumeScaleRef.current =
+      options.drumrollVolumeScale ?? audioSettings.se.drumrollVolumeScale;
+    cymbalVolumeScaleRef.current = options.cymbalVolumeScale ?? audioSettings.se.cymbalVolumeScale;
+    applyVolume();
+  }, [applyVolume, options.cymbalVolumeScale, options.drumrollVolumeScale]);
 
   const playCymbal = useCallback(() => {
     const cymbal = cymbalRef.current;

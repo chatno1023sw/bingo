@@ -1,6 +1,6 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import { type FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   audioPaths,
   audioSettings,
@@ -56,6 +56,13 @@ export const GameContent: FC = () => {
     storageKey: storageKeys.se,
     defaultVolume: audioSettings.se.defaultVolume,
   });
+  const [voiceVolume, setVoiceVolume] = useState<number>(audioSettings.number.voiceVolume);
+  const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
+    audioSettings.se.drumrollVolumeScale,
+  );
+  const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
+    audioSettings.se.cymbalVolumeScale,
+  );
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -66,7 +73,7 @@ export const GameContent: FC = () => {
 
   const playNumberVoice = useCallback(
     (number: number) => {
-      if (soundPreference.volume <= 0) {
+      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
         return;
       }
       if (numberVoiceRef.current) {
@@ -77,7 +84,7 @@ export const GameContent: FC = () => {
       const voice = new Howl({
         src: [resolveAudioPath(buildNumberVoicePath(number))],
         preload: true,
-        volume: audioSettings.number.voiceVolume,
+        volume: voiceVolume,
         onend: () => {
           voice.unload();
           if (numberVoiceRef.current === voice) {
@@ -88,7 +95,7 @@ export const GameContent: FC = () => {
       numberVoiceRef.current = voice;
       voice.play();
     },
-    [soundPreference.volume],
+    [soundPreference.volume, voiceVolume],
   );
 
   const tryAnnounceNumber = useCallback(() => {
@@ -120,6 +127,8 @@ export const GameContent: FC = () => {
     onDrumrollEnd: completeDrawAnimation,
     enabled: soundPreference.volume > 0,
     volume: soundPreference.volume,
+    drumrollVolumeScale,
+    cymbalVolumeScale,
   });
 
   const bgmRef = useRef<Howl | null>(null);
@@ -243,6 +252,33 @@ export const GameContent: FC = () => {
     playDrumroll();
   };
 
+  const extraSoundSliders = [
+    {
+      label: "ドラムロール",
+      value: drumrollVolumeScale,
+      onChange: setDrumrollVolumeScale,
+      min: 0,
+      max: 2,
+      step: 0.05,
+    },
+    {
+      label: "シンバル",
+      value: cymbalVolumeScale,
+      onChange: setCymbalVolumeScale,
+      min: 0,
+      max: 2,
+      step: 0.05,
+    },
+    {
+      label: "音声読み上げ",
+      value: voiceVolume,
+      onChange: setVoiceVolume,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+  ];
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -290,6 +326,8 @@ export const GameContent: FC = () => {
                 isReady={isReady}
                 onVolumeChange={setVolume}
                 onSoundVolumeChange={setSoundVolume}
+                extraSliders={extraSoundSliders}
+                useDialog
               />
               <Button
                 type="button"

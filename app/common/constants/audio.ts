@@ -41,8 +41,7 @@ export const audioSettings = {
   se: {
     defaultVolume: 0.2,
     baseVolumeScale: 0.9,
-    accentVolumeScale: 1.5,
-    accentMinVolume: 0.4,
+    drumrollVolumeScale: 2.25,
     cymbalVolumeScale: 0.6,
     fallbackWaitMs: 5000,
   },

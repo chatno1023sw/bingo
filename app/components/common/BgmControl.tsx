@@ -20,8 +20,27 @@ export type BgmControlProps = {
   showSoundSlider?: boolean;
   /** ダイアログ表示で音量調整を行う */
   useDialog?: boolean;
+  /** 追加で表示する音量スライダー */
+  extraSliders?: VolumeSliderConfig[];
   /** 追加クラス */
   className?: string;
+};
+
+export type VolumeSliderConfig = {
+  /** 表示ラベル */
+  label: string;
+  /** 現在の値 */
+  value: number;
+  /** 値変更ハンドラ */
+  onChange: (value: number) => void;
+  /** 最小値 */
+  min?: number;
+  /** 最大値 */
+  max?: number;
+  /** 刻み幅 */
+  step?: number;
+  /** 無効化フラグ */
+  disabled?: boolean;
 };
 
 /**
@@ -40,6 +59,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   onSoundVolumeChange,
   showSoundSlider = true,
   useDialog = false,
+  extraSliders = [],
   className,
 }) => {
   const [open, setOpen] = useState(false);
@@ -70,51 +90,57 @@ export const BgmControl: FC<BgmControlProps> = ({
 
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
-    row: cn(
-      "flex items-center gap-3",
-      useDialog ? "justify-start" : "gap-2",
-    ),
-    label: useDialog
-      ? "min-w-28 text-right text-xl whitespace-nowrap"
-      : "w-8 text-right text-xl",
+    row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
+    label: "min-w-32 text-right text-xl whitespace-nowrap",
     sliderWrap: "flex w-full",
   } as const;
-  const sliderContent = (
-    <div className={cn(sliderLayout.container, "pt-8 text-xs")}>
-      <div className={sliderLayout.row}>
-        <span className={sliderLayout.label}>BGM</span>
+
+  const sliderConfigs: VolumeSliderConfig[] = [
+    {
+      label: "BGM",
+      value: preference.volume,
+      onChange: onVolumeChange,
+    },
+    ...(showSoundSlider && soundPreference && onSoundVolumeChange
+      ? [
+          {
+            label: "ボタン音量",
+            value: soundPreference.volume,
+            onChange: onSoundVolumeChange,
+          },
+        ]
+      : []),
+    ...extraSliders,
+  ];
+
+  const renderSliderRow = (config: VolumeSliderConfig) => {
+    const min = config.min ?? 0;
+    const max = config.max ?? 1;
+    const step = config.step ?? 0.01;
+    return (
+      <div key={config.label} className={sliderLayout.row}>
+        <span className={sliderLayout.label}>{config.label}</span>
         <div className={sliderLayout.sliderWrap}>
           <Slider
-            value={[Math.round(preference.volume * 100)]}
-            min={0}
-            max={100}
-            step={1}
-            disabled={!isReady}
+            value={[config.value]}
+            min={min}
+            max={max}
+            step={step}
+            disabled={!isReady || config.disabled}
             onValueChange={(value) => {
-              const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-              onVolumeChange(next);
+              const next = value[0] ?? min;
+              const clamped = Math.min(max, Math.max(min, next));
+              config.onChange(clamped);
             }}
           />
         </div>
       </div>
-      {showSoundSlider && soundPreference && onSoundVolumeChange ? (
-        <div className={sliderLayout.row}>
-          <span className={sliderLayout.label}>ボタン音量</span>
-          <div className={sliderLayout.sliderWrap}>
-            <Slider
-              value={[Math.round(soundPreference.volume * 100)]}
-              min={0}
-              max={100}
-              step={1}
-              disabled={!isReady}
-              onValueChange={(value) => {
-                const next = Math.min(100, Math.max(0, value[0] ?? 0)) / 100;
-                onSoundVolumeChange(next);
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
+    );
+  };
+
+  const sliderContent = (
+    <div className={cn(sliderLayout.container, "pt-8 text-xs")}>
+      {sliderConfigs.map(renderSliderRow)}
     </div>
   );
 
