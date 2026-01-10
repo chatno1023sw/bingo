@@ -35,7 +35,7 @@ export const audioPaths = {
 export const audioSettings = {
   bgm: {
     defaultVolume: 0.1,
-    startVolumeScale: 1,
+    startVolumeScale: 0.5,
     gameVolumeScale: 0.2,
   },
   se: {
