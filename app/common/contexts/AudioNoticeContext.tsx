@@ -1,5 +1,22 @@
 import { createContext, useContext, useState, type FC, type PropsWithChildren } from "react";
 
+const AUDIO_NOTICE_ACK_KEY = "bingo.v1.audioNoticeAck";
+
+const getSessionStorage = (): Storage | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return window.sessionStorage ?? null;
+};
+
+const readAcknowledged = (): boolean => {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return false;
+  }
+  return storage.getItem(AUDIO_NOTICE_ACK_KEY) === "1";
+};
+
 export type AudioNoticeContextValue = {
   /** ダイアログをすでに確認したか */
   acknowledged: boolean;
@@ -18,11 +35,16 @@ const AudioNoticeContext = createContext<AudioNoticeContextValue | null>(null);
  * - Chrome DevTools MCP では Start/Game 両方で表示同期されることを確認します。
  */
 export const AudioNoticeProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [acknowledged, setAcknowledged] = useState<boolean>(() => readAcknowledged());
+
+  const markAcknowledged = () => {
+    setAcknowledged(true);
+    const storage = getSessionStorage();
+    storage?.setItem(AUDIO_NOTICE_ACK_KEY, "1");
+  };
+
   return (
-    <AudioNoticeContext.Provider
-      value={{ acknowledged, markAcknowledged: () => setAcknowledged(true) }}
-    >
+    <AudioNoticeContext.Provider value={{ acknowledged, markAcknowledged }}>
       {children}
     </AudioNoticeContext.Provider>
   );
