@@ -1,6 +1,12 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import { type FC, useCallback, useEffect, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import {
+  audioPaths,
+  audioSettings,
+  buildNumberVoicePath,
+  resolveAudioPath,
+} from "~/common/constants/audio";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
@@ -44,17 +50,85 @@ export const GameContent: FC = () => {
     handleBackToStart,
   } = useGameSession();
   const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: 0.1,
+    defaultVolume: audioSettings.bgm.defaultVolume,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
-    defaultVolume: 0.2,
+    defaultVolume: audioSettings.se.defaultVolume,
   });
+  const [voiceVolume, setVoiceVolume] = useState<number>(audioSettings.number.voiceVolume);
+  const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
+    audioSettings.se.drumrollVolumeScale,
+  );
+  const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
+    audioSettings.se.cymbalVolumeScale,
+  );
+
+  const numberVoiceRef = useRef<Howl | null>(null);
+  const pendingAnnounceRef = useRef(false);
+  const pendingNumberRef = useRef<number | null>(null);
+  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAnnouncedRef = useRef<number | null>(null);
+  const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
+
+  const playNumberVoice = useCallback(
+    (number: number) => {
+      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
+        return;
+      }
+      if (numberVoiceRef.current) {
+        numberVoiceRef.current.stop();
+        numberVoiceRef.current.unload();
+        numberVoiceRef.current = null;
+      }
+      const voice = new Howl({
+        src: [resolveAudioPath(buildNumberVoicePath(number))],
+        preload: true,
+        volume: voiceVolume,
+        onend: () => {
+          voice.unload();
+          if (numberVoiceRef.current === voice) {
+            numberVoiceRef.current = null;
+          }
+        },
+      });
+      numberVoiceRef.current = voice;
+      voice.play();
+    },
+    [soundPreference.volume, voiceVolume],
+  );
+
+  const tryAnnounceNumber = useCallback(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    const number = pendingNumberRef.current;
+    if (number === null) {
+      return;
+    }
+    if (lastAnnouncedRef.current === number) {
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      return;
+    }
+    if (announceTimerRef.current) {
+      clearTimeout(announceTimerRef.current);
+    }
+    announceTimerRef.current = setTimeout(() => {
+      playNumberVoice(number);
+      lastAnnouncedRef.current = number;
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      announceTimerRef.current = null;
+    }, ANNOUNCE_DELAY_MS);
+  }, [playNumberVoice, ANNOUNCE_DELAY_MS]);
 
   const { playDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
     enabled: soundPreference.volume > 0,
     volume: soundPreference.volume,
+    drumrollVolumeScale,
+    cymbalVolumeScale,
   });
 
   const bgmRef = useRef<Howl | null>(null);
@@ -93,7 +167,7 @@ export const GameContent: FC = () => {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_acoustic02.mp3
-      src: [`${import.meta.env.BASE_URL}game-bgm.mp3`],
+      src: [resolveAudioPath(audioPaths.bgm.game)],
       loop: true,
       preload: true,
       onplayerror: () => {
@@ -115,7 +189,7 @@ export const GameContent: FC = () => {
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume * 0.2);
+    bgm.volume(preference.volume * audioSettings.bgm.gameVolumeScale);
     if (preference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
@@ -128,13 +202,82 @@ export const GameContent: FC = () => {
     }
   }, [preference.volume, requestBgmPlay]);
 
+  useEffect(() => {
+    return () => {
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+        announceTimerRef.current = null;
+      }
+      if (numberVoiceRef.current) {
+        numberVoiceRef.current.stop();
+        numberVoiceRef.current.unload();
+        numberVoiceRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    if (drawError) {
+      pendingAnnounceRef.current = false;
+      pendingNumberRef.current = null;
+      if (announceTimerRef.current) {
+        clearTimeout(announceTimerRef.current);
+        announceTimerRef.current = null;
+      }
+    }
+  }, [drawError]);
+
+  useEffect(() => {
+    if (!pendingAnnounceRef.current) {
+      return;
+    }
+    const currentNumber = session?.gameState.currentNumber ?? null;
+    if (currentNumber === null) {
+      return;
+    }
+    pendingNumberRef.current = currentNumber;
+    tryAnnounceNumber();
+  }, [session?.gameState.currentNumber, tryAnnounceNumber]);
+
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
     }
+    pendingAnnounceRef.current = soundPreference.volume > 0;
+    pendingNumberRef.current = null;
     startDrawAnimation();
     playDrumroll();
   };
+
+  const extraSoundSliders = [
+    {
+      label: "ドラムロール",
+      value: drumrollVolumeScale,
+      onChange: setDrumrollVolumeScale,
+      min: 0,
+      max: 2,
+      step: 0.05,
+    },
+    {
+      label: "シンバル",
+      value: cymbalVolumeScale,
+      onChange: setCymbalVolumeScale,
+      min: 0,
+      max: 2,
+      step: 0.05,
+    },
+    {
+      label: "音声読み上げ",
+      value: voiceVolume,
+      onChange: setVoiceVolume,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -183,6 +326,8 @@ export const GameContent: FC = () => {
                 isReady={isReady}
                 onVolumeChange={setVolume}
                 onSoundVolumeChange={setSoundVolume}
+                extraSliders={extraSoundSliders}
+                useDialog
               />
               <Button
                 type="button"

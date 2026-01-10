@@ -14,6 +14,8 @@ declare module "howler" {
     preload?: boolean;
     /** ループ再生フラグ */
     loop?: boolean;
+    /** 初期音量 */
+    volume?: number;
     /** 再生終了時の処理 */
     onend?: HowlCallback;
     /** 読み込み失敗時の処理 */

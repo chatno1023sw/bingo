@@ -1,6 +1,7 @@
 import { Howl } from "howler";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
@@ -31,11 +32,11 @@ export default function StartRoute() {
   const navigate = useNavigate();
   const { preference, isReady, setVolume } = useBgmPreference({
     storageKey: storageKeys.bgmStart,
-    defaultVolume: 0.1,
+    defaultVolume: audioSettings.bgm.defaultVolume,
   });
   const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
     storageKey: storageKeys.se,
-    defaultVolume: 0.2,
+    defaultVolume: audioSettings.se.defaultVolume,
   });
 
   /**
@@ -145,7 +146,7 @@ export default function StartRoute() {
   useEffect(() => {
     const bgm = new Howl({
       // maou_bgm_orchestra05.mp3
-      src: [`${import.meta.env.BASE_URL}start-bgm.mp3`],
+      src: [resolveAudioPath(audioPaths.bgm.start)],
       loop: true,
       preload: true,
       onplayerror: () => {
@@ -167,7 +168,7 @@ export default function StartRoute() {
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume);
+    bgm.volume(preference.volume * audioSettings.bgm.startVolumeScale);
     if (preference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
@@ -189,6 +190,7 @@ export default function StartRoute() {
           isReady={isReady}
           onVolumeChange={setVolume}
           onSoundVolumeChange={setSoundVolume}
+          useDialog
         />
       </div>
       <div className="flex min-h-90 items-center justify-center">

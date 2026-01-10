@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import GameRoute from "~/routes/game";
+import { audioPaths } from "~/common/constants/audio";
 import { resumeSession, startSession, persistSessionState } from "~/common/services/sessionService";
 import { getHistoryView } from "~/common/services/historyService";
 import { drawNextNumber, getAvailableNumbers } from "~/common/utils/bingoEngine";
@@ -173,7 +174,7 @@ describe("game route client flow", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "抽選を開始！" }));
     await act(async () => {
-      howlOptionsBySrc.get("/drumroll.mp3")?.onend?.();
+      howlOptionsBySrc.get(`/${audioPaths.se.drumroll}`)?.onend?.();
     });
     await act(async () => {});
 

@@ -1,3 +1,4 @@
+import { audioSettings } from "~/common/constants/audio";
 import type { GameState, GameStateEnvelope, Prize, PrizeList, BgmPreference } from "~/common/types";
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
@@ -5,8 +6,6 @@ export type SessionStartOptions = {
   /** 景品の選出状態を初期化するかどうか */
   resetPrizes?: boolean;
 };
-
-const DEFAULT_BGM_VOLUME = 0.1;
 
 /**
  * 初期のゲーム状態を生成します。
@@ -34,7 +33,7 @@ const createDefaultGameState = (timestamp: string): GameState => ({
  */
 const createDefaultBgmPreference = (timestamp: string): BgmPreference => ({
   enabled: true,
-  volume: DEFAULT_BGM_VOLUME,
+  volume: audioSettings.bgm.defaultVolume,
   updatedAt: timestamp,
 });
 

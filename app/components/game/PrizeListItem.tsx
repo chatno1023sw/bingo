@@ -64,7 +64,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
           <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <button
           type="button"
           className={cn(

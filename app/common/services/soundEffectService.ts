@@ -1,7 +1,6 @@
+import { audioSettings } from "~/common/constants/audio";
 import type { BgmPreference } from "~/common/types";
 import { readStorageJson, storageKeys, writeStorageJson } from "~/common/utils/storage";
-
-const DEFAULT_SE_VOLUME = 0.2;
 
 /**
  * ボタン効果音の設定を取得します。
@@ -18,7 +17,7 @@ export const getSoundEffectPreference = (): BgmPreference => {
   }
   const fallback: BgmPreference = {
     enabled: true,
-    volume: DEFAULT_SE_VOLUME,
+    volume: audioSettings.se.defaultVolume,
     updatedAt: new Date().toISOString(),
   };
   writeStorageJson(storageKeys.se, fallback);
