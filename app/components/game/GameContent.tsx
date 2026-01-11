@@ -489,14 +489,25 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     );
   }
 
-  const historyToggleLabel = historyColumns === 4 ? "3列表示" : "4列表示に変更";
+  const historyToggleLabel = historyColumns === 4 ? "3列表示" : "4列表示";
 
   return (
     <PrizeProvider initialPrizes={session.prizes}>
       <main className="h-screen overflow-hidden bg-background text-foreground">
         <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
-          <header className="flex items-center justify-between px-6 py-4">
-            <div className="flex flex-1 items-center justify-between pr-6">
+          <header className="flex items-center px-6 py-4">
+            <div className="flex flex-1 items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                className={cn(
+                  "rounded-full border border-border px-3 py-1 text-secondary-foreground text-xs hover:bg-muted",
+                  "relative top-2",
+                )}
+                onClick={handleToggleHistoryColumns}
+              >
+                {historyToggleLabel}
+              </Button>
               <Button
                 type="button"
                 variant="secondary"
@@ -511,14 +522,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 disabled={isLoading || isResetting || session.historyView.length === 0}
               >
                 クリア
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className="rounded-full border border-border px-3 py-1 text-muted-foreground text-xs hover:bg-muted"
-                onClick={handleToggleHistoryColumns}
-              >
-                {historyToggleLabel}
               </Button>
             </div>
             <div className="relative flex items-center gap-3">
