@@ -1,22 +1,7 @@
 import { Howl } from "howler";
 import { Loader2 } from "lucide-react";
-import {
-  type FC,
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  audioPaths,
-  audioSettings,
-  buildLetterVoicePath,
-  buildNumberVoicePath,
-  resolveAudioPath,
-} from "~/common/constants/audio";
-import { type BingoLetter, bingoNumberRanges } from "~/common/constants/bingo";
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
@@ -32,7 +17,9 @@ import { GameHeader } from "~/components/game/GameHeader";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
+import { useBingoBackgroundSequence } from "~/components/game/hooks/useBingoBackgroundSequence";
 import { useGameSoundDetail } from "~/components/game/hooks/useGameSoundDetail";
+import { useNumberAnnouncement } from "~/components/game/hooks/useNumberAnnouncement";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -73,7 +60,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const { preference, isReady, setVolume } = gameBgm;
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const initialSoundDetail = useMemo(() => getSoundDetailPreference(), []);
-  const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const [historyColumns, setHistoryColumns] = useState<3 | 4>(4);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
@@ -117,100 +103,16 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     requestBgmPlay,
   });
 
-  const numberVoiceRef = useRef<Howl | null>(null);
-  const letterVoiceRef = useRef<Howl | null>(null);
-  const pendingAnnounceRef = useRef(false);
-  const pendingNumberRef = useRef<number | null>(null);
-  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastAnnouncedRef = useRef<number | null>(null);
-  const bingoLetterTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
-
-  const cleanupVoice = useCallback((voiceRef: MutableRefObject<Howl | null>) => {
-    if (voiceRef.current) {
-      voiceRef.current.stop();
-      voiceRef.current.unload();
-      voiceRef.current = null;
-    }
-  }, []);
-
-  const playVoiceClip = useCallback(
-    (src: string, targetRef: MutableRefObject<Howl | null>, onEnd?: () => void) => {
-      cleanupVoice(targetRef);
-      const voice = new Howl({
-        src: [resolveAudioPath(src)],
-        preload: true,
-        volume: voiceVolume * audioSettings.number.voicePlaybackScale,
-        onend: () => {
-          voice.unload();
-          if (targetRef.current === voice) {
-            targetRef.current = null;
-          }
-          onEnd?.();
-        },
-        onloaderror: () => {
-          onEnd?.();
-        },
-        onplayerror: () => {
-          onEnd?.();
-        },
-      });
-      targetRef.current = voice;
-      voice.play();
-    },
-    [cleanupVoice, voiceVolume],
-  );
-
-  const playAnnouncementVoice = useCallback(
-    (number: number) => {
-      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
-        return;
-      }
-      const letter = bingoNumberRanges.getLetter(number);
-      const playNumber = () => {
-        playVoiceClip(buildNumberVoicePath(number), numberVoiceRef);
-      };
-      if (!letter) {
-        playNumber();
-        return;
-      }
-      playVoiceClip(buildLetterVoicePath(letter), letterVoiceRef, playNumber);
-    },
-    [playVoiceClip, soundPreference.volume, voiceVolume],
-  );
-
-  const tryAnnounceNumber = useCallback(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
-    const number = pendingNumberRef.current;
-    if (number === null) {
-      return;
-    }
-    if (lastAnnouncedRef.current === number) {
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      return;
-    }
-    if (announceTimerRef.current) {
-      clearTimeout(announceTimerRef.current);
-    }
-    announceTimerRef.current = setTimeout(() => {
-      playAnnouncementVoice(number);
-      lastAnnouncedRef.current = number;
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      announceTimerRef.current = null;
-    }, ANNOUNCE_DELAY_MS);
-  }, [playAnnouncementVoice, ANNOUNCE_DELAY_MS]);
-
-  useEffect(
-    () => () => {
-      cleanupVoice(numberVoiceRef);
-      cleanupVoice(letterVoiceRef);
-    },
-    [cleanupVoice],
-  );
+  const {
+    bingoBackgroundLetter,
+    startSequence: startBingoBackgroundSequence,
+    clearSequence,
+  } = useBingoBackgroundSequence();
+  const { prepareAnnouncement, cancelAnnouncement, handleCurrentNumberChange } =
+    useNumberAnnouncement({
+      voiceVolume,
+      soundVolume: soundPreference.volume,
+    });
 
   const { playDrumroll, getDrumrollDurationMs } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
@@ -291,95 +193,28 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     });
   }, [preference.volume, registerGameBgmHandler, requestBgmPlay]);
 
-  const clearBingoBackgroundSequence = useCallback(() => {
-    for (const timerId of bingoLetterTimersRef.current) {
-      clearTimeout(timerId);
-    }
-    bingoLetterTimersRef.current = [];
-    setBingoBackgroundLetter(null);
-  }, []);
-
-  const startBingoBackgroundSequence = useCallback(
-    (durationMs: number) => {
-      clearBingoBackgroundSequence();
-      const letters: BingoLetter[] = ["B", "I", "N", "G", "O"];
-      if (durationMs <= 0) {
-        setBingoBackgroundLetter(letters[0]);
-        return;
-      }
-      const segmentMs = durationMs / letters.length;
-      setBingoBackgroundLetter(letters[0]);
-      letters.slice(1).forEach((letter, index) => {
-        const timerId = setTimeout(
-          () => {
-            setBingoBackgroundLetter(letter);
-          },
-          Math.round(segmentMs * (index + 1)),
-        );
-        bingoLetterTimersRef.current.push(timerId);
-      });
-      const endTimerId = setTimeout(() => {
-        setBingoBackgroundLetter(null);
-      }, Math.round(durationMs));
-      bingoLetterTimersRef.current.push(endTimerId);
-    },
-    [clearBingoBackgroundSequence],
-  );
+  useEffect(() => {
+    handleCurrentNumberChange(session?.gameState.currentNumber ?? null);
+  }, [handleCurrentNumberChange, session?.gameState.currentNumber]);
 
   useEffect(() => {
-    return () => {
-      clearBingoBackgroundSequence();
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-        announceTimerRef.current = null;
-      }
-      if (numberVoiceRef.current) {
-        numberVoiceRef.current.stop();
-        numberVoiceRef.current.unload();
-        numberVoiceRef.current = null;
-      }
-    };
-  }, [clearBingoBackgroundSequence]);
-
-  useEffect(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
     if (drawError) {
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-        announceTimerRef.current = null;
-      }
+      cancelAnnouncement();
     }
-  }, [drawError]);
-
-  useEffect(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
-    const currentNumber = session?.gameState.currentNumber ?? null;
-    if (currentNumber === null) {
-      return;
-    }
-    pendingNumberRef.current = currentNumber;
-    tryAnnounceNumber();
-  }, [session?.gameState.currentNumber, tryAnnounceNumber]);
+  }, [drawError, cancelAnnouncement]);
 
   useEffect(() => {
     if (isAnimating) {
       return;
     }
-    clearBingoBackgroundSequence();
-  }, [clearBingoBackgroundSequence, isAnimating]);
+    clearSequence();
+  }, [clearSequence, isAnimating]);
 
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
     }
-    pendingAnnounceRef.current = soundPreference.volume > 0;
-    pendingNumberRef.current = null;
+    prepareAnnouncement(soundPreference.volume > 0);
     startDrawAnimation();
     playDrumroll();
     const drumrollDurationMs = getDrumrollDurationMs();
