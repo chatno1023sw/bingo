@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AudioPreferenceProvider } from "~/common/contexts/AudioPreferenceContext";
 import { AudioUnlockProvider } from "~/common/contexts/AudioUnlockContext";
@@ -14,9 +14,34 @@ const views = {
 
 type ActiveView = (typeof views)[keyof typeof views];
 
+const ACTIVE_VIEW_STORAGE_KEY = "bingo.v1.activeView";
+
+const getInitialActiveView = (): ActiveView => {
+  if (typeof window === "undefined") {
+    return views.start;
+  }
+  const storage = window.sessionStorage;
+  if (!storage) {
+    return views.start;
+  }
+  const stored = storage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+  if (stored === views.game) {
+    return views.game;
+  }
+  return views.start;
+};
+
 export default function StartGameRoute() {
-  const [activeView, setActiveView] = useState<ActiveView>(views.start);
+  const [activeView, setActiveView] = useState<ActiveView>(() => getInitialActiveView());
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const storage = window.sessionStorage;
+    storage?.setItem(ACTIVE_VIEW_STORAGE_KEY, activeView);
+  }, [activeView]);
 
   return (
     <AudioPreferenceProvider>
