@@ -13,6 +13,8 @@ export type CurrentNumberProps = {
   isFirstState: { isFirst: boolean; setIsFirst: (isFirst: boolean) => void };
 };
 
+const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
+
 /**
  * 中央表示のシンプルな数字パネル。
  *
@@ -54,29 +56,32 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
   } as const;
 
   return (
-    <div className="flex flex-col items-center gap-6 text-foreground">
+    <div className="flex w-full flex-col items-center gap-8 text-foreground">
       <div
         className={cn(
-          "relative flex h-[24rem] w-[24rem] items-center justify-center rounded bg-card font-bold text-[clamp(4rem,10vw,10rem)] transition",
+          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(7rem,16vw,22rem)] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
+        style={{ maxWidth: NUMBER_PANEL_MAX_SIZE, maxHeight: NUMBER_PANEL_MAX_SIZE }}
       >
-        {backgroundLetter ? (
-          <span
-            className={cn(
-              "pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-black text-[clamp(4rem,14vw,12rem)] leading-none",
-              backgroundLetterStyles[backgroundLetter],
-            )}
-            aria-hidden
-          >
-            {backgroundLetter}
-          </span>
-        ) : null}
-        <span className="relative z-10 inline-block">{display}</span>
+        <div className="relative flex -translate-y-[6%] items-center justify-center">
+          {backgroundLetter ? (
+            <span
+              className={cn(
+                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(10rem,22vw,28rem)] leading-none",
+                backgroundLetterStyles[backgroundLetter],
+              )}
+              aria-hidden
+            >
+              {backgroundLetter}
+            </span>
+          ) : null}
+          <span className="relative z-10 inline-block">{display}</span>
+        </div>
         {!isDrawing && bingoLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute -right-6 -bottom-4 z-20 flex h-20 w-20 items-center justify-center rounded-full border-2 border-secondary font-black text-[2.25rem] text-white leading-none",
+              "pointer-events-none absolute right-0 bottom-6 z-20 flex h-28 w-28 translate-x-[55%] translate-y-[25%] items-center justify-center rounded-full border-2 border-secondary font-black text-[3.25rem] text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
               letterStyles[bingoLetter],
             )}
             aria-hidden
