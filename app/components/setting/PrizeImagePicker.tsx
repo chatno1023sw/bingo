@@ -117,8 +117,13 @@ export const PrizeImagePicker: FC<PrizeImagePickerProps> = ({
             />
             <Button
               type="button"
-              className="absolute top-28 right-8 z-60 h-8! bg-secondary px-2! py-1! text-xs"
-              onClick={handleImageDelete}
+              variant="secondary"
+              className="absolute top-28 right-8 z-60 h-8! px-2! py-1! text-xs"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleImageDelete();
+              }}
               disabled={disabled || !imagePath}
             >
               <div className="flex items-center gap-1">
