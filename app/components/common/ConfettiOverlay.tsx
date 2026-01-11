@@ -69,7 +69,7 @@ const generateBurstPieces = (direction: 1 | -1): ConfettiPieceConfig[] => {
     const midX = direction * rand(12, 26);
     const midY = -rand(35, 70);
     const exitX = direction * (rand(120, 180) + vw);
-    const exitY = -(vh + rand(30, 60));
+    const exitY = -(vh * 2 + rand(10, 40));
     return {
       id: `burst-${direction}-${index}`,
       isRibbon: size.isRibbon,
