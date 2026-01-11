@@ -1,4 +1,6 @@
+import { Howl } from "howler";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import type { Prize } from "~/common/types";
@@ -36,6 +38,8 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const prizesRef = useRef<Prize[]>([]);
   const onCompleteRef = useRef<(prize: Prize) => void>(() => undefined);
   const { preference } = useBgmPreference();
+  const prizeVoiceRef = useRef<Howl | null>(null);
+  const shouldPlayPrizeVoiceRef = useRef(false);
   const completeRoulette = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -51,11 +55,55 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     onCompleteRef.current(prizesRef.current[winnerIndex]);
   }, []);
 
+  const stopPrizeVoice = useCallback(() => {
+    const prizeVoice = prizeVoiceRef.current;
+    if (!prizeVoice) {
+      return;
+    }
+    prizeVoice.stop();
+  }, []);
+
+  const playPrizeVoice = useCallback(() => {
+    const prizeVoice = prizeVoiceRef.current;
+    if (!prizeVoice || preference.volume <= 0) {
+      return;
+    }
+    const baseVolume = Math.min(
+      1,
+      Math.max(0, preference.volume * audioSettings.se.baseVolumeScale),
+    );
+    prizeVoice.volume(baseVolume);
+    prizeVoice.stop();
+    prizeVoice.seek(0);
+    prizeVoice.play();
+  }, [preference.volume]);
+
+  const handleCymbalEnd = useCallback(() => {
+    if (!shouldPlayPrizeVoiceRef.current) {
+      return;
+    }
+    playPrizeVoice();
+  }, [playPrizeVoice]);
+
   const { playDrumroll, stopDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeRoulette,
+    onCymbalEnd: handleCymbalEnd,
     enabled: preference.volume > 0,
     volume: preference.volume,
   });
+
+  useEffect(() => {
+    const prizeVoice = new Howl({
+      src: [resolveAudioPath(audioPaths.se.prizeRoulette)],
+      preload: true,
+    });
+    prizeVoiceRef.current = prizeVoice;
+    return () => {
+      prizeVoice.stop();
+      prizeVoice.unload();
+      prizeVoiceRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     prizesRef.current = prizes;
@@ -67,6 +115,8 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 
   useEffect(() => {
     if (!open || prizes.length === 0) {
+      shouldPlayPrizeVoiceRef.current = false;
+      stopPrizeVoice();
       stopDrumroll();
       return;
     }
@@ -82,6 +132,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 
     setActiveIndex(selectable[0].index);
     setWinnerIndex(null);
+    shouldPlayPrizeVoiceRef.current = true;
     playDrumroll();
 
     intervalRef.current = setInterval(() => {
@@ -101,13 +152,15 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     }, 120);
 
     return () => {
+      shouldPlayPrizeVoiceRef.current = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      stopPrizeVoice();
       stopDrumroll();
     };
-  }, [open, playDrumroll, prizes, stopDrumroll]);
+  }, [open, playDrumroll, prizes, stopDrumroll, stopPrizeVoice]);
 
   const entries = prizes.slice(0, 25);
   return (
