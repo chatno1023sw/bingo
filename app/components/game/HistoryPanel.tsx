@@ -66,6 +66,11 @@ export type HistoryPanelProps = {
 export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "", columns = 4 }) => {
   const rows = useMemo(() => buildHistoryRows(recent, columns), [recent, columns]);
   const gridColumnsClass = columns === 4 ? "grid-cols-4" : "grid-cols-3";
+  const gridGapClass = columns === 4 ? "gap-2" : "gap-3";
+  const gridPaddingClass = columns === 4 ? "px-1/2" : "px-1";
+  const cardPaddingClass = columns === 4 ? "px-2" : "px-3";
+  const numberTextClass =
+    columns === 4 ? "text-[clamp(1.25rem,3vw,4rem)]" : "text-[clamp(1.5rem,3.6vw,4.8rem)]";
   return (
     <section
       className={cn(
@@ -93,14 +98,20 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "", co
                       <div className="h-px w-full bg-border" />
                     </div>
                   ) : null}
-                  <div className={cn("grid gap-2 px-1/2", gridColumnsClass)}>
+                  <div className={cn("grid", gridColumnsClass, gridGapClass, gridPaddingClass)}>
                     {row.entries.map((entry) => (
                       <div
                         key={entry.sequence}
                         className="relative w-full"
                         style={{ paddingBottom: "100%" }}
                       >
-                        <div className="absolute inset-0 flex items-center justify-center rounded border border-border bg-card px-2 text-center font-semibold text-[clamp(1.25rem,3vw,4rem)] leading-none">
+                        <div
+                          className={cn(
+                            "absolute inset-0 flex items-center justify-center rounded border border-border bg-card text-center font-semibold leading-none",
+                            cardPaddingClass,
+                            numberTextClass,
+                          )}
+                        >
                           {entry.number}
                         </div>
                       </div>
