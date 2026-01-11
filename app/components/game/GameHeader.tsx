@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import type { FC } from "react";
 import type { BgmPreference } from "~/common/types";
-import { Button } from "~/components/common/Button";
 import { BgmControl, type VolumeSliderConfig } from "~/components/common/BgmControl";
+import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
 export type GameHeaderProps = {
@@ -46,8 +46,19 @@ export const GameHeader: FC<GameHeaderProps> = ({
   bgmControl,
 }) => {
   return (
-    <header className="flex items-center justify-between gap-6 px-6 py-4">
-      <div className="flex flex-1 items-center justify-between pr-6">
+    <header className="flex items-center gap-6 px-6 py-4">
+      <div className="flex flex-1 items-center gap-2 pr-6">
+        <Button
+          type="button"
+          variant="secondary"
+          className={cn(
+            "rounded-full border border-border px-3 py-1 text-xs hover:bg-muted",
+            "relative top-2",
+          )}
+          onClick={onToggleHistoryColumns}
+        >
+          {historyToggleLabel}
+        </Button>
         <Button
           type="button"
           variant="secondary"
@@ -59,14 +70,6 @@ export const GameHeader: FC<GameHeaderProps> = ({
           disabled={clearDisabled}
         >
           クリア
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="rounded-full border border-border px-3 py-1 text-muted-foreground text-xs hover:bg-muted"
-          onClick={onToggleHistoryColumns}
-        >
-          {historyToggleLabel}
         </Button>
       </div>
       <div className="flex items-center gap-3">
