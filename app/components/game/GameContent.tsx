@@ -501,15 +501,17 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 />
               </div>
               <div className="mt-6 flex flex-col items-center gap-4">
-                <Button
-                  type="button"
-                  className="flex w-full max-w-xl items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary disabled:opacity-40"
-                  onClick={handleDrawWithBgm}
-                  disabled={isButtonDisabled}
-                >
-                  {(isAnimating || isMutating) && <Loader2 className="h-7 w-7 animate-spin" />}
-                  {drawButtonLabel}
-                </Button>
+                <div className="w-full max-w-[min(36rem,92%)]">
+                  <Button
+                    type="button"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary disabled:opacity-40"
+                    onClick={handleDrawWithBgm}
+                    disabled={isButtonDisabled}
+                  >
+                    {(isAnimating || isMutating) && <Loader2 className="h-7 w-7 animate-spin" />}
+                    {drawButtonLabel}
+                  </Button>
+                </div>
                 {drawError === "no-available-numbers" && (
                   <p className="font-semibold text-base text-destructive">
                     すべての番号が抽選済みです。
