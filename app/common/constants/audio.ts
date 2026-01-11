@@ -37,6 +37,7 @@ const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
 export const audioSettings = {
   bgm: {
     defaultVolume: 0.1,
+    startDefaultVolume: 0.05,
     startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
     gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
   },
