@@ -1,4 +1,5 @@
 import { type FC, useEffect, useRef, useState } from "react";
+import { Button } from "~/components/common/Button";
 import type { BgmPreference } from "~/common/types";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { CommonDialog } from "~/components/common/CommonDialog";
@@ -24,6 +25,8 @@ export type BgmControlProps = {
   extraSliders?: VolumeSliderConfig[];
   /** 追加クラス */
   className?: string;
+  /** デフォルト値へ戻す操作 */
+  onResetToDefault?: () => void;
 };
 
 export type VolumeSliderConfig = {
@@ -61,6 +64,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   useDialog = false,
   extraSliders = [],
   className,
+  onResetToDefault,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -158,6 +162,18 @@ export const BgmControl: FC<BgmControlProps> = ({
           title="音量設定"
           contentClassName="w-[min(92vw,420px)]"
           showCloseButton
+          footer={
+            onResetToDefault ? (
+              <Button
+                type="button"
+                className="w-full rounded-full bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
+                onClick={onResetToDefault}
+              >
+                デフォルト値に戻す
+              </Button>
+            ) : undefined
+          }
+          footerClassName="px-6 pb-6"
         >
           <div className="mt-2 space-y-3">{sliderContent}</div>
         </CommonDialog>

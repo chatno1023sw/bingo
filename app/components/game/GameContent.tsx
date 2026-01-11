@@ -469,6 +469,14 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 onSoundVolumeChange={setSoundVolume}
                 extraSliders={extraSoundSliders}
                 useDialog
+                onResetToDefault={() => {
+                  void handleGameBgmVolumeChange(audioSettings.bgm.defaultVolume);
+                  void setSoundVolume(audioSettings.se.defaultVolume);
+                  const defaults = resetSoundDetailPreference();
+                  setVoiceVolume(defaults.voiceVolume);
+                  setDrumrollVolumeScale(defaults.drumrollVolumeScale);
+                  setCymbalVolumeScale(defaults.cymbalVolumeScale);
+                }}
               />
               <Button
                 type="button"

@@ -265,6 +265,10 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
           onVolumeChange={handleStartBgmVolumeChange}
           onSoundVolumeChange={setSoundVolume}
           useDialog
+          onResetToDefault={() => {
+            void syncBgmVolume(audioSettings.bgm.defaultVolume);
+            void setSoundVolume(audioSettings.se.defaultVolume);
+          }}
         />
       </div>
       <div className="flex min-h-90 items-center justify-center">
