@@ -123,7 +123,7 @@ export const ConfettiOverlay = memo(({ active }: ConfettiOverlayProps) => {
     pieces.map((piece) => (
       <span
         key={piece.id}
-        className={`confetti-piece${piece.isRibbon ? "ribbon" : ""}`}
+        className={piece.isRibbon ? "confetti-piece ribbon" : "confetti-piece"}
         style={piece.style as CSSProperties}
       />
     ));
