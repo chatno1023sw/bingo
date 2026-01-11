@@ -2,8 +2,8 @@ import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router";
 import type { CsvImportResult, PrizeList } from "~/common/types";
-import { generatePrizesCsv, parsePrizesCsv } from "~/common/utils/csvParser";
 import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
+import { usePrizeCsvManager } from "~/components/setting/hooks/usePrizeCsvManager";
 
 export type UseSettingDraftOptions = {
   /** 既存の景品一覧 */
@@ -96,12 +96,7 @@ export const useSettingDraft = ({
   applyPrizes,
 }: UseSettingDraftOptions): UseSettingDraftResult => {
   const navigate = useNavigate();
-  const [summary, setSummary] = useState<CsvImportResult | null>(null);
-  const [exportText, setExportText] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [manualCsv, setManualCsv] = useState(
-    "id,order,prizeName,itemName,imagePath,selected,memo\n",
-  );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -110,97 +105,21 @@ export const useSettingDraft = ({
   const [isSaving, setIsSaving] = useState(false);
   const [allowNavigation, setAllowNavigation] = useState(false);
   const hasInitializedRef = useRef(false);
-
-  /**
-   * CSV 取り込み結果のサマリーを作成します。
-   *
-   * - 副作用: ありません。
-   * - 入力制約: `result` は parsePrizesCsv の戻り値を渡してください。
-   * - 戻り値: CsvImportResult を返します。
-   * - Chrome DevTools MCP ではサマリー表示を確認します。
-   */
-  const summaryFrom = (
-    sourceName: string,
-    result: ReturnType<typeof parsePrizesCsv>,
-  ): CsvImportResult => ({
-    sourceName,
-    addedCount: result.prizes.length,
-    skipped: result.skipped,
-    processedAt: new Date().toISOString(),
+  const {
+    summary,
+    exportText,
+    manualCsv,
+    setManualCsv,
+    handleFileImport,
+    handleManualImport,
+    handleExport,
+    handleCsvImportClick,
+    resetSummary,
+  } = usePrizeCsvManager({
+    draftPrizes,
+    setDraftPrizes,
+    setLocalError,
   });
-
-  /**
-   * CSV 文字列の取り込み処理を実行します。
-   *
-   * - 副作用: 下書きとエラー状態を更新します。
-   * - 入力制約: `text` は CSV 文字列を渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では CSV 反映を確認します。
-   */
-  const runImport = async (text: string, sourceName: string) => {
-    try {
-      const result = parsePrizesCsv(text);
-      setDraftPrizes(result.prizes);
-      setSummary(summaryFrom(sourceName, result));
-      setLocalError(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "csv-import-error";
-      setLocalError(message);
-    }
-  };
-
-  /**
-   * CSV ファイルの取り込み処理です。
-   *
-   * - 副作用: ファイル内容を読み取り下書きを更新します。
-   * - 入力制約: `file` は CSV ファイルを渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では取り込み結果を確認します。
-   */
-  const handleFileImport = async (file: File) => {
-    const text = await file.text();
-    await runImport(text, file.name);
-  };
-
-  /**
-   * 手入力 CSV の取り込み処理です。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: `manualCsv` に CSV 文字列が必要です。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では取り込み結果を確認します。
-   */
-  const handleManualImport = async () => {
-    await runImport(manualCsv, "manual-input");
-  };
-
-  /**
-   * CSV エクスポート文字列を生成します。
-   *
-   * - 副作用: `exportText` を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではプレビュー表示を確認します。
-   */
-  const handleExport = () => {
-    const csv = generatePrizesCsv(draftPrizes);
-    setExportText(csv);
-  };
-
-  /**
-   * CSV 追加のファイル入力を開きます。
-   *
-   * - 副作用: hidden input をクリックします。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではファイル選択が開くことを確認します。
-   */
-  const handleCsvImportClick = () => {
-    const input = document.getElementById("csv-import-simple");
-    if (input instanceof HTMLInputElement) {
-      input.click();
-    }
-  };
 
   /**
    * 画像追加のファイル入力を開きます。
@@ -299,7 +218,7 @@ export const useSettingDraft = ({
    */
   const handleDeleteAll = () => {
     setDraftPrizes([]);
-    setSummary(null);
+    resetSummary();
     setDeleteOpen(false);
   };
 
