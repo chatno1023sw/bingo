@@ -34,23 +34,38 @@ export const audioPaths = {
  */
 const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
 
+type SliderRange = {
+  min: number;
+  max: number;
+};
+
+const sliderMedian = (range: SliderRange): number => (range.min + range.max) / 2;
+
+const VOLUME_RANGE: SliderRange = { min: 0, max: 1 };
+const DETAIL_RANGE: SliderRange = { min: 0, max: 2 };
+
 export const audioSettings = {
   bgm: {
-    defaultVolume: 0.1,
-    startDefaultVolume: 0.05,
+    volumeRange: VOLUME_RANGE,
+    defaultVolume: sliderMedian(VOLUME_RANGE),
+    startDefaultVolume: sliderMedian(VOLUME_RANGE),
     startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
     gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
   },
   se: {
-    defaultVolume: 0.025,
+    volumeRange: VOLUME_RANGE,
+    defaultVolume: sliderMedian(VOLUME_RANGE),
     /** スライダーで調整される音量の最大値 */
     baseVolumeScale: 0.9,
-    drumrollVolumeScale: 2.25,
-    cymbalVolumeScale: 0.6,
+    drumrollRange: DETAIL_RANGE,
+    drumrollVolumeScale: sliderMedian(DETAIL_RANGE),
+    cymbalRange: DETAIL_RANGE,
+    cymbalVolumeScale: sliderMedian(DETAIL_RANGE),
     fallbackWaitMs: 5000,
   },
   number: {
-    voiceVolume: 1,
+    voiceRange: VOLUME_RANGE,
+    voiceVolume: sliderMedian(VOLUME_RANGE),
     /** 番号再生開始を早める秒数 */
     announceDelayMs: 350,
   },
