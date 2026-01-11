@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { useMemo, type FC } from "react";
 import type { DrawHistoryEntry } from "~/common/types";
 import { cn } from "~/lib/utils";
 
@@ -15,33 +15,33 @@ type HistoryRow = {
  * - 戻り値: 先頭行の余り件数を考慮した行配列と件数ラベルを返します。
  * - Chrome DevTools MCP では 1〜12 件の追加表示を確認します。
  */
-const buildHistoryRows = (recent: DrawHistoryEntry[]): HistoryRow[] => {
+const buildHistoryRows = (recent: DrawHistoryEntry[], columns: number): HistoryRow[] => {
   const totalCount = recent.length;
   if (totalCount === 0) {
     return [];
   }
 
-  const remainder = totalCount % 4;
-  const fullRowCount = Math.floor(totalCount / 4);
+  const remainder = totalCount % columns;
+  const fullRowCount = Math.floor(totalCount / columns);
   const labelRowOffset = remainder === 0 ? 0 : 1;
-  const firstRowSize = remainder === 0 ? 4 : remainder;
+  const firstRowSize = remainder === 0 ? columns : remainder;
   const rows: DrawHistoryEntry[][] = [recent.slice(0, firstRowSize)];
 
-  for (let i = firstRowSize; i < totalCount; i += 4) {
-    rows.push(recent.slice(i, i + 4));
+  for (let i = firstRowSize; i < totalCount; i += columns) {
+    rows.push(recent.slice(i, i + columns));
   }
 
   return rows.map((row, rowIndex) => {
     const fullRowIndex = rowIndex - labelRowOffset;
     const labelCount =
-      // 1〜3件のときはラベルを出さないため 0 にします。
-      totalCount < 4
+      // 1 行分未満のときはラベルを出さないため 0 にします。
+      totalCount < columns
         ? 0
-        : // 4件以上で通常行の場合は残りの4件単位ラベルを出します。
+        : // full 行の場合は残りの列数単位ラベルを出します。
           fullRowIndex >= 0
-          ? (fullRowCount - fullRowIndex) * 4
-          : // 先頭が余り行の場合は次の4件単位ラベルを出します。
-            (fullRowCount + 1) * 4;
+          ? (fullRowCount - fullRowIndex) * columns
+          : // 先頭が余り行の場合は次の列数単位ラベルを出します。
+            (fullRowCount + 1) * columns;
     return { entries: row, labelCount };
   });
 };
@@ -51,6 +51,8 @@ export type HistoryPanelProps = {
   recent: DrawHistoryEntry[];
   /** 追加のクラス名 */
   className?: string;
+  /** 表示列数 */
+  columns?: 3 | 4;
 };
 
 /**
@@ -61,8 +63,9 @@ export type HistoryPanelProps = {
  * - 戻り値: 履歴表示の JSX を返します。
  * - Chrome DevTools MCP では履歴表示を確認します。
  */
-export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) => {
-  const rows = buildHistoryRows(recent);
+export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "", columns = 4 }) => {
+  const rows = useMemo(() => buildHistoryRows(recent, columns), [recent, columns]);
+  const gridColumnsClass = columns === 4 ? "grid-cols-4" : "grid-cols-3";
   return (
     <section
       className={cn(
@@ -90,7 +93,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
                       <div className="h-px w-full bg-border" />
                     </div>
                   ) : null}
-                  <div className="grid grid-cols-4 gap-2 px-1/2">
+                  <div className={cn("grid gap-2 px-1/2", gridColumnsClass)}>
                     {row.entries.map((entry) => (
                       <div
                         key={entry.sequence}

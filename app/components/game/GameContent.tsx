@@ -87,6 +87,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   );
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
+  const [historyColumns, setHistoryColumns] = useState<3 | 4>(4);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
@@ -451,6 +452,10 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     soundPreference.volume,
   ]);
 
+  const handleToggleHistoryColumns = useCallback(() => {
+    setHistoryColumns((prev) => (prev === 4 ? 3 : 4));
+  }, []);
+
   const handleGameBgmVolumeChange = useCallback(
     async (volume: number) => {
       await setVolume(volume);
@@ -484,26 +489,38 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     );
   }
 
+  const historyToggleLabel = historyColumns === 4 ? "3列表示" : "4列表示に変更";
+
   return (
     <PrizeProvider initialPrizes={session.prizes}>
       <main className="h-screen overflow-hidden bg-background text-foreground">
         <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
           <header className="flex items-center justify-between px-6 py-4">
-            <Button
-              type="button"
-              variant="secondary"
-              className={cn(
-                "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
-                "relative top-2",
-              )}
-              onClick={() => {
-                isFirstState.setIsFirst(true);
-                openResetDialog();
-              }}
-              disabled={isLoading || isResetting || session.historyView.length === 0}
-            >
-              クリア
-            </Button>
+            <div className="flex flex-1 items-center justify-between pr-6">
+              <Button
+                type="button"
+                variant="secondary"
+                className={cn(
+                  "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
+                  "relative top-2",
+                )}
+                onClick={() => {
+                  isFirstState.setIsFirst(true);
+                  openResetDialog();
+                }}
+                disabled={isLoading || isResetting || session.historyView.length === 0}
+              >
+                クリア
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="rounded-full border border-border px-3 py-1 text-muted-foreground text-xs hover:bg-muted"
+                onClick={handleToggleHistoryColumns}
+              >
+                {historyToggleLabel}
+              </Button>
+            </div>
             <div className="relative flex items-center gap-3">
               <BgmControl
                 preference={preference}
@@ -534,7 +551,11 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
             </div>
           </header>
           <div className="flex flex-1 items-stretch overflow-hidden px-2 pb-6">
-            <HistoryPanel recent={session.historyView} className="min-w-[20rem] flex-[0_0_28vw]" />
+            <HistoryPanel
+              recent={session.historyView}
+              columns={historyColumns}
+              className="min-w-[20rem] flex-[0_0_28vw]"
+            />
             <section className="flex min-w-0 flex-1 flex-col px-4 py-6">
               <div className="flex min-h-0 flex-1 items-center justify-center">
                 <CurrentNumber
