@@ -41,7 +41,7 @@ export const audioSettings = {
     gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
   },
   se: {
-    defaultVolume: 0.1,
+    defaultVolume: 0.025,
     /** スライダーで調整される音量の最大値 */
     baseVolumeScale: 0.9,
     drumrollVolumeScale: 2.25,
