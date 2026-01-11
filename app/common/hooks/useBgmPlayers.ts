@@ -66,18 +66,16 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     fallbackWaitRef.current = options.fallbackWaitMs ?? audioSettings.se.fallbackWaitMs;
   }, [options.fallbackWaitMs]);
 
-  const detailAttenuation = audioSettings.se.detailAttenuation;
-
   const applyVolume = useCallback(() => {
     const baseVolume = enabledRef.current ? volumeRef.current : 0;
     const masterVolume = baseVolume * audioSettings.se.baseVolumeScale;
     const drumrollVolume = Math.min(
       1,
-      Math.max(0, masterVolume * drumrollVolumeScaleRef.current * detailAttenuation),
+      Math.max(0, masterVolume * drumrollVolumeScaleRef.current * audioSettings.se.detailBoost),
     );
     const cymbalVolume = Math.min(
       1,
-      Math.max(0, masterVolume * cymbalVolumeScaleRef.current * detailAttenuation),
+      Math.max(0, masterVolume * cymbalVolumeScaleRef.current * audioSettings.se.detailBoost),
     );
     if (drumrollRef.current) {
       drumrollRef.current.volume(drumrollVolume);
@@ -85,7 +83,7 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     if (cymbalRef.current) {
       cymbalRef.current.volume(cymbalVolume);
     }
-  }, [detailAttenuation]);
+  }, []);
 
   const clearFallbackTimeout = useCallback(() => {
     if (!fallbackTimeoutRef.current) {

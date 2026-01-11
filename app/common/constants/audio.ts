@@ -33,7 +33,10 @@ export const audioPaths = {
  * - Chrome DevTools MCP では音量バランスと再生タイミングを確認します。
  */
 const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
-const OUTPUT_ATTENUATION = 1 / 3;
+const BUTTON_ATTENUATION = 1 / 3;
+const BGM_ATTENUATION = 1 / 2;
+const VOICE_BOOST = 3;
+const EFFECT_BOOST = 2;
 
 type SliderRange = {
   min: number;
@@ -52,25 +55,25 @@ export const audioSettings = {
     volumeRange: VOLUME_RANGE,
     defaultVolume: MEDIAN_VOLUME,
     startDefaultVolume: MEDIAN_VOLUME,
-    startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * OUTPUT_ATTENUATION,
-    gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * OUTPUT_ATTENUATION,
+    startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * BGM_ATTENUATION,
+    gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * BGM_ATTENUATION,
   },
   se: {
     volumeRange: VOLUME_RANGE,
     defaultVolume: MEDIAN_VOLUME,
     /** スライダーで調整される音量の最大値 */
-    baseVolumeScale: 0.9 * OUTPUT_ATTENUATION,
+    baseVolumeScale: 0.9 * BUTTON_ATTENUATION,
     drumrollRange: DETAIL_RANGE,
     drumrollVolumeScale: MEDIAN_DETAIL,
     cymbalRange: DETAIL_RANGE,
     cymbalVolumeScale: MEDIAN_DETAIL,
-    detailAttenuation: OUTPUT_ATTENUATION,
+    detailBoost: EFFECT_BOOST,
     fallbackWaitMs: 5000,
   },
   number: {
     voiceRange: VOLUME_RANGE,
     voiceVolume: MEDIAN_VOLUME,
-    voicePlaybackScale: OUTPUT_ATTENUATION,
+    voicePlaybackScale: VOICE_BOOST,
     /** 番号再生開始を早める秒数 */
     announceDelayMs: 350,
   },
