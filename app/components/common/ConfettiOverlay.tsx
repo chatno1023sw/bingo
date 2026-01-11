@@ -40,6 +40,10 @@ const generateRainPieces = (): ConfettiPieceConfig[] => {
   return Array.from({ length: confettiConstants.rainCount }).map((_, index) => {
     const size = generateSize();
     const fallDuration = Math.round(rand(minRainDuration, maxRainDuration));
+    const delay = Math.max(
+      0,
+      Math.round(rand(minRainDelay, maxRainDelay)) - confettiConstants.rainDelayAdvanceMs,
+    );
     return {
       id: `rain-${index}`,
       isRibbon: size.isRibbon,
@@ -49,7 +53,7 @@ const generateRainPieces = (): ConfettiPieceConfig[] => {
         "--drift": `${rand(-12, 12)}vw`,
         "--spin": `${rand(720, 1600)}deg`,
         "--dur": `${fallDuration}ms`,
-        "--delay": `${Math.round(rand(minRainDelay, maxRainDelay))}ms`,
+        "--delay": `${delay}ms`,
         "--w": `${size.w.toFixed(1)}px`,
         "--h": `${size.h.toFixed(1)}px`,
         "--s": `${rand(0.7, 1.2).toFixed(2)}`,

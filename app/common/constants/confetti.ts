@@ -4,6 +4,7 @@ export const confettiConstants = {
   rainCount: 60,
   rainAnimationDelayRangeMs: [900, 3200],
   rainDurationRangeMs: [3600, 7200],
+  rainDelayAdvanceMs: 500,
   ribbonProbability: 0.18,
   longPieceProbability: 0.5,
 };
