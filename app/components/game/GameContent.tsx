@@ -387,14 +387,25 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
-    void setVolume(audioSettings.bgm.defaultVolume);
-    void setSoundVolume(audioSettings.se.defaultVolume);
+    const restoredBgmVolume =
+      preference.volume > 0 ? preference.volume : audioSettings.bgm.defaultVolume;
+    const restoredSoundVolume =
+      soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
+    void setVolume(restoredBgmVolume);
+    void setSoundVolume(restoredSoundVolume);
     const defaults = resetSoundDetailPreference();
     setVoiceVolume(defaults.voiceVolume);
     setDrumrollVolumeScale(defaults.drumrollVolumeScale);
     setCymbalVolumeScale(defaults.cymbalVolumeScale);
     requestBgmPlay();
-  }, [acknowledgeAudioNotice, requestBgmPlay, setVolume, setSoundVolume]);
+  }, [
+    acknowledgeAudioNotice,
+    preference.volume,
+    requestBgmPlay,
+    setVolume,
+    setSoundVolume,
+    soundPreference.volume,
+  ]);
 
   const handleGameBgmVolumeChange = useCallback(
     async (volume: number) => {
