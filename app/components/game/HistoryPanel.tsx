@@ -86,18 +86,18 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
                 <div key={`history-row-${rowKey}`} className="flex flex-col gap-3">
                   {row.labelCount > 0 ? (
                     <div className="flex flex-col gap-1">
-                      <span className="text-muted-foreground text-xs">{`${row.labelCount}`}</span>
+                      <span className="font-semibold text-muted-foreground text-sm">{`${row.labelCount}`}</span>
                       <div className="h-px w-full bg-border" />
                     </div>
                   ) : null}
-                  <div className="grid grid-cols-4 gap-2 px-1/2">
+                  <div className="grid grid-cols-4 gap-3 px-1">
                     {row.entries.map((entry) => (
                       <div
                         key={entry.sequence}
                         className="relative w-full"
                         style={{ paddingBottom: "100%" }}
                       >
-                        <div className="absolute inset-0 flex items-center justify-center rounded border border-border bg-card px-2 text-center font-semibold text-[clamp(1.25rem,3vw,4rem)] leading-none">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg border border-border bg-card px-3 text-center font-semibold text-[clamp(1.75rem,4vw,5.5rem)] leading-none">
                           {entry.number}
                         </div>
                       </div>
