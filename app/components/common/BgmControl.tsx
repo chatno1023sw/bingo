@@ -1,7 +1,7 @@
 import { type FC, useEffect, useRef, useState } from "react";
-import { Button } from "~/components/common/Button";
 import type { BgmPreference } from "~/common/types";
 import { BgmToggle } from "~/components/common/BgmToggle";
+import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
 import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
@@ -167,23 +167,24 @@ export const BgmControl: FC<BgmControlProps> = ({
           showCloseButton
           footer={
             onResetToDefault ? (
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  type="button"
-                  className="w-full rounded-full bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
-                  onClick={onResetToDefault}
-                >
-                  デフォルト値に戻す
-                </Button>
+              <div className="flex w-full items-center justify-center gap-3 sm:flex-row">
                 {onMuteAll ? (
                   <Button
                     type="button"
-                    className="w-full rounded-full border border-border bg-card px-4 py-3 text-muted-foreground text-sm hover:bg-muted"
+                    variant="secondary"
+                    className="w-full rounded-full border border-border bg-card px-4 py-3 text-secondary-foreground text-sm hover:bg-muted"
                     onClick={onMuteAll}
                   >
                     音量なし
                   </Button>
                 ) : null}
+                <Button
+                  type="button"
+                  className="w-full rounded-full px-4 py-3"
+                  onClick={onResetToDefault}
+                >
+                  デフォルト値
+                </Button>
               </div>
             ) : undefined
           }
