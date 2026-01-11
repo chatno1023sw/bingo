@@ -1,5 +1,5 @@
 import { Howl } from "howler";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   type FC,
   type MutableRefObject,
@@ -23,21 +23,16 @@ import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useGameSession } from "~/common/hooks/useGameSession";
-import {
-  getSoundDetailPreference,
-  muteSoundDetailPreference,
-  resetSoundDetailPreference,
-  saveSoundDetailPreference,
-} from "~/common/services/soundDetailPreferenceService";
+import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
 import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
-import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
+import { GameHeader } from "~/components/game/GameHeader";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
-import { cn } from "~/lib/utils";
+import { useGameSoundDetail } from "~/components/game/hooks/useGameSoundDetail";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -77,19 +72,50 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const { registerGameBgmHandler } = useAudioUnlock();
   const { preference, isReady, setVolume } = gameBgm;
   const { preference: soundPreference, setVolume: setSoundVolume } = sound;
-  const initialSoundDetailRef = useRef(getSoundDetailPreference());
-  const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
-  const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
-    initialSoundDetailRef.current.drumrollVolumeScale,
-  );
-  const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
-    initialSoundDetailRef.current.cymbalVolumeScale,
-  );
+  const initialSoundDetail = useMemo(() => getSoundDetailPreference(), []);
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const [historyColumns, setHistoryColumns] = useState<3 | 4>(4);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAcknowledged();
+  }, [markAcknowledged]);
+  const bgmRef = useRef<Howl | null>(null);
+  const bgmPlayingRef = useRef(false);
+  const bgmPendingRef = useRef(false);
+  const bgmUnlockAttachedRef = useRef(false);
+  const requestBgmPlay = useCallback(() => {
+    const bgm = bgmRef.current;
+    if (!bgm) {
+      return;
+    }
+    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
+    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
+      bgmPlayingRef.current = true;
+      return;
+    }
+    bgm.play();
+    bgmPlayingRef.current = true;
+  }, []);
+  const {
+    voiceVolume,
+    drumrollVolumeScale,
+    cymbalVolumeScale,
+    extraSoundSliders,
+    handleMuteAllAudio,
+    handleEnableAllAudio,
+    handleGameBgmVolumeChange,
+    resetSoundDetailToDefault,
+  } = useGameSoundDetail({
+    initialDetail: initialSoundDetail,
+    bgmVolume: preference.volume,
+    soundVolume: soundPreference.volume,
+    acknowledgeAudioNotice,
+    setBgmVolume: setVolume,
+    setSoundVolume,
+    requestBgmPlay,
+  });
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const letterVoiceRef = useRef<Howl | null>(null);
@@ -193,25 +219,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     drumrollVolumeScale,
     cymbalVolumeScale,
   });
-
-  const bgmRef = useRef<Howl | null>(null);
-  const bgmPlayingRef = useRef(false);
-  const bgmPendingRef = useRef(false);
-  const bgmUnlockAttachedRef = useRef(false);
-
-  const requestBgmPlay = useCallback(() => {
-    const bgm = bgmRef.current;
-    if (!bgm) {
-      return;
-    }
-    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
-    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
-      bgmPlayingRef.current = true;
-      return;
-    }
-    bgm.play();
-    bgmPlayingRef.current = true;
-  }, []);
 
   const handleUserUnlock = useCallback(() => {
     if (!bgmPendingRef.current) {
@@ -367,18 +374,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     clearBingoBackgroundSequence();
   }, [clearBingoBackgroundSequence, isAnimating]);
 
-  useEffect(() => {
-    saveSoundDetailPreference({
-      voiceVolume,
-      drumrollVolumeScale,
-      cymbalVolumeScale,
-    });
-  }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
-
-  const acknowledgeAudioNotice = useCallback(() => {
-    markAcknowledged();
-  }, [markAcknowledged]);
-
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
@@ -393,78 +388,14 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     startBingoBackgroundSequence(sequenceDurationMs);
   };
 
-  const extraSoundSliders = [
-    {
-      label: "ドラムロール",
-      value: drumrollVolumeScale,
-      onChange: setDrumrollVolumeScale,
-      min: 0,
-      max: 2,
-      step: 0.05,
-    },
-    {
-      label: "シンバル",
-      value: cymbalVolumeScale,
-      onChange: setCymbalVolumeScale,
-      min: 0,
-      max: 2,
-      step: 0.05,
-    },
-    {
-      label: "音声読み上げ",
-      value: voiceVolume,
-      onChange: setVoiceVolume,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    },
-  ];
-
-  const handleMuteAllAudio = useCallback(() => {
-    acknowledgeAudioNotice();
-    void setVolume(0);
-    void setSoundVolume(0);
-    const muted = muteSoundDetailPreference();
-    setVoiceVolume(muted.voiceVolume);
-    setDrumrollVolumeScale(muted.drumrollVolumeScale);
-    setCymbalVolumeScale(muted.cymbalVolumeScale);
-  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
-
-  const handleEnableAllAudio = useCallback(() => {
-    acknowledgeAudioNotice();
-    const restoredBgmVolume =
-      preference.volume > 0 ? preference.volume : audioSettings.bgm.defaultVolume;
-    const restoredSoundVolume =
-      soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
-    void setVolume(restoredBgmVolume);
-    void setSoundVolume(restoredSoundVolume);
-    const defaults = resetSoundDetailPreference();
-    setVoiceVolume(defaults.voiceVolume);
-    setDrumrollVolumeScale(defaults.drumrollVolumeScale);
-    setCymbalVolumeScale(defaults.cymbalVolumeScale);
-    requestBgmPlay();
-  }, [
-    acknowledgeAudioNotice,
-    preference.volume,
-    requestBgmPlay,
-    setVolume,
-    setSoundVolume,
-    soundPreference.volume,
-  ]);
-
   const handleToggleHistoryColumns = useCallback(() => {
     setHistoryColumns((prev) => (prev === 4 ? 3 : 4));
   }, []);
 
-  const handleGameBgmVolumeChange = useCallback(
-    async (volume: number) => {
-      await setVolume(volume);
-      if (volume > 0) {
-        requestBgmPlay();
-      }
-    },
-    [requestBgmPlay, setVolume],
-  );
+  const handleClearHistory = useCallback(() => {
+    isFirstState.setIsFirst(true);
+    openResetDialog();
+  }, [isFirstState, openResetDialog]);
 
   if (isLoading) {
     return (
@@ -495,65 +426,23 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     <PrizeProvider initialPrizes={session.prizes}>
       <main className="h-screen overflow-hidden bg-background text-foreground">
         <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
-          <header className="flex items-center px-6 py-4">
-            <div className="flex flex-1 items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                className={cn(
-                  "rounded-full border border-border px-3 py-1 text-secondary-foreground text-xs hover:bg-muted",
-                  "relative top-2",
-                )}
-                onClick={handleToggleHistoryColumns}
-              >
-                {historyToggleLabel}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className={cn(
-                  "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
-                  "relative top-2",
-                )}
-                onClick={() => {
-                  isFirstState.setIsFirst(true);
-                  openResetDialog();
-                }}
-                disabled={isLoading || isResetting || session.historyView.length === 0}
-              >
-                クリア
-              </Button>
-            </div>
-            <div className="relative flex items-center gap-3">
-              <BgmControl
-                preference={preference}
-                soundPreference={soundPreference}
-                isReady={isReady}
-                onVolumeChange={handleGameBgmVolumeChange}
-                onSoundVolumeChange={setSoundVolume}
-                extraSliders={extraSoundSliders}
-                useDialog
-                onResetToDefault={() => {
-                  void handleGameBgmVolumeChange(audioSettings.bgm.defaultVolume);
-                  void setSoundVolume(audioSettings.se.defaultVolume);
-                  const defaults = resetSoundDetailPreference();
-                  setVoiceVolume(defaults.voiceVolume);
-                  setDrumrollVolumeScale(defaults.drumrollVolumeScale);
-                  setCymbalVolumeScale(defaults.cymbalVolumeScale);
-                }}
-                onMuteAll={handleMuteAllAudio}
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                className="rounded-full!"
-                aria-label="Start 画面に戻る"
-                onClick={handleBackToStart}
-              >
-                <X className="aspect-square h-6 w-6" />
-              </Button>
-            </div>
-          </header>
+          <GameHeader
+            onClear={handleClearHistory}
+            clearDisabled={isLoading || isResetting || session.historyView.length === 0}
+            historyToggleLabel={historyToggleLabel}
+            onToggleHistoryColumns={handleToggleHistoryColumns}
+            onNavigateBack={handleBackToStart}
+            bgmControl={{
+              preference,
+              soundPreference,
+              isReady,
+              onVolumeChange: handleGameBgmVolumeChange,
+              onSoundVolumeChange: setSoundVolume,
+              extraSliders: extraSoundSliders,
+              onResetToDefault: resetSoundDetailToDefault,
+              onMuteAll: handleMuteAllAudio,
+            }}
+          />
           <div className="flex flex-1 items-stretch overflow-hidden px-2 pb-6">
             <HistoryPanel
               recent={session.historyView}
