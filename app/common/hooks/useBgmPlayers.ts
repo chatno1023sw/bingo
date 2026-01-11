@@ -71,11 +71,11 @@ export const useBgmPlayers = (options: UseBgmPlayersOptions = {}): UseBgmPlayers
     const masterVolume = baseVolume * audioSettings.se.baseVolumeScale;
     const drumrollVolume = Math.min(
       1,
-      Math.max(0, masterVolume * drumrollVolumeScaleRef.current * audioSettings.se.detailBoost),
+      Math.max(0, masterVolume * drumrollVolumeScaleRef.current * audioSettings.se.drumrollBoost),
     );
     const cymbalVolume = Math.min(
       1,
-      Math.max(0, masterVolume * cymbalVolumeScaleRef.current * audioSettings.se.detailBoost),
+      Math.max(0, masterVolume * cymbalVolumeScaleRef.current * audioSettings.se.cymbalBoost),
     );
     if (drumrollRef.current) {
       drumrollRef.current.volume(drumrollVolume);

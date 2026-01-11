@@ -44,7 +44,8 @@ const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
 const BUTTON_ATTENUATION = 0.1;
 const BGM_ATTENUATION = 0.1;
 const VOICE_BOOST = 3;
-const EFFECT_BOOST = 2;
+const DRUMROLL_BOOST = 2;
+const CYMBAL_BOOST = 1;
 
 type SliderRange = {
   min: number;
@@ -98,12 +99,14 @@ export const audioSettings = {
     drumrollRange: DETAIL_RANGE,
     /** ドラムロール倍率の初期値です。 */
     drumrollVolumeScale: MEDIAN_DETAIL,
+    /** ドラムロールへ掛ける増幅倍率です。 */
+    drumrollBoost: DRUMROLL_BOOST,
     /** シンバル倍率の範囲です。 */
     cymbalRange: DETAIL_RANGE,
     /** シンバル倍率の初期値です。 */
     cymbalVolumeScale: MEDIAN_DETAIL,
-    /** ドラムロール/シンバルへ掛ける増幅倍率です。 */
-    detailBoost: EFFECT_BOOST,
+    /** シンバルへ掛ける増幅倍率です。 */
+    cymbalBoost: CYMBAL_BOOST,
     /** 効果音フェイルオーバーまでの待機時間（ミリ秒）です。 */
     fallbackWaitMs: 5000,
   },
