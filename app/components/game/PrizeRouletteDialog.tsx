@@ -40,6 +40,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const { preference } = useBgmPreference();
   const prizeVoiceRef = useRef<Howl | null>(null);
   const shouldPlayPrizeVoiceRef = useRef(false);
+  const hasCompletedRef = useRef(false);
 
   const initializeSelectable = useCallback(() => {
     const entries = prizesRef.current.slice(0, 25);
@@ -64,6 +65,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       return;
     }
     const winnerIndex = selectable[Math.floor(Math.random() * selectable.length)].index;
+    hasCompletedRef.current = true;
     setActiveIndex(winnerIndex);
     setWinnerIndex(winnerIndex);
     onCompleteRef.current(prizesRef.current[winnerIndex]);
@@ -129,8 +131,10 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
 
   useEffect(() => {
     if (!open) {
-      shouldPlayPrizeVoiceRef.current = false;
-      stopPrizeVoice();
+      if (!hasCompletedRef.current) {
+        shouldPlayPrizeVoiceRef.current = false;
+        stopPrizeVoice();
+      }
       stopDrumroll();
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -138,6 +142,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       }
       return;
     }
+    hasCompletedRef.current = false;
     if (!initializeSelectable()) {
       shouldPlayPrizeVoiceRef.current = false;
       stopPrizeVoice();
@@ -174,7 +179,9 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      stopPrizeVoice();
+      if (!hasCompletedRef.current) {
+        stopPrizeVoice();
+      }
       stopDrumroll();
     };
   }, [initializeSelectable, open, playDrumroll, stopDrumroll, stopPrizeVoice]);
