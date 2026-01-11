@@ -1,3 +1,5 @@
+import type { BingoLetter } from "~/common/constants/bingo";
+
 /**
  * 音声アセットの相対パス一覧です。
  *
@@ -28,6 +30,10 @@ export const audioPaths = {
   },
   number: {
     dir: "number",
+    ext: "wav",
+  },
+  letter: {
+    dir: "roulette-letter",
     ext: "wav",
   },
 } as const;
@@ -142,3 +148,14 @@ export const resolveAudioPath = (path: string): string => `${import.meta.env.BAS
  */
 export const buildNumberVoicePath = (number: number): string =>
   `${audioPaths.number.dir}/${number}.${audioPaths.number.ext}`;
+
+/**
+ * ルーレット文字音声の相対パスを生成します。
+ *
+ * - 副作用: なし。
+ * - 入力制約: `letter` は BINGO のいずれかの文字を渡してください。
+ * - 戻り値: BINGO 文字音声の相対パスを返します。
+ * - Chrome DevTools MCP では指定文字の音声が再生されることを確認します。
+ */
+export const buildLetterVoicePath = (letter: BingoLetter): string =>
+  `${audioPaths.letter.dir}/${letter}.${audioPaths.letter.ext}`;
