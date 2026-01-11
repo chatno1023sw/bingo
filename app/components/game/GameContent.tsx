@@ -8,9 +8,9 @@ import {
   resolveAudioPath,
 } from "~/common/constants/audio";
 import type { BingoLetter } from "~/common/constants/bingo";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import { useGameSession } from "~/common/hooks/useGameSession";
 import {
   getSoundDetailPreference,
@@ -19,11 +19,7 @@ import {
   saveSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
 import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
-import {
-  hasAudioNoticeAcknowledged,
-  markAudioNoticeAcknowledged,
-} from "~/common/utils/audioNoticeState";
-import { storageKeys } from "~/common/utils/storage";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
@@ -32,6 +28,12 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
+
+export type GameContentProps = {
+  /** Start ビューへ戻る */
+  onNavigateStart?: () => void;
+};
 
 /**
  * Game 画面のメインコンテンツです。
@@ -41,7 +43,7 @@ import { cn } from "~/lib/utils";
  * - 戻り値: ゲーム画面の JSX を返します。
  * - Chrome DevTools MCP では抽選操作が動作することを確認します。
  */
-export const GameContent: FC = () => {
+export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const {
     session,
     isLoading,
@@ -61,14 +63,11 @@ export const GameContent: FC = () => {
     completeDrawAnimation,
     handleReset,
     handleBackToStart,
-  } = useGameSession();
-  const { preference, isReady, setVolume } = useBgmPreference({
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
-    storageKey: storageKeys.se,
-    defaultVolume: audioSettings.se.defaultVolume,
-  });
+  } = useGameSession({ onNavigateToStart: onNavigateStart });
+  const { gameBgm, sound } = useAudioPreferences();
+  const { registerGameBgmHandler } = useAudioUnlock();
+  const { preference, isReady, setVolume } = gameBgm;
+  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
   const initialSoundDetailRef = useRef(getSoundDetailPreference());
   const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
   const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
@@ -80,7 +79,7 @@ export const GameContent: FC = () => {
   const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
   const [isFirst, setIsFirst] = useState(true);
   const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
+  const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
   const numberVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
@@ -232,6 +231,14 @@ export const GameContent: FC = () => {
     }
   }, [requestBgmPlay]);
 
+  useEffect(() => {
+    return registerGameBgmHandler(() => {
+      if (preference.volume > 0) {
+        requestBgmPlay();
+      }
+    });
+  }, [preference.volume, registerGameBgmHandler, requestBgmPlay]);
+
   const clearBingoBackgroundSequence = useCallback(() => {
     for (const timerId of bingoLetterTimersRef.current) {
       clearTimeout(timerId);
@@ -324,9 +331,8 @@ export const GameContent: FC = () => {
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
   const acknowledgeAudioNotice = useCallback(() => {
-    markAudioNoticeAcknowledged();
-    setAudioNoticeOpen(false);
-  }, []);
+    markAcknowledged();
+  }, [markAcknowledged]);
 
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
@@ -381,14 +387,25 @@ export const GameContent: FC = () => {
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
-    void setVolume(audioSettings.bgm.defaultVolume);
-    void setSoundVolume(audioSettings.se.defaultVolume);
+    const restoredBgmVolume =
+      preference.volume > 0 ? preference.volume : audioSettings.bgm.defaultVolume;
+    const restoredSoundVolume =
+      soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
+    void setVolume(restoredBgmVolume);
+    void setSoundVolume(restoredSoundVolume);
     const defaults = resetSoundDetailPreference();
     setVoiceVolume(defaults.voiceVolume);
     setDrumrollVolumeScale(defaults.drumrollVolumeScale);
     setCymbalVolumeScale(defaults.cymbalVolumeScale);
     requestBgmPlay();
-  }, [acknowledgeAudioNotice, requestBgmPlay, setVolume, setSoundVolume]);
+  }, [
+    acknowledgeAudioNotice,
+    preference.volume,
+    requestBgmPlay,
+    setVolume,
+    setSoundVolume,
+    soundPreference.volume,
+  ]);
 
   const handleGameBgmVolumeChange = useCallback(
     async (volume: number) => {
@@ -452,6 +469,14 @@ export const GameContent: FC = () => {
                 onSoundVolumeChange={setSoundVolume}
                 extraSliders={extraSoundSliders}
                 useDialog
+                onResetToDefault={() => {
+                  void handleGameBgmVolumeChange(audioSettings.bgm.defaultVolume);
+                  void setSoundVolume(audioSettings.se.defaultVolume);
+                  const defaults = resetSoundDetailPreference();
+                  setVoiceVolume(defaults.voiceVolume);
+                  setDrumrollVolumeScale(defaults.drumrollVolumeScale);
+                  setCymbalVolumeScale(defaults.cymbalVolumeScale);
+                }}
               />
               <Button
                 type="button"
@@ -499,7 +524,7 @@ export const GameContent: FC = () => {
         disabled={isResetting}
       />
       <AudioNoticeDialog
-        open={audioNoticeOpen}
+        open={!audioNoticeAcknowledged}
         onClose={acknowledgeAudioNotice}
         onMuteAll={handleMuteAllAudio}
         onEnableAll={handleEnableAllAudio}

@@ -1,5 +1,7 @@
 # design
 
+## root ビュー内の Start / Game 切り替え
+
 start
 
 ![image.png](design/image.png)

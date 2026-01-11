@@ -1,12 +1,6 @@
-import { Howl } from "howler";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Howl, Howler } from "howler";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
-import {
-  muteSoundDetailPreference,
-  resetSoundDetailPreference,
-} from "~/common/services/soundDetailPreferenceService";
-import { useBgmPreference } from "~/common/hooks/useBgmPreference";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
@@ -14,26 +8,28 @@ import {
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
-import { storageKeys } from "~/common/utils/storage";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
-import { StartMenu } from "~/components/start/StartMenu";
 import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
-import {
-  hasAudioNoticeAcknowledged,
-  markAudioNoticeAcknowledged,
-} from "~/common/utils/audioNoticeState";
+import { StartMenu } from "~/components/start/StartMenu";
 import { StartOverDialog } from "~/components/start/StartOverDialog";
+import {
+  muteSoundDetailPreference,
+  resetSoundDetailPreference,
+} from "~/common/services/soundDetailPreferenceService";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 
-/**
- * Start 画面のルートコンポーネント。
- *
- * - Chrome DevTools MCP の SF-START-001〜003 を想定し、BGM トグル状態を localStorage と同期します。
- * - 画面遷移の前に localStorage を更新し、ブラウザ完結のフローで開始状態を整えます。
- */
-export default function StartRoute() {
+export type StartViewProps = {
+  /** Game ビューへ切り替える */
+  onShowGame: () => void;
+  /** Setting 画面へ遷移する */
+  onNavigateSetting: () => void;
+};
+
+export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting }) => {
   const [startOverDialogOpen, setStartOverDialogOpen] = useState(false);
-  const [audioNoticeOpen, setAudioNoticeOpen] = useState(() => !hasAudioNoticeAcknowledged());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const [shouldResumeBgm, setShouldResumeBgm] = useState(() => consumeStartBgmUnlock());
@@ -42,35 +38,27 @@ export default function StartRoute() {
   const bgmPlayingRef = useRef(false);
   const bgmPendingRef = useRef(false);
   const bgmUnlockAttachedRef = useRef(false);
-  const navigate = useNavigate();
-  const {
-    preference,
-    isReady,
-    setVolume: setStartBgmVolume,
-  } = useBgmPreference({
-    storageKey: storageKeys.bgmStart,
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { setVolume: setGameBgmVolume } = useBgmPreference({
-    defaultVolume: audioSettings.bgm.defaultVolume,
-  });
-  const { preference: soundPreference, setVolume: setSoundVolume } = useBgmPreference({
-    storageKey: storageKeys.se,
-    defaultVolume: audioSettings.se.defaultVolume,
-  });
+  const { startBgm, gameBgm, sound } = useAudioPreferences();
+  const { preference: startBgmPreference, isReady, setVolume: setStartBgmVolume } = startBgm;
+  const { setVolume: setGameBgmVolume } = gameBgm;
+  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
+  const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
+  const { requestGameBgmPlay } = useAudioUnlock();
 
-  /**
-   * セッション開始処理を実行します。
-   *
-   * - 副作用: セッション開始 API を呼び出し、画面遷移します。
-   * - 入力制約: なし。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では Start→Game の遷移を確認します。
-   */
-  const acknowledgeAudioNotice = useCallback(() => {
-    markAudioNoticeAcknowledged();
-    setAudioNoticeOpen(false);
+  const resumeAudioContext = useCallback(() => {
+    const ctx = Howler.ctx;
+    if (!ctx || typeof ctx.resume !== "function") {
+      return;
+    }
+    if (ctx.state === "running") {
+      return;
+    }
+    void ctx.resume();
   }, []);
+
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAcknowledged();
+  }, [markAcknowledged]);
 
   const handleStart = async () => {
     acknowledgeAudioNotice();
@@ -79,20 +67,18 @@ export default function StartRoute() {
       await startSession();
       markGameBgmUnlock();
       setIsSubmitting(false);
-      navigate("/game");
+      onShowGame();
     } catch {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * 「はじめから」押下時の処理です。
-   *
-   * - 副作用: 必要に応じて確認ダイアログを開きます。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では確認ダイアログの表示を確認します。
-   */
+  const triggerStart = () => {
+    requestGameBgmPlay();
+    resumeAudioContext();
+    void handleStart();
+  };
+
   const handleStartRequest = () => {
     if (isSubmitting) {
       return;
@@ -101,20 +87,14 @@ export default function StartRoute() {
       setStartOverDialogOpen(true);
       return;
     }
-    void handleStart();
+    triggerStart();
   };
 
-  /**
-   * 「続きから」確定時の処理です。
-   *
-   * - 副作用: セッション復元/開始と画面遷移を行います。
-   * - 入力制約: なし。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では続きからの遷移を確認します。
-   */
   const handleResumeConfirm = async () => {
     acknowledgeAudioNotice();
     setIsSubmitting(true);
+    requestGameBgmPlay();
+    resumeAudioContext();
     try {
       const resumed = await resumeSession();
       if (!resumed) {
@@ -122,22 +102,14 @@ export default function StartRoute() {
       }
       markGameBgmUnlock();
       setIsSubmitting(false);
-      navigate("/game");
+      onShowGame();
     } catch {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * 設定画面へ遷移します。
-   *
-   * - 副作用: 画面遷移を実行します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では Setting 画面への遷移を確認します。
-   */
   const handleSetting = () => {
-    navigate("/setting");
+    onNavigateSetting();
   };
 
   useEffect(() => {
@@ -179,7 +151,6 @@ export default function StartRoute() {
 
   useEffect(() => {
     const bgm = new Howl({
-      // maou_bgm_orchestra05.mp3
       src: [resolveAudioPath(audioPaths.bgm.start)],
       loop: true,
       preload: true,
@@ -204,8 +175,8 @@ export default function StartRoute() {
     if (!bgm) {
       return;
     }
-    bgm.volume(preference.volume * audioSettings.bgm.startVolumeScale);
-    if (preference.volume > 0) {
+    bgm.volume(startBgmPreference.volume * audioSettings.bgm.startVolumeScale);
+    if (startBgmPreference.volume > 0) {
       if (!bgmPlayingRef.current) {
         requestBgmPlay();
       }
@@ -215,7 +186,7 @@ export default function StartRoute() {
       bgm.stop();
       bgmPlayingRef.current = false;
     }
-  }, [preference.volume, requestBgmPlay]);
+  }, [startBgmPreference.volume, requestBgmPlay]);
 
   useEffect(() => {
     if (!shouldResumeBgm) {
@@ -224,16 +195,22 @@ export default function StartRoute() {
     if (!isBgmReady) {
       return;
     }
-    if (audioNoticeOpen) {
+    if (!audioNoticeAcknowledged) {
       return;
     }
-    if (preference.volume <= 0) {
+    if (startBgmPreference.volume <= 0) {
       setShouldResumeBgm(false);
       return;
     }
     requestBgmPlay();
     setShouldResumeBgm(false);
-  }, [audioNoticeOpen, isBgmReady, preference.volume, requestBgmPlay, shouldResumeBgm]);
+  }, [
+    audioNoticeAcknowledged,
+    isBgmReady,
+    startBgmPreference.volume,
+    requestBgmPlay,
+    shouldResumeBgm,
+  ]);
 
   const syncBgmVolume = useCallback(
     async (volume: number) => {
@@ -251,11 +228,22 @@ export default function StartRoute() {
 
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
-    void syncBgmVolume(audioSettings.bgm.defaultVolume);
-    void setSoundVolume(audioSettings.se.defaultVolume);
+    const restoredBgmVolume =
+      startBgmPreference.volume > 0 ? startBgmPreference.volume : audioSettings.bgm.defaultVolume;
+    const restoredSoundVolume =
+      soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
+    void syncBgmVolume(restoredBgmVolume);
+    void setSoundVolume(restoredSoundVolume);
     resetSoundDetailPreference();
     requestBgmPlay();
-  }, [acknowledgeAudioNotice, requestBgmPlay, setSoundVolume, syncBgmVolume]);
+  }, [
+    acknowledgeAudioNotice,
+    requestBgmPlay,
+    setSoundVolume,
+    soundPreference.volume,
+    startBgmPreference.volume,
+    syncBgmVolume,
+  ]);
 
   const handleStartBgmVolumeChange = useCallback(
     (volume: number) => {
@@ -271,12 +259,16 @@ export default function StartRoute() {
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
       <div className="absolute top-8 right-8">
         <BgmControl
-          preference={preference}
+          preference={startBgmPreference}
           soundPreference={soundPreference}
           isReady={isReady}
           onVolumeChange={handleStartBgmVolumeChange}
           onSoundVolumeChange={setSoundVolume}
           useDialog
+          onResetToDefault={() => {
+            void syncBgmVolume(audioSettings.bgm.defaultVolume);
+            void setSoundVolume(audioSettings.se.defaultVolume);
+          }}
         />
       </div>
       <div className="flex min-h-90 items-center justify-center">
@@ -293,16 +285,16 @@ export default function StartRoute() {
         onClose={() => setStartOverDialogOpen(false)}
         onConfirm={() => {
           setStartOverDialogOpen(false);
-          void handleStart();
+          triggerStart();
         }}
         disabled={isSubmitting}
       />
       <AudioNoticeDialog
-        open={audioNoticeOpen}
+        open={!audioNoticeAcknowledged}
         onClose={acknowledgeAudioNotice}
         onMuteAll={handleMuteAllAudio}
         onEnableAll={handleEnableAllAudio}
       />
     </main>
   );
-}
+};

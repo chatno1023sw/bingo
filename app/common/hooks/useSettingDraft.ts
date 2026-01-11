@@ -574,11 +574,11 @@ export const useSettingDraft = ({
     try {
       setAllowNavigation(true);
       if (!isDirty) {
-        navigate("/start");
+        navigate("/");
         return;
       }
       await applyPrizes(draftPrizes);
-      navigate("/start");
+      navigate("/");
     } finally {
       setIsSaving(false);
       setAllowNavigation(false);

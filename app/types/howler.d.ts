@@ -35,4 +35,12 @@ declare module "howler" {
     volume(value: number): number;
     unload(): void;
   }
+
+  /**
+   * Howler 全体のグローバルオブジェクトです。
+   */
+  export const Howler: {
+    /** 内部で利用される AudioContext */
+    ctx?: AudioContext;
+  };
 }

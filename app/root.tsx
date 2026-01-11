@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -6,6 +7,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import {
+  AUDIO_NOTICE_ACK_KEY,
+  AUDIO_NOTICE_INIT_PATH_KEY,
+} from "~/common/contexts/AudioNoticeContext";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -67,6 +72,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
  * - Chrome DevTools MCP では各ルートが描画されることを確認します。
  */
 export default function App() {
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const storage = window.sessionStorage;
+    if (!storage) {
+      return;
+    }
+    if (!storage.getItem(AUDIO_NOTICE_INIT_PATH_KEY)) {
+      const initialPath = window.location.pathname;
+      storage.setItem(AUDIO_NOTICE_INIT_PATH_KEY, initialPath);
+      if (initialPath === "/setting") {
+        storage.removeItem(AUDIO_NOTICE_ACK_KEY);
+      }
+    }
+    const handlePageHide = () => {
+      storage.removeItem(AUDIO_NOTICE_INIT_PATH_KEY);
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, []);
   return <Outlet />;
 }
 

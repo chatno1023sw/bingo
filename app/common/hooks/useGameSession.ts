@@ -95,6 +95,11 @@ export type UseGameSessionResult = {
   handleBackToStart: () => void;
 };
 
+export type UseGameSessionOptions = {
+  /** Start ビューへ戻る時のコールバック */
+  onNavigateToStart?: () => void;
+};
+
 /**
  * Game 画面のセッション制御フックです。
  *
@@ -103,7 +108,7 @@ export type UseGameSessionResult = {
  * - 戻り値: 画面表示に必要な状態と操作関数を返します。
  * - Chrome DevTools MCP では抽選とリセットが動作することを確認します。
  */
-export const useGameSession = (): UseGameSessionResult => {
+export const useGameSession = (options: UseGameSessionOptions = {}): UseGameSessionResult => {
   const [session, setSession] = useState<GameLoaderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
@@ -291,7 +296,11 @@ export const useGameSession = (): UseGameSessionResult => {
    */
   const handleBackToStart = () => {
     markStartBgmUnlock();
-    navigate("/start");
+    if (options.onNavigateToStart) {
+      options.onNavigateToStart();
+      return;
+    }
+    navigate("/");
   };
 
   const drawButtonLabel =
