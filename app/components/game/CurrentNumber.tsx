@@ -14,7 +14,6 @@ export type CurrentNumberProps = {
 };
 
 const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
-const NUMBER_TRANSLATE = "translateY(calc(-6% - 3.2rem))";
 
 /**
  * 中央表示のシンプルな数字パネル。
@@ -65,10 +64,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
         )}
         style={{ maxWidth: NUMBER_PANEL_MAX_SIZE, maxHeight: NUMBER_PANEL_MAX_SIZE }}
       >
-        <div
-          className="relative flex items-center justify-center"
-          style={{ transform: NUMBER_TRANSLATE }}
-        >
+        <div className="relative flex -translate-y-[6%] items-center justify-center">
           {backgroundLetter ? (
             <span
               className={cn(
