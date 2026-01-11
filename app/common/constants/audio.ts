@@ -33,8 +33,8 @@ export const audioPaths = {
  * - Chrome DevTools MCP では音量バランスと再生タイミングを確認します。
  */
 const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
-const BUTTON_ATTENUATION = 1 / 3;
-const BGM_ATTENUATION = 1 / 2;
+const BUTTON_ATTENUATION = 0.1;
+const BGM_ATTENUATION = 0.1;
 const VOICE_BOOST = 3;
 const EFFECT_BOOST = 2;
 
