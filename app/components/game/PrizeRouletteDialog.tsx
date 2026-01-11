@@ -40,6 +40,20 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const { preference } = useBgmPreference();
   const prizeVoiceRef = useRef<Howl | null>(null);
   const shouldPlayPrizeVoiceRef = useRef(false);
+
+  const initializeSelectable = useCallback(() => {
+    const entries = prizesRef.current.slice(0, 25);
+    const selectable = entries
+      .map((prize, index) => ({ prize, index }))
+      .filter(({ prize }) => !prize.selected);
+    selectableRef.current = selectable;
+    if (selectable.length === 0) {
+      return false;
+    }
+    setActiveIndex(selectable[0].index);
+    setWinnerIndex(null);
+    return true;
+  }, []);
   const completeRoulette = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -114,29 +128,32 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   }, [onComplete]);
 
   useEffect(() => {
-    if (!open || prizes.length === 0) {
+    if (!open) {
+      shouldPlayPrizeVoiceRef.current = false;
+      stopPrizeVoice();
+      stopDrumroll();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+    if (!initializeSelectable()) {
       shouldPlayPrizeVoiceRef.current = false;
       stopPrizeVoice();
       stopDrumroll();
       return;
     }
-    const entries = prizes.slice(0, 25);
-    const selectable = entries
-      .map((prize, index) => ({ prize, index }))
-      .filter(({ prize }) => !prize.selected);
-    selectableRef.current = selectable;
-    if (selectable.length === 0) {
-      stopDrumroll();
-      return;
-    }
 
-    setActiveIndex(selectable[0].index);
-    setWinnerIndex(null);
     shouldPlayPrizeVoiceRef.current = true;
     playDrumroll();
 
     intervalRef.current = setInterval(() => {
       setActiveIndex((prev) => {
+        const selectable = selectableRef.current;
+        if (selectable.length === 0) {
+          return prev;
+        }
         if (selectable.length === 1) {
           return selectable[0].index;
         }
@@ -160,7 +177,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       stopPrizeVoice();
       stopDrumroll();
     };
-  }, [open, playDrumroll, prizes, stopDrumroll, stopPrizeVoice]);
+  }, [initializeSelectable, open, playDrumroll, stopDrumroll, stopPrizeVoice]);
 
   const entries = prizes.slice(0, 25);
   return (
