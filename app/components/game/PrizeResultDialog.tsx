@@ -2,7 +2,7 @@ import { Howl } from "howler";
 import { useEffect, useRef } from "react";
 import { Image } from "lucide-react";
 import type { FC } from "react";
-import { resolveAudioPath } from "~/common/constants/audio";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
 import { useStoredImage } from "~/common/hooks/useStoredImage";
@@ -27,26 +27,47 @@ export type PrizeResultDialogProps = {
  */
 export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onClose }) => {
   const prizeVoiceRef = useRef<Howl | null>(null);
+  const prizeVoiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { sound } = useAudioPreferences();
   const soundDetail = getSoundDetailPreference();
   const resolvedImagePath = useStoredImage(prize?.imagePath ?? null);
   const hasImage = Boolean(resolvedImagePath);
   useEffect(() => {
+    if (prizeVoiceTimerRef.current) {
+      clearTimeout(prizeVoiceTimerRef.current);
+      prizeVoiceTimerRef.current = null;
+    }
     if (!open || !prize) {
       prizeVoiceRef.current?.stop();
       return;
     }
+    if (sound.preference.volume <= 0 || soundDetail.voiceVolume <= 0) {
+      return;
+    }
     const prizeVoice = new Howl({
-      src: [resolveAudioPath("prize-roulette.wav")],
-      volume: sound.preference.volume * soundDetail.voiceVolume,
+      src: [resolveAudioPath(audioPaths.se.prizeRoulette)],
+      volume: soundDetail.voiceVolume * audioSettings.number.voicePlaybackScale,
       onend: () => {
         prizeVoice.unload();
         prizeVoiceRef.current = null;
       },
+      onloaderror: () => {
+        prizeVoiceRef.current = null;
+      },
+      onplayerror: () => {
+        prizeVoiceRef.current = null;
+      },
     });
     prizeVoiceRef.current = prizeVoice;
-    prizeVoice.play();
+    prizeVoiceTimerRef.current = setTimeout(() => {
+      prizeVoice.play();
+      prizeVoiceTimerRef.current = null;
+    }, 500);
     return () => {
+      if (prizeVoiceTimerRef.current) {
+        clearTimeout(prizeVoiceTimerRef.current);
+        prizeVoiceTimerRef.current = null;
+      }
       prizeVoice.stop();
       prizeVoice.unload();
       prizeVoiceRef.current = null;
