@@ -3,15 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
 
 export type UseDrawAnimationParams = {
-  /** 抽選実行時に呼び出す処理 */
   onFinalizeDraw: () => void;
-  /** 抽選対象の番号一覧 */
   availableNumbers: number[];
-  /** 抽選処理中フラグ */
   isMutating: boolean;
-  /** リセット中フラグ */
   isResetting: boolean;
-  /** 現在の番号 */
   currentNumber: number | null;
 };
 
@@ -22,14 +17,6 @@ export type UseDrawAnimationResult = {
   completeDrawAnimation: () => void;
 };
 
-/**
- * 抽選演出と表示番号を管理します。
- *
- * - 副作用: interval を用いてランダム表示を行います。
- * - 入力制約: `availableNumbers` が空の場合は演出を開始しません。
- * - 戻り値: 表示番号と演出制御関数を返します。
- * - Chrome DevTools MCP では演出の開始/停止が動作することを確認します。
- */
 export const useDrawAnimation = ({
   onFinalizeDraw,
   availableNumbers,

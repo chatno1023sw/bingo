@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { getHistoryView } from "~/common/services/historyService";
-import { persistSessionState, resumeSession, startSession } from "~/common/services/sessionService";
+import { resumeSession, startSession } from "~/common/services/sessionService";
 import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
 import { getAvailableNumbers } from "~/common/utils/bingoEngine";
+
+export type GameLoaderData = GameStateEnvelope & {
+  historyView: DrawHistoryEntry[];
+  availableNumbers: number[];
+};
 
 export const ensureSession = async (): Promise<GameStateEnvelope> => {
   const resumed = await resumeSession();
@@ -22,11 +27,6 @@ export const buildLoaderData = async (envelope: GameStateEnvelope): Promise<Game
   };
 };
 
-export type GameLoaderData = GameStateEnvelope & {
-  historyView: DrawHistoryEntry[];
-  availableNumbers: number[];
-};
-
 export const useGameSessionLoader = () => {
   const [session, setSession] = useState<GameLoaderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,11 +38,15 @@ export const useGameSessionLoader = () => {
       try {
         const nextSession = await ensureSession();
         const nextData = await buildLoaderData(nextSession);
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setSession(nextData);
         setLoadError(null);
       } catch (err) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setLoadError(err instanceof Error ? err.message : "load-session-error");
       } finally {
         if (mounted) {
@@ -57,5 +61,4 @@ export const useGameSessionLoader = () => {
   }, []);
 
   return { session, setSession, isLoading, loadError };
-};
 };
