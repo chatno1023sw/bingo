@@ -30,7 +30,6 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
     <CommonDialog
       open={open}
       onClose={onClose}
-      title="おめでとうございます！"
       titleClassName="pt-8 text-3xl"
       headerClassName="text-center"
       contentClassName="flex flex-col items-center justify-center"
