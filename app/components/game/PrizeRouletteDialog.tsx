@@ -39,8 +39,10 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const onCompleteRef = useRef<(prize: Prize) => void>(() => undefined);
   const { preference } = useBgmPreference();
   const prizeVoiceRef = useRef<Howl | null>(null);
-  const shouldPlayPrizeVoiceRef = useRef(false);
+  const prizeVoiceEndHandlerRef = useRef<() => void>(() => undefined);
   const hasCompletedRef = useRef(false);
+  const pendingPrizeRef = useRef<Prize | null>(null);
+  const isPrizeVoicePlayingRef = useRef(false);
 
   const initializeSelectable = useCallback(() => {
     const entries = prizesRef.current.slice(0, 25);
@@ -66,9 +68,9 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     }
     const winnerIndex = selectable[Math.floor(Math.random() * selectable.length)].index;
     hasCompletedRef.current = true;
+    pendingPrizeRef.current = prizesRef.current[winnerIndex] ?? null;
     setActiveIndex(winnerIndex);
     setWinnerIndex(winnerIndex);
-    onCompleteRef.current(prizesRef.current[winnerIndex]);
   }, []);
 
   const stopPrizeVoice = useCallback(() => {
@@ -76,12 +78,26 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     if (!prizeVoice) {
       return;
     }
+    isPrizeVoicePlayingRef.current = false;
+    prizeVoiceEndHandlerRef.current = () => undefined;
     prizeVoice.stop();
   }, []);
 
+  const handlePrizeVoiceEnd = useCallback(() => {
+    if (isPrizeVoicePlayingRef.current) {
+      stopPrizeVoice();
+    }
+    const prize = pendingPrizeRef.current;
+    pendingPrizeRef.current = null;
+    if (prize) {
+      onCompleteRef.current(prize);
+    }
+  }, [stopPrizeVoice]);
+
   const playPrizeVoice = useCallback(() => {
     const prizeVoice = prizeVoiceRef.current;
-    if (!prizeVoice || preference.volume <= 0) {
+    if (!prizeVoice || !pendingPrizeRef.current || preference.volume <= 0) {
+      handlePrizeVoiceEnd();
       return;
     }
     const baseVolume = Math.min(
@@ -91,11 +107,13 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     prizeVoice.volume(baseVolume);
     prizeVoice.stop();
     prizeVoice.seek(0);
+    prizeVoiceEndHandlerRef.current = handlePrizeVoiceEnd;
+    isPrizeVoicePlayingRef.current = true;
     prizeVoice.play();
-  }, [preference.volume]);
+  }, [handlePrizeVoiceEnd, preference.volume]);
 
   const handleCymbalEnd = useCallback(() => {
-    if (!shouldPlayPrizeVoiceRef.current) {
+    if (!pendingPrizeRef.current) {
       return;
     }
     playPrizeVoice();
@@ -112,6 +130,9 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     const prizeVoice = new Howl({
       src: [resolveAudioPath(audioPaths.se.prizeRoulette)],
       preload: true,
+      onend: () => prizeVoiceEndHandlerRef.current(),
+      onloaderror: () => prizeVoiceEndHandlerRef.current(),
+      onplayerror: () => prizeVoiceEndHandlerRef.current(),
     });
     prizeVoiceRef.current = prizeVoice;
     return () => {
@@ -132,7 +153,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   useEffect(() => {
     if (!open) {
       if (!hasCompletedRef.current) {
-        shouldPlayPrizeVoiceRef.current = false;
+        pendingPrizeRef.current = null;
         stopPrizeVoice();
       }
       stopDrumroll();
@@ -144,13 +165,12 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     }
     hasCompletedRef.current = false;
     if (!initializeSelectable()) {
-      shouldPlayPrizeVoiceRef.current = false;
+      pendingPrizeRef.current = null;
       stopPrizeVoice();
       stopDrumroll();
       return;
     }
 
-    shouldPlayPrizeVoiceRef.current = true;
     playDrumroll();
 
     intervalRef.current = setInterval(() => {
@@ -174,14 +194,12 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
     }, 120);
 
     return () => {
-      shouldPlayPrizeVoiceRef.current = false;
+      pendingPrizeRef.current = null;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      if (!hasCompletedRef.current) {
-        stopPrizeVoice();
-      }
+      stopPrizeVoice();
       stopDrumroll();
     };
   }, [initializeSelectable, open, playDrumroll, stopDrumroll, stopPrizeVoice]);
