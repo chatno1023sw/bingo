@@ -1,5 +1,10 @@
+import { Howl } from "howler";
+import { useEffect, useRef } from "react";
 import { Image } from "lucide-react";
 import type { FC } from "react";
+import { resolveAudioPath } from "~/common/constants/audio";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
+import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
 import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
@@ -21,8 +26,32 @@ export type PrizeResultDialogProps = {
  * - Chrome DevTools MCP では結果ダイアログが自動表示されることを確認します。
  */
 export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onClose }) => {
+  const prizeVoiceRef = useRef<Howl | null>(null);
+  const { sound } = useAudioPreferences();
+  const soundDetail = getSoundDetailPreference();
   const resolvedImagePath = useStoredImage(prize?.imagePath ?? null);
   const hasImage = Boolean(resolvedImagePath);
+  useEffect(() => {
+    if (!open || !prize) {
+      prizeVoiceRef.current?.stop();
+      return;
+    }
+    const prizeVoice = new Howl({
+      src: [resolveAudioPath("prize-roulette.wav")],
+      volume: sound.preference.volume * soundDetail.voiceVolume,
+      onend: () => {
+        prizeVoice.unload();
+        prizeVoiceRef.current = null;
+      },
+    });
+    prizeVoiceRef.current = prizeVoice;
+    prizeVoice.play();
+    return () => {
+      prizeVoice.stop();
+      prizeVoice.unload();
+      prizeVoiceRef.current = null;
+    };
+  }, [open, prize, sound.preference.volume, soundDetail.voiceVolume]);
   if (!prize) {
     return null;
   }
