@@ -1,4 +1,5 @@
 import type { PrizeList } from "~/common/types";
+import { normalizeKeyText } from "~/common/utils/text";
 
 /**
  * 景品 ID を生成します。
@@ -18,7 +19,7 @@ export const normalizeSelected = (value?: string): boolean => {
   if (!value) {
     return false;
   }
-  const normalized = value.trim().toLowerCase();
+  const normalized = normalizeKeyText(value);
   return (
     normalized === "true" ||
     normalized === "1" ||

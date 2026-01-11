@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import type { PrizeList } from "~/common/types";
 import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
+import { normalizeKeyText } from "~/common/utils/text";
 
 export type UsePrizeImageUploaderParams = {
   draftPrizes: PrizeList;
@@ -40,14 +41,11 @@ export const usePrizeImageUploader = ({
         const mappings = Array.from(files)
           .filter((file) => file.type.startsWith("image/"))
           .map((file) => ({ name: file.name, file }));
-        const normalizeName = (value: string) =>
-          value
-            .trim()
-            .toLowerCase()
-            .replace(/\.[^/.]+$/, "");
+        const normalizeFileName = (value: string) =>
+          normalizeKeyText(value).replace(/\.[^/.]+$/, "");
         const grouped = mappings.reduce<Record<string, { name: string; file: File }[]>>(
           (acc, entry) => {
-            const key = normalizeName(entry.name);
+            const key = normalizeFileName(entry.name);
             if (!key) {
               return acc;
             }
@@ -61,7 +59,7 @@ export const usePrizeImageUploader = ({
         const next: PrizeList = [];
         for (const prize of draftPrizes) {
           const candidates = [prize.itemName, prize.prizeName]
-            .map((value) => normalizeName(value))
+            .map((value) => normalizeKeyText(value))
             .filter((value) => value.length > 0);
           const matchedKey =
             candidates.find((candidate) => grouped[candidate]?.length) ??

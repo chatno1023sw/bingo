@@ -1,4 +1,5 @@
 import type { Prize, PrizeList } from "~/common/types";
+import { normalizeKeyText } from "~/common/utils/text";
 
 export type CsvParseResult = {
   /** 正常に取り込めた景品一覧 */
@@ -69,7 +70,7 @@ const normalizeHeader = (line: string): string[] => parseCsvLine(line).map((valu
  * - Chrome DevTools MCP では true/false の解釈を確認します。
  */
 const parseBoolean = (value: string): boolean => {
-  const normalized = value.trim().toLowerCase();
+  const normalized = normalizeKeyText(value);
   return normalized === "true" || normalized === "1" || normalized === "yes";
 };
 
