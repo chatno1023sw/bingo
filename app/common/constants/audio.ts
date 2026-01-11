@@ -33,6 +33,7 @@ export const audioPaths = {
  * - Chrome DevTools MCP では音量バランスと再生タイミングを確認します。
  */
 const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
+const OUTPUT_ATTENUATION = 1 / 3;
 
 type SliderRange = {
   min: number;
@@ -45,31 +46,31 @@ const VOLUME_RANGE: SliderRange = { min: 0, max: 1 };
 const DETAIL_RANGE: SliderRange = { min: 0, max: 2 };
 const MEDIAN_VOLUME = sliderMedian(VOLUME_RANGE);
 const MEDIAN_DETAIL = sliderMedian(DETAIL_RANGE);
-const REDUCED_VOLUME = MEDIAN_VOLUME / 3;
-const REDUCED_DETAIL = MEDIAN_DETAIL / 3;
 
 export const audioSettings = {
   bgm: {
     volumeRange: VOLUME_RANGE,
-    defaultVolume: REDUCED_VOLUME,
-    startDefaultVolume: REDUCED_VOLUME,
-    startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
-    gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
+    defaultVolume: MEDIAN_VOLUME,
+    startDefaultVolume: MEDIAN_VOLUME,
+    startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * OUTPUT_ATTENUATION,
+    gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE * OUTPUT_ATTENUATION,
   },
   se: {
     volumeRange: VOLUME_RANGE,
-    defaultVolume: REDUCED_VOLUME,
+    defaultVolume: MEDIAN_VOLUME,
     /** スライダーで調整される音量の最大値 */
-    baseVolumeScale: 0.9,
+    baseVolumeScale: 0.9 * OUTPUT_ATTENUATION,
     drumrollRange: DETAIL_RANGE,
-    drumrollVolumeScale: REDUCED_DETAIL,
+    drumrollVolumeScale: MEDIAN_DETAIL,
     cymbalRange: DETAIL_RANGE,
-    cymbalVolumeScale: REDUCED_DETAIL,
+    cymbalVolumeScale: MEDIAN_DETAIL,
+    detailAttenuation: OUTPUT_ATTENUATION,
     fallbackWaitMs: 5000,
   },
   number: {
     voiceRange: VOLUME_RANGE,
-    voiceVolume: REDUCED_VOLUME,
+    voiceVolume: MEDIAN_VOLUME,
+    voicePlaybackScale: OUTPUT_ATTENUATION,
     /** 番号再生開始を早める秒数 */
     announceDelayMs: 350,
   },

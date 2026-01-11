@@ -102,7 +102,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
       const voice = new Howl({
         src: [resolveAudioPath(buildNumberVoicePath(number))],
         preload: true,
-        volume: voiceVolume,
+        volume: voiceVolume * audioSettings.number.voicePlaybackScale,
         onend: () => {
           voice.unload();
           if (numberVoiceRef.current === voice) {
