@@ -15,7 +15,7 @@ export type CurrentNumberProps = {
 
 const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
 const BADGE_OVERLAP = "clamp(0.5rem, 1.5vw, 1.25rem)";
-const BADGE_SIZE = "clamp(5.25rem, 9vw, 8rem)";
+const BADGE_SIZE = "clamp(4.5rem, 8vw, 7rem)";
 const BADGE_FONT_SIZE = "clamp(2.5rem, 3.8vw, 3.25rem)";
 
 /**
@@ -62,7 +62,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
     <div className="flex w-full flex-col items-center gap-8 text-foreground">
       <div
         className={cn(
-          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(7rem,16vw,22rem)] transition",
+          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(10.5rem,24vw,33rem)] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
         style={{ maxWidth: NUMBER_PANEL_MAX_SIZE, maxHeight: NUMBER_PANEL_MAX_SIZE }}
@@ -71,7 +71,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
           {backgroundLetter ? (
             <span
               className={cn(
-                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(10rem,22vw,28rem)] leading-none",
+                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(15rem,33vw,42rem)] leading-none",
                 backgroundLetterStyles[backgroundLetter],
               )}
               aria-hidden
