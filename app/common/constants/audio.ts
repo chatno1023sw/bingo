@@ -43,29 +43,33 @@ const sliderMedian = (range: SliderRange): number => (range.min + range.max) / 2
 
 const VOLUME_RANGE: SliderRange = { min: 0, max: 1 };
 const DETAIL_RANGE: SliderRange = { min: 0, max: 2 };
+const MEDIAN_VOLUME = sliderMedian(VOLUME_RANGE);
+const MEDIAN_DETAIL = sliderMedian(DETAIL_RANGE);
+const REDUCED_VOLUME = MEDIAN_VOLUME / 3;
+const REDUCED_DETAIL = MEDIAN_DETAIL / 3;
 
 export const audioSettings = {
   bgm: {
     volumeRange: VOLUME_RANGE,
-    defaultVolume: sliderMedian(VOLUME_RANGE),
-    startDefaultVolume: sliderMedian(VOLUME_RANGE),
+    defaultVolume: REDUCED_VOLUME,
+    startDefaultVolume: REDUCED_VOLUME,
     startVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
     gameVolumeScale: DEFAULT_BGM_PLAYBACK_SCALE,
   },
   se: {
     volumeRange: VOLUME_RANGE,
-    defaultVolume: sliderMedian(VOLUME_RANGE),
+    defaultVolume: REDUCED_VOLUME,
     /** スライダーで調整される音量の最大値 */
     baseVolumeScale: 0.9,
     drumrollRange: DETAIL_RANGE,
-    drumrollVolumeScale: sliderMedian(DETAIL_RANGE),
+    drumrollVolumeScale: REDUCED_DETAIL,
     cymbalRange: DETAIL_RANGE,
-    cymbalVolumeScale: sliderMedian(DETAIL_RANGE),
+    cymbalVolumeScale: REDUCED_DETAIL,
     fallbackWaitMs: 5000,
   },
   number: {
     voiceRange: VOLUME_RANGE,
-    voiceVolume: sliderMedian(VOLUME_RANGE),
+    voiceVolume: REDUCED_VOLUME,
     /** 番号再生開始を早める秒数 */
     announceDelayMs: 350,
   },
