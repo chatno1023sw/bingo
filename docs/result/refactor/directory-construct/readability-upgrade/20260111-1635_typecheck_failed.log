@@ -1,0 +1,5 @@
+
+> typecheck
+> react-router typegen && tsc
+
+app/common/router/HashHydratedRouter.tsx(4,3): error TS2724: '"react-router"' has no exported member named 'UNSAFE_frameworkContext'. Did you mean 'UNSAFE_FrameworkContext'?

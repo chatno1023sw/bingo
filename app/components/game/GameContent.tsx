@@ -1,15 +1,11 @@
-import { Howl } from "howler";
 import { Loader2 } from "lucide-react";
-import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
+import { type FC, useCallback, useEffect, useMemo } from "react";
+import { audioSettings } from "~/common/constants/audio";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
-import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
-import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useGameSession } from "~/common/hooks/useGameSession";
 import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
-import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
@@ -18,6 +14,8 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { useBingoBackgroundSequence } from "~/components/game/hooks/useBingoBackgroundSequence";
+import { useGameBgmController } from "~/components/game/hooks/useGameBgmController";
+import { useGameLayoutControls } from "~/components/game/hooks/useGameLayoutControls";
 import { useGameSoundDetail } from "~/components/game/hooks/useGameSoundDetail";
 import { useNumberAnnouncement } from "~/components/game/hooks/useNumberAnnouncement";
 
@@ -55,35 +53,22 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     handleReset,
     handleBackToStart,
   } = useGameSession({ onNavigateToStart: onNavigateStart });
-  const { gameBgm, sound } = useAudioPreferences();
-  const { registerGameBgmHandler } = useAudioUnlock();
-  const { preference, isReady, setVolume } = gameBgm;
-  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
+  const { preference, soundPreference, isReady, requestBgmPlay, setBgmVolume, setSoundVolume } =
+    useGameBgmController();
   const initialSoundDetail = useMemo(() => getSoundDetailPreference(), []);
-  const [isFirst, setIsFirst] = useState(true);
-  const [historyColumns, setHistoryColumns] = useState<3 | 4>(4);
-  const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
+  const {
+    isFirstState,
+    historyColumns,
+    historyToggleLabel,
+    handleToggleHistoryColumns,
+    handleClearHistory,
+  } = useGameLayoutControls({
+    onRequestReset: openResetDialog,
+  });
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
   const acknowledgeAudioNotice = useCallback(() => {
     markAcknowledged();
   }, [markAcknowledged]);
-  const bgmRef = useRef<Howl | null>(null);
-  const bgmPlayingRef = useRef(false);
-  const bgmPendingRef = useRef(false);
-  const bgmUnlockAttachedRef = useRef(false);
-  const requestBgmPlay = useCallback(() => {
-    const bgm = bgmRef.current;
-    if (!bgm) {
-      return;
-    }
-    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
-    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
-      bgmPlayingRef.current = true;
-      return;
-    }
-    bgm.play();
-    bgmPlayingRef.current = true;
-  }, []);
   const {
     voiceVolume,
     drumrollVolumeScale,
@@ -98,7 +83,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     bgmVolume: preference.volume,
     soundVolume: soundPreference.volume,
     acknowledgeAudioNotice,
-    setBgmVolume: setVolume,
+    setBgmVolume,
     setSoundVolume,
     requestBgmPlay,
   });
@@ -121,77 +106,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     drumrollVolumeScale,
     cymbalVolumeScale,
   });
-
-  const handleUserUnlock = useCallback(() => {
-    if (!bgmPendingRef.current) {
-      return;
-    }
-    bgmPendingRef.current = false;
-    bgmUnlockAttachedRef.current = false;
-    requestBgmPlay();
-  }, [requestBgmPlay]);
-
-  const attachUnlockListeners = useCallback(() => {
-    if (bgmUnlockAttachedRef.current) {
-      return;
-    }
-    bgmUnlockAttachedRef.current = true;
-    const handler = () => handleUserUnlock();
-    document.addEventListener("pointerdown", handler, { once: true });
-    document.addEventListener("keydown", handler, { once: true });
-  }, [handleUserUnlock]);
-
-  useEffect(() => {
-    const bgm = new Howl({
-      // maou_bgm_acoustic02.mp3
-      src: [resolveAudioPath(audioPaths.bgm.game)],
-      loop: true,
-      preload: true,
-      onplayerror: () => {
-        bgmPendingRef.current = true;
-        bgmPlayingRef.current = false;
-        attachUnlockListeners();
-      },
-    });
-    bgmRef.current = bgm;
-    return () => {
-      bgm.stop();
-      bgm.unload();
-      bgmRef.current = null;
-    };
-  }, [attachUnlockListeners]);
-
-  useEffect(() => {
-    const bgm = bgmRef.current;
-    if (!bgm) {
-      return;
-    }
-    bgm.volume(preference.volume * audioSettings.bgm.gameVolumeScale);
-    if (preference.volume > 0) {
-      if (!bgmPlayingRef.current) {
-        requestBgmPlay();
-      }
-      return;
-    }
-    if (bgmPlayingRef.current) {
-      bgm.stop();
-      bgmPlayingRef.current = false;
-    }
-  }, [preference.volume, requestBgmPlay]);
-
-  useEffect(() => {
-    if (consumeGameBgmUnlock()) {
-      requestBgmPlay();
-    }
-  }, [requestBgmPlay]);
-
-  useEffect(() => {
-    return registerGameBgmHandler(() => {
-      if (preference.volume > 0) {
-        requestBgmPlay();
-      }
-    });
-  }, [preference.volume, registerGameBgmHandler, requestBgmPlay]);
 
   useEffect(() => {
     handleCurrentNumberChange(session?.gameState.currentNumber ?? null);
@@ -223,15 +137,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     startBingoBackgroundSequence(sequenceDurationMs);
   };
 
-  const handleToggleHistoryColumns = useCallback(() => {
-    setHistoryColumns((prev) => (prev === 4 ? 3 : 4));
-  }, []);
-
-  const handleClearHistory = useCallback(() => {
-    isFirstState.setIsFirst(true);
-    openResetDialog();
-  }, [isFirstState, openResetDialog]);
-
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -255,8 +160,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     );
   }
 
-  const historyToggleLabel = historyColumns === 4 ? "3列表示" : "4列表示";
-
   return (
     <PrizeProvider initialPrizes={session.prizes}>
       <main className="h-screen overflow-hidden bg-background text-foreground">
@@ -278,13 +181,15 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
               onMuteAll: handleMuteAllAudio,
             }}
           />
-          <div className="flex flex-1 items-stretch overflow-hidden px-2 pb-6">
-            <HistoryPanel
-              recent={session.historyView}
-              columns={historyColumns}
-              className="min-w-[20rem] flex-[0_0_28vw]"
-            />
-            <section className="flex min-w-0 flex-1 flex-col px-4 py-6">
+          <div className="flex flex-1 flex-col gap-6 overflow-hidden px-3 pb-6 lg:flex-row lg:px-4">
+            <aside className="min-h-[18rem] lg:min-h-0 lg:min-w-[20rem] lg:flex-[0_0_28vw]">
+              <HistoryPanel
+                recent={session.historyView}
+                columns={historyColumns}
+                className="h-full"
+              />
+            </aside>
+            <section className="flex min-w-0 flex-1 flex-col px-1 py-4 lg:px-4 lg:py-6">
               <div className="flex min-h-0 flex-1 items-center justify-center">
                 <CurrentNumber
                   value={displayNumber}
@@ -315,8 +220,9 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 </p>
               </div>
             </section>
-
-            <SidePanel className="min-w-[20rem] flex-[0_0_28vw]" />
+            <aside className="min-h-[18rem] lg:min-h-0 lg:min-w-[20rem] lg:flex-[0_0_28vw]">
+              <SidePanel className="h-full" />
+            </aside>
           </div>
         </div>
       </main>
