@@ -489,9 +489,9 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
               </Button>
             </div>
           </header>
-          <div className="flex flex-1 items-stretch overflow-hidden px-6 pb-6">
+          <div className="flex flex-1 items-stretch overflow-hidden px-4 pb-6">
             <HistoryPanel recent={session.historyView} className="min-w-[18rem] flex-[0_0_24vw]" />
-            <section className="flex min-w-0 flex-1 flex-col px-8 py-6">
+            <section className="flex min-w-0 flex-1 flex-col px-4 py-6">
               <div className="flex min-h-0 flex-1 items-center justify-center">
                 <CurrentNumber
                   value={displayNumber}
