@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { usePrizeManager } from "~/common/hooks/usePrizeManager";
 import { Button } from "~/components/common/Button";
 import { PrizeList } from "~/components/game/PrizeList";
 import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
+import { usePrizeSidePanel } from "~/components/game/hooks/usePrizeSidePanel";
 import { cn } from "~/lib/utils";
 
 export type SidePanelProps = {
@@ -20,110 +19,25 @@ export type SidePanelProps = {
  * - Chrome DevTools MCP では景品操作を確認します。
  */
 export const SidePanel = ({ className = "" }: SidePanelProps) => {
-  const { prizes, isLoading, isMutating, error, togglePrize } = usePrizeManager();
-  const [rouletteOpen, setRouletteOpen] = useState(false);
-  const [resultOpen, setResultOpen] = useState(false);
-  const [resultPrize, setResultPrize] = useState<(typeof prizes)[number] | null>(null);
-  const [showPrizeNameOnly, setShowPrizeNameOnly] = useState(true);
-  const [itemNameOverrides, setItemNameOverrides] = useState<Set<string>>(new Set());
-
-  const summary = useMemo(() => {
-    const selected = prizes.filter((prize) => prize.selected).length;
-    return {
-      total: prizes.length,
-      selected,
-      remaining: prizes.length - selected,
-    };
-  }, [prizes]);
-
-  useEffect(() => {
-    setItemNameOverrides((prev) => {
-      const validIds = new Set(prizes.map((prize) => prize.id));
-      const next = new Set<string>();
-      if (!showPrizeNameOnly) {
-        for (const id of validIds) {
-          next.add(id);
-        }
-        return next;
-      }
-      for (const id of prev) {
-        if (validIds.has(id)) {
-          next.add(id);
-        }
-      }
-      return next;
-    });
-  }, [prizes, showPrizeNameOnly]);
-
-  /**
-   * 個別の表示名切り替えを行います。
-   *
-   * - 副作用: 表示状態の Set を更新します。
-   * - 入力制約: `id` は景品 ID を渡してください。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では表示名の切替を確認します。
-   */
-  const handleToggleDisplay = (id: string) => {
-    setItemNameOverrides((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  /**
-   * 表示名の一括切り替えを行います。
-   *
-   * - 副作用: 表示状態の Set を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では一括切替を確認します。
-   */
-  const handleToggleDisplayAll = () => {
-    setShowPrizeNameOnly((prev) => {
-      const next = !prev;
-      setItemNameOverrides(next ? new Set() : new Set(prizes.map((prize) => prize.id)));
-      return next;
-    });
-  };
-
-  /**
-   * ルーレットを開始します。
-   *
-   * - 副作用: ダイアログ状態を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではルーレット表示を確認します。
-   */
-  const handleRouletteStart = () => {
-    setResultOpen(false);
-    setRouletteOpen(true);
-  };
-
-  /**
-   * ルーレット完了時の処理です。
-   *
-   * - 副作用: 選出状態の更新と結果表示を行います。
-   * - 入力制約: `prize` は景品データを渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では結果表示を確認します。
-   */
-  const handleRouletteComplete = async (prize: (typeof prizes)[number]) => {
-    setRouletteOpen(false);
-    if (!prize.selected) {
-      try {
-        await togglePrize(prize.id, true);
-      } catch {
-        /* 失敗時は結果表示だけ行う */
-      }
-    }
-    setResultPrize(prize);
-    setResultOpen(true);
-  };
+  const {
+    prizes,
+    isLoading,
+    isMutating,
+    error,
+    summary,
+    showPrizeNameOnly,
+    itemNameOverrides,
+    rouletteOpen,
+    resultOpen,
+    resultPrize,
+    togglePrize,
+    handleToggleDisplay,
+    handleToggleDisplayAll,
+    handleRouletteStart,
+    handleRouletteComplete,
+    closeRouletteDialog,
+    closeResultDialog,
+  } = usePrizeSidePanel();
 
   return (
     <section
@@ -186,14 +100,10 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       <PrizeRouletteDialog
         open={rouletteOpen}
         prizes={prizes}
-        onClose={() => setRouletteOpen(false)}
+        onClose={closeRouletteDialog}
         onComplete={handleRouletteComplete}
       />
-      <PrizeResultDialog
-        open={resultOpen}
-        prize={resultPrize}
-        onClose={() => setResultOpen(false)}
-      />
+      <PrizeResultDialog open={resultOpen} prize={resultPrize} onClose={closeResultDialog} />
     </section>
   );
 };
