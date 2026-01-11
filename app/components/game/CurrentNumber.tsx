@@ -62,7 +62,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
     <div className="flex w-full flex-col items-center gap-8 text-foreground">
       <div
         className={cn(
-          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(10.5rem,24vw,33rem)] transition",
+          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(7.875rem,18vw,24.75rem)] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
         style={{ maxWidth: NUMBER_PANEL_MAX_SIZE, maxHeight: NUMBER_PANEL_MAX_SIZE }}
@@ -71,7 +71,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
           {backgroundLetter ? (
             <span
               className={cn(
-                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(15rem,33vw,42rem)] leading-none",
+                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(11.25rem,24.75vw,31.5rem)] leading-none",
                 backgroundLetterStyles[backgroundLetter],
               )}
               aria-hidden
