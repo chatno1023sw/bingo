@@ -15,8 +15,8 @@ export type CurrentNumberProps = {
 
 const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
 const BADGE_OVERLAP = "clamp(0.5rem, 1.5vw, 1.25rem)";
-const BADGE_SIZE = "clamp(4.5rem, 8vw, 7rem)";
-const BADGE_FONT_SIZE = "clamp(2.25rem, 3.5vw, 3rem)";
+const BADGE_SIZE = "clamp(5.25rem, 9vw, 8rem)";
+const BADGE_FONT_SIZE = "clamp(2.5rem, 3.8vw, 3.25rem)";
 
 /**
  * 中央表示のシンプルな数字パネル。
