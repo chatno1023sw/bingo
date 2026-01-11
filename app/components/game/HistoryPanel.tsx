@@ -90,13 +90,16 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
                       <div className="h-px w-full bg-border" />
                     </div>
                   ) : null}
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-2 px-1/2">
                     {row.entries.map((entry) => (
                       <div
                         key={entry.sequence}
-                        className="flex aspect-square min-h-24 items-center justify-center rounded border border-border text-[clamp(24px,5vw,84px)]"
+                        className="relative w-full"
+                        style={{ paddingBottom: "100%" }}
                       >
-                        {entry.number}
+                        <div className="absolute inset-0 flex items-center justify-center rounded border border-border bg-card px-2 text-center font-semibold text-[clamp(1.25rem,3vw,4rem)] leading-none">
+                          {entry.number}
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -57,14 +57,14 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
     <div className="flex flex-col items-center gap-6 text-foreground">
       <div
         className={cn(
-          "relative flex h-112 w-md items-center justify-center rounded bg-card font-bold text-[20rem] transition",
+          "relative flex h-[24rem] w-[24rem] items-center justify-center rounded bg-card font-bold text-[clamp(4rem,10vw,10rem)] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
       >
         {backgroundLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-black text-[clamp(8rem,18vw,18rem)] leading-none",
+              "pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-black text-[clamp(4rem,14vw,12rem)] leading-none",
               backgroundLetterStyles[backgroundLetter],
             )}
             aria-hidden
@@ -76,7 +76,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
         {!isDrawing && bingoLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute -right-10 -bottom-8 z-20 flex h-30 w-30 items-center justify-center rounded-full border-2 border-secondary font-black text-[5rem] text-white leading-none",
+              "pointer-events-none absolute -right-6 -bottom-4 z-20 flex h-20 w-20 items-center justify-center rounded-full border-2 border-secondary font-black text-[2.25rem] text-white leading-none",
               letterStyles[bingoLetter],
             )}
             aria-hidden
