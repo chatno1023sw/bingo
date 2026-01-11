@@ -19,7 +19,7 @@ const AudioPreferenceContext = createContext<AudioPreferenceContextValue | null>
 export const AudioPreferenceProvider: FC<PropsWithChildren> = ({ children }) => {
   const startBgm = useBgmPreference({
     storageKey: storageKeys.bgmStart,
-    defaultVolume: audioSettings.bgm.defaultVolume,
+    defaultVolume: audioSettings.bgm.startDefaultVolume,
   });
   const gameBgm = useBgmPreference({
     defaultVolume: audioSettings.bgm.defaultVolume,

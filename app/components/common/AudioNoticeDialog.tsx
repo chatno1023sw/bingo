@@ -57,7 +57,7 @@ export const AudioNoticeDialog: FC<AudioNoticeDialogProps> = ({
             </Button>
             <Button
               type="button"
-              className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 text-lg text-primary-foreground shadow-sm hover:bg-primary"
+              className="flex-1 rounded-2xl border border-transparent bg-primary px-4 py-3 text-lg text-primary-foreground shadow-sm"
               onClick={onEnableAll}
             >
               音あり

@@ -229,7 +229,9 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
   const handleEnableAllAudio = useCallback(() => {
     acknowledgeAudioNotice();
     const restoredBgmVolume =
-      startBgmPreference.volume > 0 ? startBgmPreference.volume : audioSettings.bgm.defaultVolume;
+      startBgmPreference.volume > 0
+        ? startBgmPreference.volume
+        : audioSettings.bgm.startDefaultVolume;
     const restoredSoundVolume =
       soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
     void syncBgmVolume(restoredBgmVolume);
@@ -266,7 +268,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
           onSoundVolumeChange={setSoundVolume}
           useDialog
           onResetToDefault={() => {
-            void syncBgmVolume(audioSettings.bgm.defaultVolume);
+            void syncBgmVolume(audioSettings.bgm.startDefaultVolume);
             void setSoundVolume(audioSettings.se.defaultVolume);
           }}
         />

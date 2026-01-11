@@ -13,6 +13,11 @@ export type CurrentNumberProps = {
   isFirstState: { isFirst: boolean; setIsFirst: (isFirst: boolean) => void };
 };
 
+const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
+const BADGE_OVERLAP = "clamp(0.5rem, 1.5vw, 1.25rem)";
+const BADGE_SIZE = "clamp(4.5rem, 8vw, 7rem)";
+const BADGE_FONT_SIZE = "clamp(3.125rem, 4.75vw, 4.0625rem)";
+
 /**
  * 中央表示のシンプルな数字パネル。
  *
@@ -54,36 +59,48 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
   } as const;
 
   return (
-    <div className="flex flex-col items-center gap-6 text-foreground">
+    <div className="flex w-full flex-col items-center gap-8 text-foreground">
       <div
         className={cn(
-          "relative flex h-112 w-md items-center justify-center rounded bg-card font-bold text-[20rem] transition",
+          "relative flex aspect-square w-full items-center justify-center rounded-3xl bg-card px-6 font-bold text-[clamp(7.875rem,18vw,24.75rem)] transition",
           isDrawing ? "opacity-50" : "opacity-100",
         )}
+        style={{ maxWidth: NUMBER_PANEL_MAX_SIZE, maxHeight: NUMBER_PANEL_MAX_SIZE }}
       >
-        {backgroundLetter ? (
-          <span
-            className={cn(
-              "pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-black text-[clamp(8rem,18vw,18rem)] leading-none",
-              backgroundLetterStyles[backgroundLetter],
-            )}
-            aria-hidden
-          >
-            {backgroundLetter}
+        <div className="relative flex -translate-y-[6%] items-center justify-center">
+          {backgroundLetter ? (
+            <span
+              className={cn(
+                "pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 font-black text-[clamp(11.25rem,24.75vw,31.5rem)] leading-none",
+                backgroundLetterStyles[backgroundLetter],
+              )}
+              aria-hidden
+            >
+              {backgroundLetter}
+            </span>
+          ) : null}
+          <span className="relative z-10 inline-flex items-center justify-center leading-none">
+            <span className="inline-block">{display}</span>
+            {!isDrawing && bingoLetter ? (
+              <span
+                className={cn(
+                  "pointer-events-none absolute z-20 flex items-center justify-center rounded-full border-2 border-secondary font-black text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
+                  letterStyles[bingoLetter],
+                )}
+                style={{
+                  right: `calc(-1 * ${BADGE_OVERLAP})`,
+                  bottom: `calc(-1 * ${BADGE_OVERLAP})`,
+                  width: BADGE_SIZE,
+                  height: BADGE_SIZE,
+                  fontSize: BADGE_FONT_SIZE,
+                }}
+                aria-hidden
+              >
+                {bingoLetter}
+              </span>
+            ) : null}
           </span>
-        ) : null}
-        <span className="relative z-10 inline-block">{display}</span>
-        {!isDrawing && bingoLetter ? (
-          <span
-            className={cn(
-              "pointer-events-none absolute -right-10 -bottom-8 z-20 flex h-30 w-30 items-center justify-center rounded-full border-2 border-secondary font-black text-[5rem] text-white leading-none",
-              letterStyles[bingoLetter],
-            )}
-            aria-hidden
-          >
-            {bingoLetter}
-          </span>
-        ) : null}
+        </div>
       </div>
     </div>
   );
