@@ -78,7 +78,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         <div className="flex items-end gap-2">
           <Button
             type="button"
-            className="rounded bg-primary px-3 py-2 text-primary-foreground text-xs shadow-sm hover:bg-primary disabled:opacity-50"
+            className="rounded bg-primary px-3 py-2 text-primary-foreground text-xs shadow-sm disabled:opacity-50"
             onClick={onExport}
             disabled={disabled}
           >
@@ -97,7 +97,7 @@ export const CsvControls: FC<CsvControlsProps> = ({
         />
         <Button
           type="button"
-          className="rounded border border-primary px-3 py-2 text-primary text-xs shadow-sm hover:bg-primary/10 disabled:opacity-50"
+          className="/10 rounded border border-primary px-3 py-2 text-primary text-xs shadow-sm disabled:opacity-50"
           onClick={onManualImport}
           disabled={disabled}
         >

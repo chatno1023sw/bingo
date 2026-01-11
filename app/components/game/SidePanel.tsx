@@ -162,7 +162,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
       </div>
       <Button
         type="button"
-        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm hover:bg-primary disabled:opacity-40"
+        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm disabled:opacity-40"
         onClick={handleRouletteStart}
         disabled={isLoading || prizes.length === 0}
       >

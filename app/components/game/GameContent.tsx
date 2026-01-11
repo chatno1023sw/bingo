@@ -8,7 +8,9 @@ import {
   resolveAudioPath,
 } from "~/common/constants/audio";
 import type { BingoLetter } from "~/common/constants/bingo";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useGameSession } from "~/common/hooks/useGameSession";
@@ -19,7 +21,6 @@ import {
   saveSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
 import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
-import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
@@ -28,7 +29,6 @@ import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
 import { cn } from "~/lib/utils";
-import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -504,7 +504,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 <div className="w-full max-w-[min(36rem,92%)]">
                   <Button
                     type="button"
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary disabled:opacity-40"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground text-xl shadow-sm disabled:opacity-40"
                     onClick={handleDrawWithBgm}
                     disabled={isButtonDisabled}
                   >
