@@ -1,16 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { getHistoryView } from "~/common/services/historyService";
-import { persistSessionState, resumeSession, startSession } from "~/common/services/sessionService";
-import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
-import {
-  drawNextNumber,
-  getAvailableNumbers,
-  NoAvailableNumbersError,
-} from "~/common/utils/bingoEngine";
+import { persistSessionState } from "~/common/services/sessionService";
+import { drawNextNumber, NoAvailableNumbersError } from "~/common/utils/bingoEngine";
 import { markStartBgmUnlock } from "~/common/utils/audioUnlock";
-
-const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
+import { useDrawAnimation } from "~/common/hooks/useDrawAnimation";
+import {
+  useGameSessionLoader,
+  ensureSession,
+  buildLoaderData,
+  type GameLoaderData,
+} from "~/common/hooks/useGameSessionLoader";
 
 /**
  * セッションを取得または新規作成します。
@@ -20,40 +19,9 @@ const NUMBER_POOL = Array.from({ length: 75 }, (_, index) => index + 1);
  * - 戻り値: GameStateEnvelope を返します。
  * - Chrome DevTools MCP ではセッション作成を確認します。
  */
-const ensureSession = async (): Promise<GameStateEnvelope> => {
-  const resumed = await resumeSession();
-  if (resumed) {
-    return resumed;
-  }
-  return startSession();
-};
-
-/**
- * Game 画面のローダー相当データ。
- */
 export type GameLoaderData = GameStateEnvelope & {
-  /** 表示用の抽選履歴 */
   historyView: DrawHistoryEntry[];
-  /** 抽選可能な番号一覧 */
   availableNumbers: number[];
-};
-
-/**
- * Game 画面の表示用データを構築します。
- *
- * - 副作用: ありません。
- * - 入力制約: `envelope` は GameStateEnvelope を渡してください。
- * - 戻り値: GameLoaderData を返します。
- * - Chrome DevTools MCP では履歴/候補の算出を確認します。
- */
-const buildLoaderData = async (envelope: GameStateEnvelope): Promise<GameLoaderData> => {
-  const historyView = getHistoryView(envelope.gameState);
-  const availableNumbers = getAvailableNumbers(envelope.gameState.drawHistory);
-  return {
-    ...envelope,
-    historyView,
-    availableNumbers,
-  };
 };
 
 export type UseGameSessionResult = {
