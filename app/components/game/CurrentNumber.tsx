@@ -14,6 +14,9 @@ export type CurrentNumberProps = {
 };
 
 const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
+const BADGE_OFFSET = "clamp(1rem, 3vw, 3rem)";
+const BADGE_SIZE = "clamp(4.5rem, 8vw, 7rem)";
+const BADGE_FONT_SIZE = "clamp(2.25rem, 3.5vw, 3rem)";
 
 /**
  * 中央表示のシンプルな数字パネル。
@@ -81,9 +84,16 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
         {!isDrawing && bingoLetter ? (
           <span
             className={cn(
-              "pointer-events-none absolute right-0 bottom-6 z-20 flex h-28 w-28 translate-x-[55%] translate-y-[25%] items-center justify-center rounded-full border-2 border-secondary font-black text-[3.25rem] text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
+              "pointer-events-none absolute z-20 flex items-center justify-center rounded-full border-2 border-secondary font-black text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
               letterStyles[bingoLetter],
             )}
+            style={{
+              right: BADGE_OFFSET,
+              bottom: BADGE_OFFSET,
+              width: BADGE_SIZE,
+              height: BADGE_SIZE,
+              fontSize: BADGE_FONT_SIZE,
+            }}
             aria-hidden
           >
             {bingoLetter}
