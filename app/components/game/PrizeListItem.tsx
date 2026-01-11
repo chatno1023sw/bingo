@@ -49,11 +49,11 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   return (
     <li
       className={cn(
-        "flex w-full min-w-0 items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition",
+        "flex w-full min-w-0 items-center gap-4 rounded-2xl border px-4 py-4 text-base transition",
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <div className="flex aspect-4/3 w-14 items-center justify-center overflow-hidden rounded-lg bg-muted">
+      <div className="flex aspect-4/3 w-20 items-center justify-center overflow-hidden rounded-xl bg-muted">
         {hasImage ? (
           <img
             src={resolvedImagePath ?? ""}
@@ -68,7 +68,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         <button
           type="button"
           className={cn(
-            "line-clamp-2 w-full min-w-0 cursor-pointer break-all text-left text-3xl focus:outline-none",
+            "line-clamp-2 w-full min-w-0 cursor-pointer break-all text-left text-[clamp(2rem,2vw,2.75rem)] focus:outline-none",
             prize.selected ? "text-muted-foreground line-through" : "text-foreground",
           )}
           onClick={() => onToggleDisplay(prize.id)}
@@ -79,9 +79,9 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       </div>
       <Button
         type="button"
-        variant={prize.selected ? "secondary" : "secondary"}
+        variant="secondary"
         className={cn(
-          "rounded-full px-4 py-1 text-xs",
+          "rounded-full px-5 py-2 text-sm",
           prize.selected && "border border-border text-muted-foreground",
         )}
         onClick={handleToggle}
