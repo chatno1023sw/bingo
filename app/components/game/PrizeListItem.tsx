@@ -49,11 +49,11 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   return (
     <li
       className={cn(
-        "flex w-full min-w-0 items-center gap-5 rounded-2xl border px-6 py-5 text-lg transition",
+        "flex w-full min-w-0 items-center gap-4 rounded-2xl border px-5 py-3 text-base transition",
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <div className="flex aspect-4/3 w-24 items-center justify-center overflow-hidden rounded-2xl bg-muted">
+      <div className="flex aspect-4/3 w-20 items-center justify-center overflow-hidden rounded-2xl bg-muted">
         {hasImage ? (
           <img
             src={resolvedImagePath ?? ""}
@@ -81,7 +81,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         type="button"
         variant="secondary"
         className={cn(
-          "rounded-full px-6 py-2.5 text-base",
+          "rounded-full px-5 py-2 text-sm",
           prize.selected && "border border-border text-muted-foreground",
         )}
         onClick={handleToggle}
