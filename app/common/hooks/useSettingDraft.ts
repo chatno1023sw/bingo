@@ -1,9 +1,12 @@
-import Papa from "papaparse";
-import { useEffect, useRef, useState } from "react";
-import { useBlocker, useNavigate } from "react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import type { CsvImportResult, PrizeList } from "~/common/types";
-import { generatePrizesCsv, parsePrizesCsv } from "~/common/utils/csvParser";
-import { buildPrizeImagePath, savePrizeImage } from "~/common/utils/imageStorage";
+import { arePrizesEqual } from "~/common/hooks/setting/prizeDraftUtils";
+import { usePrizeImageUploader } from "~/common/hooks/setting/usePrizeImageUploader";
+import { useSettingCsvImport } from "~/common/hooks/setting/useSettingCsvImport";
+import { usePrizeDraftOperations } from "~/common/hooks/setting/usePrizeDraftOperations";
+import { useUnsavedChangesGuard } from "~/common/hooks/setting/useUnsavedChangesGuard";
+import { usePrizeCsvManager } from "~/components/setting/hooks/usePrizeCsvManager";
 
 export type UseSettingDraftOptions = {
   /** 既存の景品一覧 */
@@ -96,437 +99,56 @@ export const useSettingDraft = ({
   applyPrizes,
 }: UseSettingDraftOptions): UseSettingDraftResult => {
   const navigate = useNavigate();
-  const [summary, setSummary] = useState<CsvImportResult | null>(null);
-  const [exportText, setExportText] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [manualCsv, setManualCsv] = useState(
-    "id,order,prizeName,itemName,imagePath,selected,memo\n",
-  );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [draftPrizes, setDraftPrizes] = useState<PrizeList>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [allowNavigation, setAllowNavigation] = useState(false);
   const hasInitializedRef = useRef(false);
-
-  /**
-   * CSV 取り込み結果のサマリーを作成します。
-   *
-   * - 副作用: ありません。
-   * - 入力制約: `result` は parsePrizesCsv の戻り値を渡してください。
-   * - 戻り値: CsvImportResult を返します。
-   * - Chrome DevTools MCP ではサマリー表示を確認します。
-   */
-  const summaryFrom = (
-    sourceName: string,
-    result: ReturnType<typeof parsePrizesCsv>,
-  ): CsvImportResult => ({
-    sourceName,
-    addedCount: result.prizes.length,
-    skipped: result.skipped,
-    processedAt: new Date().toISOString(),
+  const {
+    summary,
+    exportText,
+    manualCsv,
+    setManualCsv,
+    handleFileImport,
+    handleManualImport,
+    handleExport,
+    handleCsvImportClick,
+    resetSummary,
+  } = usePrizeCsvManager({
+    draftPrizes,
+    setDraftPrizes,
+    setLocalError,
+  });
+  const { handleCsvImport } = useSettingCsvImport({ setDraftPrizes, setLocalError });
+  const { isUploading, handleImageUploadClick, handleUploadImages } = usePrizeImageUploader({
+    draftPrizes,
+    setDraftPrizes,
+    setLocalError,
+  });
+  const {
+    handleAddCard,
+    handleDeleteAll,
+    handleResetSelections,
+    handleReorder,
+    handleRemove,
+    handleUpdate,
+  } = usePrizeDraftOperations({
+    setDraftPrizes,
+    resetSummary,
+    setDeleteOpen,
+    setResetOpen,
   });
 
-  /**
-   * CSV 文字列の取り込み処理を実行します。
-   *
-   * - 副作用: 下書きとエラー状態を更新します。
-   * - 入力制約: `text` は CSV 文字列を渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では CSV 反映を確認します。
-   */
-  const runImport = async (text: string, sourceName: string) => {
-    try {
-      const result = parsePrizesCsv(text);
-      setDraftPrizes(result.prizes);
-      setSummary(summaryFrom(sourceName, result));
-      setLocalError(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "csv-import-error";
-      setLocalError(message);
-    }
-  };
-
-  /**
-   * CSV ファイルの取り込み処理です。
-   *
-   * - 副作用: ファイル内容を読み取り下書きを更新します。
-   * - 入力制約: `file` は CSV ファイルを渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では取り込み結果を確認します。
-   */
-  const handleFileImport = async (file: File) => {
-    const text = await file.text();
-    await runImport(text, file.name);
-  };
-
-  /**
-   * 手入力 CSV の取り込み処理です。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: `manualCsv` に CSV 文字列が必要です。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では取り込み結果を確認します。
-   */
-  const handleManualImport = async () => {
-    await runImport(manualCsv, "manual-input");
-  };
-
-  /**
-   * CSV エクスポート文字列を生成します。
-   *
-   * - 副作用: `exportText` を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではプレビュー表示を確認します。
-   */
-  const handleExport = () => {
-    const csv = generatePrizesCsv(draftPrizes);
-    setExportText(csv);
-  };
-
-  /**
-   * CSV 追加のファイル入力を開きます。
-   *
-   * - 副作用: hidden input をクリックします。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではファイル選択が開くことを確認します。
-   */
-  const handleCsvImportClick = () => {
-    const input = document.getElementById("csv-import-simple");
-    if (input instanceof HTMLInputElement) {
-      input.click();
-    }
-  };
-
-  /**
-   * 画像追加のファイル入力を開きます。
-   *
-   * - 副作用: hidden input をクリックします。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではファイル選択が開くことを確認します。
-   */
-  const handleImageUploadClick = () => {
-    const input = document.getElementById("image-import-simple");
-    if (input instanceof HTMLInputElement) {
-      input.click();
-    }
-  };
-
-  /**
-   * CSV の選出値を真偽値へ変換します。
-   *
-   * - 副作用: ありません。
-   * - 入力制約: `value` は文字列を渡してください。
-   * - 戻り値: 選出フラグを返します。
-   * - Chrome DevTools MCP では選出値の変換を確認します。
-   */
-  const normalizeSelected = (value: string | undefined): boolean => {
-    if (!value) {
-      return false;
-    }
-    const normalized = value.trim().toLowerCase();
-    return (
-      normalized === "true" ||
-      normalized === "1" ||
-      normalized === "yes" ||
-      normalized === "selected" ||
-      value.trim() === "選出"
-    );
-  };
-
-  /**
-   * 追加 CSV を解析して下書きに追加します。
-   *
-   * - 副作用: 下書きとエラー状態を更新します。
-   * - 入力制約: `file` は CSV ファイルを渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では追加結果を確認します。
-   */
-  const handleCsvImport = async (file: File) => {
-    const text = await file.text();
-    /**
-     * CSV 取り込み時の行データ。
-     */
-    type CsvRow = {
-      /** 賞名 */
-      賞名?: string;
-      /** 景品名 */
-      景品名?: string;
-      /** 選出フラグ */
-      選出?: string;
-    };
-    const result = Papa.parse<CsvRow>(text, {
-      header: true,
-      skipEmptyLines: true,
-    });
-    if (result.errors.length > 0) {
-      setLocalError("csv-import-error");
-      return;
-    }
-    const parsed = result.data
-      .map((row, index) => ({
-        id:
-          globalThis.crypto?.randomUUID?.() ??
-          `prize-${Date.now()}-${Math.random().toString(16).slice(2)}-${index}`,
-        order: draftPrizes.length + index,
-        prizeName: row.賞名?.trim() ?? "",
-        itemName: row.景品名?.trim() ?? "",
-        imagePath: null,
-        selected: normalizeSelected(row.選出),
-        memo: null,
-      }))
-      .filter((row) => row.prizeName || row.itemName);
-    if (parsed.length === 0) {
-      setLocalError("csv-import-empty");
-      return;
-    }
-    setDraftPrizes((prev) => [...prev, ...parsed]);
-    setLocalError(null);
-  };
-
-  /**
-   * すべての景品を削除します。
-   *
-   * - 副作用: 下書きとサマリーを更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では一覧が空になることを確認します。
-   */
-  const handleDeleteAll = () => {
-    setDraftPrizes([]);
-    setSummary(null);
-    setDeleteOpen(false);
-  };
-
-  /**
-   * 選出状態をすべて解除します。
-   *
-   * - 副作用: 下書きとダイアログ状態を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では選出状態が解除されることを確認します。
-   */
-  const handleResetSelections = () => {
-    setDraftPrizes((prev) =>
-      prev.map((prize, index) => ({
-        ...prize,
-        selected: false,
-        order: index,
-      })),
-    );
-    setResetOpen(false);
-  };
-
-  /**
-   * 画像を一括で取り込みます。
-   *
-   * - 副作用: IndexedDB と下書きを更新します。
-   * - 入力制約: `files` は画像ファイルの FileList を渡してください。
-   * - 戻り値: Promise を返します。
-   * - Chrome DevTools MCP では画像反映を確認します。
-   */
-  const handleUploadImages = async (files: FileList) => {
-    if (files.length === 0) {
-      return;
-    }
-    setIsUploading(true);
-    try {
-      const mappings = Array.from(files)
-        .filter((file) => file.type.startsWith("image/"))
-        .map((file) => ({ name: file.name, file }));
-      const normalizeName = (value: string) =>
-        value
-          .trim()
-          .toLowerCase()
-          .replace(/\.[^/.]+$/, "");
-      const grouped = mappings.reduce<Record<string, { name: string; file: File }[]>>(
-        (acc, entry) => {
-          const key = normalizeName(entry.name);
-          if (!key) {
-            return acc;
-          }
-          acc[key] = acc[key] ? [...acc[key], entry] : [entry];
-          return acc;
-        },
-        {},
-      );
-      const keys = Object.keys(grouped);
-      const remaining = mappings.slice();
-      const next: PrizeList = [];
-      for (const prize of draftPrizes) {
-        const candidates = [prize.itemName, prize.prizeName]
-          .map((value) => normalizeName(value))
-          .filter((value) => value.length > 0);
-        const matchedKey =
-          candidates.find((candidate) => grouped[candidate]?.length) ??
-          keys.find((key) => candidates.some((candidate) => key.includes(candidate)));
-        if (!matchedKey && candidates.length === 0) {
-          const fallback = remaining.shift();
-          if (!fallback) {
-            next.push(prize);
-            continue;
-          }
-          await savePrizeImage(prize.id, fallback.file);
-          next.push({
-            ...prize,
-            imagePath: buildPrizeImagePath(prize.id),
-          });
-          continue;
-        }
-        if (!matchedKey) {
-          next.push(prize);
-          continue;
-        }
-        const images = grouped[matchedKey];
-        if (!images || images.length === 0) {
-          next.push(prize);
-          continue;
-        }
-        const nextImage = images.shift();
-        if (!nextImage) {
-          next.push(prize);
-          continue;
-        }
-        const usedIndex = remaining.findIndex((entry) => entry.name === nextImage.name);
-        if (usedIndex >= 0) {
-          remaining.splice(usedIndex, 1);
-        }
-        await savePrizeImage(prize.id, nextImage.file);
-        next.push({
-          ...prize,
-          imagePath: buildPrizeImagePath(prize.id),
-        });
-      }
-      setDraftPrizes(next);
-      setLocalError(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "image-upload-error";
-      setLocalError(message);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  /**
-   * 空の景品カードを生成します。
-   *
-   * - 副作用: ありません。
-   * - 入力制約: `order` は 0 起点の順序を渡してください。
-   * - 戻り値: 空の Prize を返します。
-   * - Chrome DevTools MCP では追加カードが表示されることを確認します。
-   */
-  const buildEmptyPrize = (order: number) => {
-    const nextId =
-      globalThis.crypto?.randomUUID?.() ??
-      `prize-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    return {
-      id: nextId,
-      order,
-      prizeName: "",
-      itemName: "",
-      imagePath: null,
-      selected: false,
-      memo: null,
-    };
-  };
-
-  /**
-   * 空のカードを追加します。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではカード追加を確認します。
-   */
-  const handleAddCard = () => {
-    setDraftPrizes((prev) => [...prev, buildEmptyPrize(prev.length)]);
-  };
-
-  /**
-   * 指定 ID のカードを削除します。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: `id` は既存 ID を渡してください。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではカード削除を確認します。
-   */
-  const handleRemove = (id: string) => {
-    setDraftPrizes((prev) =>
-      prev
-        .filter((prize) => prize.id !== id)
-        .map((prize, index) => ({
-          ...prize,
-          order: index,
-        })),
-    );
-  };
-
-  /**
-   * 指定 ID のカードを更新します。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: `patch` は Prize の部分更新を渡してください。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では更新内容を確認します。
-   */
-  const handleUpdate = (id: string, patch: Partial<PrizeList[number]>) => {
-    setDraftPrizes((prev) =>
-      prev.map((prize) => (prize.id === id ? { ...prize, ...patch } : prize)),
-    );
-  };
-
-  /**
-   * カードの並び順を更新します。
-   *
-   * - 副作用: 下書きを更新します。
-   * - 入力制約: `ids` は並び順の配列を渡してください。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では並び替え結果を確認します。
-   */
-  const handleReorder = (ids: string[]) => {
-    const lookup = new Map(draftPrizes.map((prize) => [prize.id, prize]));
-    const ordered = ids
-      .map((id) => lookup.get(id))
-      .filter((prize): prize is (typeof prizes)[number] => Boolean(prize))
-      .map((prize, index) => ({
-        ...prize,
-        order: index,
-      }));
-    setDraftPrizes(ordered);
-  };
-
-  /**
-   * 景品一覧の一致判定を行います。
-   *
-   * - 副作用: ありません。
-   * - 入力制約: `left` と `right` は PrizeList を渡してください。
-   * - 戻り値: 完全一致なら true を返します。
-   * - Chrome DevTools MCP では変更判定を確認します。
-   */
-  const isPrizesEqual = (left: PrizeList, right: PrizeList) => {
-    if (left.length !== right.length) {
-      return false;
-    }
-    return left.every((prize, index) => {
-      const target = right[index];
-      return (
-        prize.id === target.id &&
-        prize.order === target.order &&
-        prize.prizeName === target.prizeName &&
-        prize.itemName === target.itemName &&
-        prize.imagePath === target.imagePath &&
-        prize.selected === target.selected &&
-        prize.memo === target.memo
-      );
-    });
-  };
-
-  const isDirty = !isPrizesEqual(draftPrizes, prizes);
+  const isDirty = useMemo(() => !arePrizesEqual(draftPrizes, prizes), [draftPrizes, prizes]);
+  const { handleCancelConfirm, handleConfirmProceed } = useUnsavedChangesGuard({
+    isDirty,
+    allowNavigation,
+    setAllowNavigation,
+    setConfirmOpen,
+  });
 
   useEffect(() => {
     if (!hasInitializedRef.current && !isLoading) {
@@ -538,28 +160,6 @@ export const useSettingDraft = ({
       setDraftPrizes(prizes);
     }
   }, [isDirty, isLoading, prizes]);
-
-  const blocker = useBlocker(isDirty && !allowNavigation);
-
-  useEffect(() => {
-    if (blocker.state === "blocked") {
-      setConfirmOpen(true);
-    }
-  }, [blocker.state]);
-
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
-    const handler = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => {
-      window.removeEventListener("beforeunload", handler);
-    };
-  }, [isDirty]);
 
   /**
    * 保存して Start 画面へ戻ります。
@@ -583,34 +183,6 @@ export const useSettingDraft = ({
       setIsSaving(false);
       setAllowNavigation(false);
     }
-  };
-
-  /**
-   * 未保存警告のキャンセル操作です。
-   *
-   * - 副作用: ダイアログ状態と blocker を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP ではダイアログが閉じることを確認します。
-   */
-  const handleCancelConfirm = () => {
-    setConfirmOpen(false);
-    setAllowNavigation(false);
-    blocker.reset?.();
-  };
-
-  /**
-   * 未保存のまま遷移します。
-   *
-   * - 副作用: ダイアログ状態と blocker を更新します。
-   * - 入力制約: なし。
-   * - 戻り値: なし。
-   * - Chrome DevTools MCP では遷移が実行されることを確認します。
-   */
-  const handleConfirmProceed = () => {
-    setConfirmOpen(false);
-    setAllowNavigation(true);
-    blocker.proceed?.();
   };
 
   const combinedError = error ?? localError;
