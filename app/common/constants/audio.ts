@@ -43,7 +43,7 @@ export const audioPaths = {
 const DEFAULT_BGM_PLAYBACK_SCALE = 0.5;
 const BUTTON_ATTENUATION = 0.1;
 const BGM_ATTENUATION = 0.1;
-const VOICE_BOOST = 3;
+const VOICE_BOOST = 1;
 const DRUMROLL_BOOST = 2;
 const CYMBAL_BOOST = 1;
 
