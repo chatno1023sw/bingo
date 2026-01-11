@@ -8,6 +8,7 @@ import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenc
 import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize } from "~/common/types";
 import { CommonDialog } from "~/components/common/CommonDialog";
+import { ConfettiOverlay } from "~/components/common/ConfettiOverlay";
 
 export type PrizeResultDialogProps = {
   /** ダイアログの表示状態 */
@@ -77,35 +78,38 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
     return null;
   }
   return (
-    <CommonDialog
-      open={open}
-      onClose={onClose}
-      titleClassName="pt-8 text-3xl"
-      headerClassName="text-center"
-      contentClassName="flex flex-col items-center justify-center"
-      showCloseButton
-    >
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="flex h-48 w-full items-center justify-center rounded-2xl">
-          {hasImage ? (
-            <img
-              src={resolvedImagePath ?? ""}
-              alt={`${prize.prizeName || "景品"} 画像`}
-              className="h-full w-full rounded-2xl object-cover object-center"
-            />
-          ) : (
-            <Image
-              className="h-48 w-48 text-muted-foreground"
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-          )}
+    <>
+      <ConfettiOverlay active={open} />
+      <CommonDialog
+        open={open}
+        onClose={onClose}
+        titleClassName="pt-8 text-3xl"
+        headerClassName="text-center"
+        contentClassName="flex flex-col items-center justify-center"
+        showCloseButton
+      >
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="flex h-48 w-full items-center justify-center rounded-2xl">
+            {hasImage ? (
+              <img
+                src={resolvedImagePath ?? ""}
+                alt={`${prize.prizeName || "景品"} 画像`}
+                className="h-full w-full rounded-2xl object-cover object-center"
+              />
+            ) : (
+              <Image
+                className="h-48 w-48 text-muted-foreground"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            )}
+          </div>
+          <div className="flex w-full flex-col items-center justify-center space-y-2 text-3xl text-foreground">
+            <p>{prize.prizeName || "未設定"}</p>
+            <p>{prize.itemName || "未設定"}</p>
+          </div>
         </div>
-        <div className="flex w-full flex-col items-center justify-center space-y-2 text-3xl text-foreground">
-          <p>{prize.prizeName || "未設定"}</p>
-          <p>{prize.itemName || "未設定"}</p>
-        </div>
-      </div>
-    </CommonDialog>
+      </CommonDialog>
+    </>
   );
 };
