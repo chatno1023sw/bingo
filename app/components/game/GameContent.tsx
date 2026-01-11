@@ -541,6 +541,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                   setDrumrollVolumeScale(defaults.drumrollVolumeScale);
                   setCymbalVolumeScale(defaults.cymbalVolumeScale);
                 }}
+                onMuteAll={handleMuteAllAudio}
               />
               <Button
                 type="button"

@@ -271,6 +271,7 @@ export const StartView: FC<StartViewProps> = ({ onShowGame, onNavigateSetting })
             void syncBgmVolume(audioSettings.bgm.startDefaultVolume);
             void setSoundVolume(audioSettings.se.defaultVolume);
           }}
+          onMuteAll={handleMuteAllAudio}
         />
       </div>
       <div className="flex min-h-90 items-center justify-center">

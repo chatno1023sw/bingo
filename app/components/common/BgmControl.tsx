@@ -27,6 +27,8 @@ export type BgmControlProps = {
   className?: string;
   /** デフォルト値へ戻す操作 */
   onResetToDefault?: () => void;
+  /** すべての音量をミュートする操作 */
+  onMuteAll?: () => void;
 };
 
 export type VolumeSliderConfig = {
@@ -65,6 +67,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   extraSliders = [],
   className,
   onResetToDefault,
+  onMuteAll,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -164,13 +167,24 @@ export const BgmControl: FC<BgmControlProps> = ({
           showCloseButton
           footer={
             onResetToDefault ? (
-              <Button
-                type="button"
-                className="w-full rounded-full bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
-                onClick={onResetToDefault}
-              >
-                デフォルト値に戻す
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  className="w-full rounded-full bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
+                  onClick={onResetToDefault}
+                >
+                  デフォルト値に戻す
+                </Button>
+                {onMuteAll ? (
+                  <Button
+                    type="button"
+                    className="w-full rounded-full border border-border bg-card px-4 py-3 text-muted-foreground text-sm hover:bg-muted"
+                    onClick={onMuteAll}
+                  >
+                    音量なし
+                  </Button>
+                ) : null}
+              </div>
             ) : undefined
           }
           footerClassName="px-6 pb-6"
