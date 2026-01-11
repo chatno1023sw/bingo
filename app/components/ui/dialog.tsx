@@ -72,13 +72,18 @@ DialogOverlay.displayName = "DialogOverlay";
  * - 戻り値: ダイアログ本体の要素を返します。
  * - Chrome DevTools MCP では中央配置とサイズが想定通りであることを確認します。
  */
+type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+  /** オーバーレイを非表示にするかどうか */
+  hideOverlay?: boolean;
+};
+
 export const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, ...props }, ref) => {
+  DialogContentProps
+>(({ className, hideOverlay = false, ...props }, ref) => {
   return (
     <DialogPrimitive.Portal>
-      <DialogOverlay />
+      {!hideOverlay && <DialogOverlay />}
       <DialogPrimitive.Content
         ref={ref}
         className={cn(

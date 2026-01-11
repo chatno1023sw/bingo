@@ -43,6 +43,8 @@ export type CommonDialogProps = {
   closeDisabled?: boolean;
   /** オーバーレイ操作で閉じるのを無効化するかどうか */
   preventOutsideClose?: boolean;
+  /** 背景オーバーレイを非表示にするかどうか */
+  overlayHidden?: boolean;
 };
 
 /**
@@ -69,6 +71,7 @@ export const CommonDialog: FC<CommonDialogProps> = ({
   closeButtonAriaLabel = "閉じる",
   closeDisabled = false,
   preventOutsideClose = false,
+  overlayHidden = false,
 }) => {
   if (!open) {
     return null;
@@ -90,6 +93,7 @@ export const CommonDialog: FC<CommonDialogProps> = ({
     >
       <DialogContent
         className={contentClassName}
+        hideOverlay={overlayHidden}
         onInteractOutside={
           preventOutsideClose
             ? (event) => {

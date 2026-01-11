@@ -1,13 +1,22 @@
 import { Howl } from "howler";
 import { Loader2, X } from "lucide-react";
-import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type FC,
+  type MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   audioPaths,
   audioSettings,
+  buildLetterVoicePath,
   buildNumberVoicePath,
   resolveAudioPath,
 } from "~/common/constants/audio";
-import type { BingoLetter } from "~/common/constants/bingo";
+import { type BingoLetter, bingoNumberRanges } from "~/common/constants/bingo";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
 import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
@@ -82,6 +91,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
 
   const numberVoiceRef = useRef<Howl | null>(null);
+  const letterVoiceRef = useRef<Howl | null>(null);
   const pendingAnnounceRef = useRef(false);
   const pendingNumberRef = useRef<number | null>(null);
   const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,31 +99,57 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   const bingoLetterTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
 
-  const playNumberVoice = useCallback(
-    (number: number) => {
-      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
-        return;
-      }
-      if (numberVoiceRef.current) {
-        numberVoiceRef.current.stop();
-        numberVoiceRef.current.unload();
-        numberVoiceRef.current = null;
-      }
+  const cleanupVoice = useCallback((voiceRef: MutableRefObject<Howl | null>) => {
+    if (voiceRef.current) {
+      voiceRef.current.stop();
+      voiceRef.current.unload();
+      voiceRef.current = null;
+    }
+  }, []);
+
+  const playVoiceClip = useCallback(
+    (src: string, targetRef: MutableRefObject<Howl | null>, onEnd?: () => void) => {
+      cleanupVoice(targetRef);
       const voice = new Howl({
-        src: [resolveAudioPath(buildNumberVoicePath(number))],
+        src: [resolveAudioPath(src)],
         preload: true,
         volume: voiceVolume * audioSettings.number.voicePlaybackScale,
         onend: () => {
           voice.unload();
-          if (numberVoiceRef.current === voice) {
-            numberVoiceRef.current = null;
+          if (targetRef.current === voice) {
+            targetRef.current = null;
           }
+          onEnd?.();
+        },
+        onloaderror: () => {
+          onEnd?.();
+        },
+        onplayerror: () => {
+          onEnd?.();
         },
       });
-      numberVoiceRef.current = voice;
+      targetRef.current = voice;
       voice.play();
     },
-    [soundPreference.volume, voiceVolume],
+    [cleanupVoice, voiceVolume],
+  );
+
+  const playAnnouncementVoice = useCallback(
+    (number: number) => {
+      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
+        return;
+      }
+      const letter = bingoNumberRanges.getLetter(number);
+      const playNumber = () => {
+        playVoiceClip(buildNumberVoicePath(number), numberVoiceRef);
+      };
+      if (!letter) {
+        playNumber();
+        return;
+      }
+      playVoiceClip(buildLetterVoicePath(letter), letterVoiceRef, playNumber);
+    },
+    [playVoiceClip, soundPreference.volume, voiceVolume],
   );
 
   const tryAnnounceNumber = useCallback(() => {
@@ -133,13 +169,21 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
       clearTimeout(announceTimerRef.current);
     }
     announceTimerRef.current = setTimeout(() => {
-      playNumberVoice(number);
+      playAnnouncementVoice(number);
       lastAnnouncedRef.current = number;
       pendingAnnounceRef.current = false;
       pendingNumberRef.current = null;
       announceTimerRef.current = null;
     }, ANNOUNCE_DELAY_MS);
-  }, [playNumberVoice, ANNOUNCE_DELAY_MS]);
+  }, [playAnnouncementVoice, ANNOUNCE_DELAY_MS]);
+
+  useEffect(
+    () => () => {
+      cleanupVoice(numberVoiceRef);
+      cleanupVoice(letterVoiceRef);
+    },
+    [cleanupVoice],
+  );
 
   const { playDrumroll, getDrumrollDurationMs } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,

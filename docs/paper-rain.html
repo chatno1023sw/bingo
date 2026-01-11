@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Confetti</title>
+    <style>
+      .confetti-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 9999;
+      }
+
+      .confetti-burst {
+        position: absolute;
+        bottom: 10vh;
+        width: 1px;
+        height: 1px;
+      }
+      .confetti-burst.left {
+        left: 6vw;
+      }
+      .confetti-burst.right {
+        right: 6vw;
+      }
+
+      .confetti-rain {
+        position: absolute;
+        inset: 0;
+      }
+
+      .confetti-piece {
+        position: absolute;
+        background: var(--c, #fff);
+        width: var(--w, 6px);
+        height: var(--h, 12px);
+        border-radius: 2px;
+        opacity: 0.95;
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(var(--s, 1));
+        will-change: transform, opacity;
+      }
+
+      .confetti-piece::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        border-radius: inherit;
+        transform: rotate(0deg) skewX(0deg) scaleX(1);
+        animation: confetti-flutter var(--flutterDur, 1100ms) ease-in-out infinite;
+      }
+
+      .confetti-piece.ribbon {
+        border-radius: 999px;
+      }
+
+      .confetti-burst .confetti-piece {
+        left: 0;
+        bottom: 0;
+        animation: confetti-shoot var(--dur, 1200ms) cubic-bezier(0.15, 0.85, 0.25, 1)
+          var(--delay, 0ms) forwards;
+      }
+
+      .confetti-rain .confetti-piece {
+        top: 0;
+        left: var(--x, 50vw);
+        animation: confetti-fall var(--dur, 4200ms) linear var(--delay, 1200ms) infinite;
+      }
+
+      @keyframes confetti-shoot {
+        0% {
+          transform: translate3d(0, 0, 0) rotate(0deg) scale(var(--s, 1));
+          opacity: 1;
+        }
+        40% {
+          transform: translate3d(var(--mxpx, 0px), var(--mypx, 0px), 0) rotate(240deg)
+            scale(var(--s, 1));
+          opacity: 1;
+        }
+        99% {
+          transform: translate3d(var(--oxpx, 0px), var(--oypx, 0px), 0)
+            rotate(var(--spin, 1100deg)) scale(var(--s, 1));
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(var(--oxpx, 0px), var(--oypx, 0px), 0)
+            rotate(var(--spin, 1100deg)) scale(var(--s, 1));
+          opacity: 0;
+        }
+      }
+
+      @keyframes confetti-fall {
+        0% {
+          transform: translate3d(0, -20vh, 0) rotate(0deg) scale(var(--s, 1));
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(var(--drift, 0vw), 120vh, 0) rotate(var(--spin, 1080deg))
+            scale(var(--s, 1));
+          opacity: 1;
+        }
+      }
+
+      @keyframes confetti-flutter {
+        0% {
+          transform: rotate(0deg) skewX(0deg) scaleX(1);
+          opacity: 1;
+        }
+        50% {
+          transform: rotate(12deg) skewX(16deg) scaleX(0.65);
+          opacity: 0.85;
+        }
+        100% {
+          transform: rotate(0deg) skewX(0deg) scaleX(1);
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .confetti-piece {
+          animation: none;
+          opacity: 0;
+        }
+        .confetti-piece::before {
+          animation: none;
+        }
+      }
+
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        padding: 24px;
+      }
+      .btns {
+        display: flex;
+        gap: 12px;
+      }
+      button {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background: #fff;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="btns">
+      <button onclick="startConfetti()">startConfetti()</button>
+      <button onclick="stopConfetti()">stopConfetti()</button>
+    </div>
+
+    <script>
+      (() => {
+        const COLORS = ["#f43f5e", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7"];
+        const rand = (a, b) => Math.random() * (b - a) + a;
+        const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+        const ensureLayer = () => {
+          let layer = document.querySelector(".confetti-layer");
+          if (layer) return layer;
+
+          layer = document.createElement("div");
+          layer.className = "confetti-layer";
+
+          const burstL = document.createElement("div");
+          burstL.className = "confetti-burst left";
+          burstL.dataset.role = "burst-left";
+
+          const burstR = document.createElement("div");
+          burstR.className = "confetti-burst right";
+          burstR.dataset.role = "burst-right";
+
+          const rain = document.createElement("div");
+          rain.className = "confetti-rain";
+          rain.dataset.role = "rain";
+
+          layer.append(burstL, burstR, rain);
+          document.body.appendChild(layer);
+          return layer;
+        };
+
+        const makePiece = (vars, isRibbon) => {
+          const el = document.createElement("span");
+          el.className = `confetti-piece${isRibbon ? " ribbon" : ""}`;
+          for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
+          return el;
+        };
+
+        const sizeVars = () => {
+          const isRibbon = Math.random() < 0.18;
+          if (isRibbon) {
+            return {
+              isRibbon,
+              w: rand(6, 10),
+              h: rand(34, 70),
+              flutterDur: `${(rand(800, 1400) | 0)}ms`
+            };
+          }
+          const isLong = Math.random() < 0.5;
+          return {
+            isRibbon,
+            w: rand(4, 8),
+            h: isLong ? rand(14, 22) : rand(9, 14),
+            flutterDur: `${(rand(900, 1500) | 0)}ms`
+          };
+        };
+
+        const buildRain = (rainEl) => {
+          if (rainEl.dataset.built === "1") return;
+          rainEl.dataset.built = "1";
+
+          const count = 64;
+          for (let i = 0; i < count; i++) {
+            const s = sizeVars();
+            const fallDur = rand(3200, 7200) | 0;
+
+            const piece = makePiece(
+              {
+                "--c": pick(COLORS),
+                "--x": `${rand(0, 100)}vw`,
+                "--drift": `${rand(-10, 10)}vw`,
+                "--spin": `${rand(720, 1600)}deg`,
+                "--dur": `${fallDur}ms`,
+                "--delay": `${(rand(900, 3200) | 0)}ms`,
+                "--w": `${s.w.toFixed(1)}px`,
+                "--h": `${s.h.toFixed(1)}px`,
+                "--s": `${rand(0.75, 1.2).toFixed(2)}`,
+                "--flutterDur": s.flutterDur
+              },
+              s.isRibbon
+            );
+
+            rainEl.appendChild(piece);
+          }
+        };
+
+        const fireBurst = (burstEl, dir) => {
+          burstEl.textContent = "";
+          const count = 28;
+
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+
+          for (let i = 0; i < count; i++) {
+            const s = sizeVars();
+
+            const dur = rand(900, 1400) | 0;
+
+            const mxpx = dir * (w * rand(0.12, 0.28));
+            const mypx = -h * rand(0.35, 0.75);
+
+            const marginX = rand(240, 520);
+            const marginY = rand(240, 520);
+            const oxpx = dir * (w + marginX);
+            const oypx = -(h + marginY);
+
+            const piece = makePiece(
+              {
+                "--c": pick(COLORS),
+                "--mxpx": `${mxpx.toFixed(0)}px`,
+                "--mypx": `${mypx.toFixed(0)}px`,
+                "--oxpx": `${oxpx.toFixed(0)}px`,
+                "--oypx": `${oypx.toFixed(0)}px`,
+                "--spin": `${rand(820, 1500).toFixed(0)}deg`,
+                "--dur": `${dur}ms`,
+                "--delay": `${(rand(0, 140) | 0)}ms`,
+                "--w": `${s.w.toFixed(1)}px`,
+                "--h": `${s.h.toFixed(1)}px`,
+                "--s": `${rand(0.85, 1.25).toFixed(2)}`,
+                "--flutterDur": s.flutterDur
+              },
+              s.isRibbon
+            );
+
+            piece.addEventListener("animationend", () => piece.remove(), { once: true });
+            burstEl.appendChild(piece);
+          }
+        };
+
+        window.startConfetti = () => {
+          const layer = ensureLayer();
+          const burstL = layer.querySelector('[data-role="burst-left"]');
+          const burstR = layer.querySelector('[data-role="burst-right"]');
+          const rain = layer.querySelector('[data-role="rain"]');
+
+          buildRain(rain);
+          fireBurst(burstL, +1);
+          fireBurst(burstR, -1);
+        };
+
+        window.stopConfetti = () => {
+          const layer = document.querySelector(".confetti-layer");
+          if (layer) layer.remove();
+        };
+      })();
+    </script>
+  </body>
+</html>

@@ -36,6 +36,21 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   const prizesRef = useRef<Prize[]>([]);
   const onCompleteRef = useRef<(prize: Prize) => void>(() => undefined);
   const { preference } = useBgmPreference();
+  const hasCompletedRef = useRef(false);
+
+  const initializeSelectable = useCallback(() => {
+    const entries = prizesRef.current.slice(0, 25);
+    const selectable = entries
+      .map((prize, index) => ({ prize, index }))
+      .filter(({ prize }) => !prize.selected);
+    selectableRef.current = selectable;
+    if (selectable.length === 0) {
+      return false;
+    }
+    setActiveIndex(selectable[0].index);
+    setWinnerIndex(null);
+    return true;
+  }, []);
   const completeRoulette = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -46,13 +61,16 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       return;
     }
     const winnerIndex = selectable[Math.floor(Math.random() * selectable.length)].index;
+    hasCompletedRef.current = true;
     setActiveIndex(winnerIndex);
     setWinnerIndex(winnerIndex);
     onCompleteRef.current(prizesRef.current[winnerIndex]);
   }, []);
+  const handleCymbalEnd = useCallback(() => {}, []);
 
   const { playDrumroll, stopDrumroll } = useBgmPlayers({
     onDrumrollEnd: completeRoulette,
+    onCymbalEnd: handleCymbalEnd,
     enabled: preference.volume > 0,
     volume: preference.volume,
   });
@@ -66,26 +84,28 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
   }, [onComplete]);
 
   useEffect(() => {
-    if (!open || prizes.length === 0) {
+    if (!open) {
       stopDrumroll();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       return;
     }
-    const entries = prizes.slice(0, 25);
-    const selectable = entries
-      .map((prize, index) => ({ prize, index }))
-      .filter(({ prize }) => !prize.selected);
-    selectableRef.current = selectable;
-    if (selectable.length === 0) {
+    hasCompletedRef.current = false;
+    if (!initializeSelectable()) {
       stopDrumroll();
       return;
     }
 
-    setActiveIndex(selectable[0].index);
-    setWinnerIndex(null);
     playDrumroll();
 
     intervalRef.current = setInterval(() => {
       setActiveIndex((prev) => {
+        const selectable = selectableRef.current;
+        if (selectable.length === 0) {
+          return prev;
+        }
         if (selectable.length === 1) {
           return selectable[0].index;
         }
@@ -107,7 +127,7 @@ export const PrizeRouletteDialog: FC<PrizeRouletteDialogProps> = ({
       }
       stopDrumroll();
     };
-  }, [open, playDrumroll, prizes, stopDrumroll]);
+  }, [initializeSelectable, open, playDrumroll, stopDrumroll]);
 
   const entries = prizes.slice(0, 25);
   return (
