@@ -1,7 +1,7 @@
 import { type FC, useEffect, useRef, useState } from "react";
-import { Button } from "~/components/common/Button";
 import type { BgmPreference } from "~/common/types";
 import { BgmToggle } from "~/components/common/BgmToggle";
+import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
 import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
@@ -27,6 +27,8 @@ export type BgmControlProps = {
   className?: string;
   /** デフォルト値へ戻す操作 */
   onResetToDefault?: () => void;
+  /** すべての音量をミュートする操作 */
+  onMuteAll?: () => void;
 };
 
 export type VolumeSliderConfig = {
@@ -65,6 +67,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   extraSliders = [],
   className,
   onResetToDefault,
+  onMuteAll,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -164,13 +167,25 @@ export const BgmControl: FC<BgmControlProps> = ({
           showCloseButton
           footer={
             onResetToDefault ? (
-              <Button
-                type="button"
-                className="w-full rounded-full bg-secondary px-4 py-3 text-secondary-foreground hover:bg-secondary/80"
-                onClick={onResetToDefault}
-              >
-                デフォルト値に戻す
-              </Button>
+              <div className="flex w-full items-center justify-center gap-3 sm:flex-row">
+                {onMuteAll ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full rounded-full border border-border bg-card px-4 py-3 text-secondary-foreground text-sm hover:bg-muted"
+                    onClick={onMuteAll}
+                  >
+                    音量なし
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  className="w-full rounded-full px-4 py-3"
+                  onClick={onResetToDefault}
+                >
+                  デフォルト値
+                </Button>
+              </div>
             ) : undefined
           }
           footerClassName="px-6 pb-6"
