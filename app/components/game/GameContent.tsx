@@ -489,31 +489,39 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
               </Button>
             </div>
           </header>
-          <div className="flex flex-1 overflow-hidden px-6 pb-6">
-            <HistoryPanel recent={session.historyView} className="flex-[0_0_30vw]" />
-            <section className="flex flex-1 flex-col items-center justify-center gap-8">
-              <CurrentNumber
-                value={displayNumber}
-                isDrawing={isAnimating || isMutating}
-                backgroundLetter={bingoBackgroundLetter}
-                isFirstState={isFirstState}
-              />
-              <Button
-                type="button"
-                className="mt-12.5 flex w-80 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground text-xl shadow-sm hover:bg-primary"
-                onClick={handleDrawWithBgm}
-                disabled={isButtonDisabled}
-              >
-                {(isAnimating || isMutating) && <Loader2 className={"animate-spin"} />}
-                {drawButtonLabel}
-              </Button>
-              {drawError === "no-available-numbers" && (
-                <p className="text-destructive text-sm">すべての番号が抽選済みです。</p>
-              )}
-              <p className="text-muted-foreground text-xs">残り {availableNumbers.length} / 75</p>
+          <div className="flex flex-1 items-stretch overflow-hidden px-6 pb-6">
+            <HistoryPanel recent={session.historyView} className="min-w-[18rem] flex-[0_0_24vw]" />
+            <section className="flex min-w-0 flex-1 flex-col px-8 py-6">
+              <div className="flex min-h-0 flex-1 items-center justify-center">
+                <CurrentNumber
+                  value={displayNumber}
+                  isDrawing={isAnimating || isMutating}
+                  backgroundLetter={bingoBackgroundLetter}
+                  isFirstState={isFirstState}
+                />
+              </div>
+              <div className="mt-6 flex flex-col items-center gap-4">
+                <Button
+                  type="button"
+                  className="flex w-full max-w-xl items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground text-xl shadow-sm hover:bg-primary disabled:opacity-40"
+                  onClick={handleDrawWithBgm}
+                  disabled={isButtonDisabled}
+                >
+                  {(isAnimating || isMutating) && <Loader2 className="h-7 w-7 animate-spin" />}
+                  {drawButtonLabel}
+                </Button>
+                {drawError === "no-available-numbers" && (
+                  <p className="font-semibold text-base text-destructive">
+                    すべての番号が抽選済みです。
+                  </p>
+                )}
+                <p className="font-semibold text-base text-muted-foreground">
+                  残り {availableNumbers.length} / 75
+                </p>
+              </div>
             </section>
 
-            <SidePanel className="flex-[0_0_30vw]" />
+            <SidePanel className="min-w-[18rem] flex-[0_0_24vw]" />
           </div>
         </div>
       </main>
