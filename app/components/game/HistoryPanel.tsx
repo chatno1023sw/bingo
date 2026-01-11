@@ -77,7 +77,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ recent, className = "" }) 
         )}
       >
         {recent.length === 0 ? (
-          <div className="text-muted-foreground text-sm">まだ抽選結果されてないよ</div>
+          <div className="text-muted-foreground text-sm">まだ抽選されてないよ</div>
         ) : (
           <div className="flex flex-col gap-3">
             {rows.map((row, rowIndex) => {
