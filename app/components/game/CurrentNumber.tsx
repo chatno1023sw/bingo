@@ -14,7 +14,7 @@ export type CurrentNumberProps = {
 };
 
 const NUMBER_PANEL_MAX_SIZE = "min(44rem, calc(100vh - 18rem))";
-const BADGE_OFFSET = "clamp(1rem, 3vw, 3rem)";
+const BADGE_OVERLAP = "clamp(0.5rem, 1.5vw, 1.25rem)";
 const BADGE_SIZE = "clamp(4.5rem, 8vw, 7rem)";
 const BADGE_FONT_SIZE = "clamp(2.25rem, 3.5vw, 3rem)";
 
@@ -79,26 +79,28 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
               {backgroundLetter}
             </span>
           ) : null}
-          <span className="relative z-10 inline-block">{display}</span>
-        </div>
-        {!isDrawing && bingoLetter ? (
-          <span
-            className={cn(
-              "pointer-events-none absolute z-20 flex items-center justify-center rounded-full border-2 border-secondary font-black text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
-              letterStyles[bingoLetter],
-            )}
-            style={{
-              right: BADGE_OFFSET,
-              bottom: BADGE_OFFSET,
-              width: BADGE_SIZE,
-              height: BADGE_SIZE,
-              fontSize: BADGE_FONT_SIZE,
-            }}
-            aria-hidden
-          >
-            {bingoLetter}
+          <span className="relative z-10 inline-flex items-center justify-center leading-none">
+            <span className="inline-block">{display}</span>
+            {!isDrawing && bingoLetter ? (
+              <span
+                className={cn(
+                  "pointer-events-none absolute z-20 flex items-center justify-center rounded-full border-2 border-secondary font-black text-white leading-none shadow-[0_10px_25px_hsl(var(--secondary)/0.45)]",
+                  letterStyles[bingoLetter],
+                )}
+                style={{
+                  right: `calc(-1 * ${BADGE_OVERLAP})`,
+                  bottom: `calc(-1 * ${BADGE_OVERLAP})`,
+                  width: BADGE_SIZE,
+                  height: BADGE_SIZE,
+                  fontSize: BADGE_FONT_SIZE,
+                }}
+                aria-hidden
+              >
+                {bingoLetter}
+              </span>
+            ) : null}
           </span>
-        ) : null}
+        </div>
       </div>
     </div>
   );
