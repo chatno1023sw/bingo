@@ -4,6 +4,7 @@ import { Button } from "~/components/common/Button";
 import { PrizeList } from "~/components/game/PrizeList";
 import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
+import { cn } from "~/lib/utils";
 
 export type SidePanelProps = {
   /** 追加のクラス名 */
@@ -126,49 +127,62 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
 
   return (
     <section
-      className={`flex h-full w-full min-w-0 flex-col rounded-3xl border border-border bg-card p-4 text-foreground ${className}`}
+      className={cn(
+        "flex h-full min-w-0 flex-col rounded-3xl border border-border bg-card p-4 text-foreground",
+        className,
+      )}
     >
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-5">
-          <h2 className="text-base">景品一覧</h2>
-
-          <span className="text-muted-foreground text-xs">
-            当選済み {summary.selected} / {summary.total}
-          </span>
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-base">景品一覧</h2>
+            <span className="text-muted-foreground text-xs">
+              当選済み {summary.selected} / {summary.total}
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
+            onClick={handleToggleDisplayAll}
+            disabled={isLoading}
+          >
+            {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
+          </Button>
+        </header>
+        <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-muted px-2 py-3">
+          {isLoading ? (
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-muted-foreground text-sm">景品情報を読み込み中...</p>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto pr-1">
+              <PrizeList
+                prizes={prizes}
+                disabled={isMutating}
+                onToggle={togglePrize}
+                itemNameOverrides={itemNameOverrides}
+                onToggleDisplay={handleToggleDisplay}
+              />
+            </div>
+          )}
         </div>
-
-        <Button
-          type="button"
-          variant="secondary"
-          className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
-          onClick={handleToggleDisplayAll}
-          disabled={isLoading}
-        >
-          {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
-        </Button>
-      </header>
-      <div className="no-scrollbar mt-4 flex h-full w-full min-w-0 flex-1 items-center justify-center overflow-y-auto pr-1">
-        {isLoading ? (
-          <p className="text-muted-foreground text-sm">景品情報を読み込み中...</p>
-        ) : (
-          <PrizeList
-            prizes={prizes}
-            disabled={isMutating}
-            onToggle={togglePrize}
-            itemNameOverrides={itemNameOverrides}
-            onToggleDisplay={handleToggleDisplay}
-          />
-        )}
+        <div className="space-y-3 pt-1">
+          <Button
+            type="button"
+            className="w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm disabled:opacity-40"
+            onClick={handleRouletteStart}
+            disabled={isLoading || prizes.length === 0}
+          >
+            景品ルーレット
+          </Button>
+          {error && (
+            <p className="text-destructive text-xs" aria-live="polite">
+              {error}
+            </p>
+          )}
+        </div>
       </div>
-      <Button
-        type="button"
-        className="mt-4 w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm disabled:opacity-40"
-        onClick={handleRouletteStart}
-        disabled={isLoading || prizes.length === 0}
-      >
-        景品ルーレット
-      </Button>
-      {error && <p className="mt-3 text-destructive text-xs">{error}</p>}
       <PrizeRouletteDialog
         open={rouletteOpen}
         prizes={prizes}
