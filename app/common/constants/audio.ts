@@ -27,6 +27,7 @@ export const audioPaths = {
     button: "se/button-se.mp3",
     buttonCancel: "se/button-cancel-se.mp3",
     hover: "se/hover-se.mp3",
+    prizeRoulette: "prize-roulette.wav",
   },
   number: {
     dir: "number",
