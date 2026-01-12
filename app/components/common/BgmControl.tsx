@@ -140,7 +140,7 @@ export const BgmControl: FC<BgmControlProps> = ({
     row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
     labelWrap: "flex min-w-28 items-center justify-end gap-2 text-right text-xl",
     label: "whitespace-nowrap",
-    sliderWrap: cn("flex w-full", useDialog ? "pr-4" : "pr-2"),
+    sliderWrap: cn("flex min-w-0 flex-1", useDialog ? "pr-2" : "pr-1"),
   } as const;
 
   const sliderConfigs: VolumeSliderConfig[] = [
