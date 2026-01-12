@@ -1,7 +1,0 @@
-- `npm install` 依存取得。
-- `npm run dev` HMR 付き開発サーバー (http://localhost:5173)。
-- `npm run build` 本番ビルド (build/client, build/server)。
-- `npm run start` ビルド成果物を react-router-serve で実行。
-- `npm run typecheck` ルート型の生成 + tsc --noEmit で型検証。
-- `npm run test` Vitest を passWithNoTests 付きで実行。
-- `npm run similarity` mizchi/similarity によるコード類似チェック。

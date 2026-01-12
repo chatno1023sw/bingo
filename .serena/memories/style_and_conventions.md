@@ -1,6 +1,0 @@
-- すべて TypeScript、インデント 2 スペース、文字列はダブルクォーテーション、基本は named export。
-- コメント/TSDoc は仕様に合わせて必ず日本語で記述。
-- ルートは loader/action/component のみを記し、ロジックや UI パーツは app/common や app/components（必要に応じて新設）へ切り出す。
-- Setting 画面は <table> 禁止で Tailwind の Flex/Grid で「テーブル風」レイアウトを組む。
-- 深い相対パスを避ける際は ~/ エイリアス（=app/）を使用。
-- docs/spec seed/requirements.md へテストシナリオを追記しつつ TDD を行うことが求められ、実装順序はテストシナリオ→実装→Chrome DevTools MCP での動作確認。

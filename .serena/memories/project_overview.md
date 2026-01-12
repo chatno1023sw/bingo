@@ -1,3 +1,0 @@
-- React Router v7 + Vite + Tailwind でビンゴアプリを実装するリポジトリ。start/game/setting の 3 画面構成で、抽選ロジックや UI パーツは app/common, app/components に分離する方針。
-- HTML シェルは app/root.tsx、ルートは app/routes/ 以下。静的アセットは public/、仕様やモックは docs/spec seed/requirements.md と docs/spec seed/design/design.md を参照する。
-- TypeScript 5.9、React 19、Tailwind、mizchi/similarity、Chrome DevTools MCP を組み合わせた最新 React Router スタック。
