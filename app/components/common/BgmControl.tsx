@@ -136,7 +136,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   }, [onDialogOpenChange, open]);
 
   const sliderLayout = {
-    container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
+    container: useDialog ? "flex w-full flex-col gap-4 px-4" : "flex w-full flex-col gap-3",
     row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
     labelWrap: "flex min-w-28 items-center justify-end gap-2 text-right text-xl",
     label: "whitespace-nowrap",
