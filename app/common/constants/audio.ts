@@ -37,6 +37,9 @@ export const audioPaths = {
     dir: "roulette-letter",
     ext: "wav",
   },
+  sample: {
+    voice: "test-voice.wav",
+  },
 } as const;
 
 /**

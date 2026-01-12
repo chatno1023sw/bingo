@@ -12,6 +12,8 @@ declare module "howler" {
     src: string[];
     /** 事前読み込みフラグ */
     preload?: boolean;
+    /** HTMLAudioElement を利用するかどうか */
+    html5?: boolean;
     /** ループ再生フラグ */
     loop?: boolean;
     /** 初期音量 */
@@ -34,6 +36,9 @@ declare module "howler" {
     seek(seek?: number): number;
     volume(value: number): number;
     unload(): void;
+    on(event: string, callback: HowlCallback): void;
+    once(event: string, callback: HowlCallback): void;
+    off(event: string, callback: HowlCallback): void;
   }
 
   /**
