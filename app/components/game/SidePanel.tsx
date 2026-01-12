@@ -21,11 +21,13 @@ export type SidePanelProps = {
 export const SidePanel = ({ className = "" }: SidePanelProps) => {
   const {
     prizes,
+    displayPrizes,
     isLoading,
     isMutating,
     error,
     summary,
     showPrizeNameOnly,
+    hideSelected,
     itemNameOverrides,
     rouletteOpen,
     resultOpen,
@@ -33,6 +35,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     togglePrize,
     handleToggleDisplay,
     handleToggleDisplayAll,
+    handleToggleSelectedFilter,
     handleRouletteStart,
     handleRouletteComplete,
     closeRouletteDialog,
@@ -54,15 +57,26 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
               当選済み {summary.selected} / {summary.total}
             </span>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
-            onClick={handleToggleDisplayAll}
-            disabled={isLoading}
-          >
-            {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
+              onClick={handleToggleSelectedFilter}
+              disabled={isLoading}
+            >
+              {hideSelected ? "フィルタ解除" : "当選除外"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
+              onClick={handleToggleDisplayAll}
+              disabled={isLoading}
+            >
+              {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
+            </Button>
+          </div>
         </header>
         <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-muted px-2 py-3">
           {isLoading ? (
@@ -72,7 +86,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
           ) : (
             <div className="flex-1 overflow-y-auto pr-1">
               <PrizeList
-                prizes={prizes}
+                prizes={displayPrizes}
                 disabled={isMutating}
                 onToggle={togglePrize}
                 itemNameOverrides={itemNameOverrides}
