@@ -1,8 +1,8 @@
 import { Button } from "~/components/common/Button";
+import { usePrizeSidePanel } from "~/components/game/hooks/usePrizeSidePanel";
 import { PrizeList } from "~/components/game/PrizeList";
 import { PrizeResultDialog } from "~/components/game/PrizeResultDialog";
 import { PrizeRouletteDialog } from "~/components/game/PrizeRouletteDialog";
-import { usePrizeSidePanel } from "~/components/game/hooks/usePrizeSidePanel";
 import { cn } from "~/lib/utils";
 
 export type SidePanelProps = {
@@ -61,20 +61,23 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
             <Button
               type="button"
               variant="outline"
-              className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
-              onClick={handleToggleSelectedFilter}
-              disabled={isLoading}
-            >
-              {hideSelected ? "フィルタ解除" : "当選除外"}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted disabled:opacity-50"
+              className="rounded-full border border-border px-3 py-1 text-xs disabled:opacity-50"
               onClick={handleToggleDisplayAll}
               disabled={isLoading}
             >
               {showPrizeNameOnly ? "賞名表示" : "賞品表示"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(
+                "rounded-full border border-border px-3 py-1 text-xs disabled:opacity-50",
+                hideSelected && "bg-primary/30",
+              )}
+              onClick={handleToggleSelectedFilter}
+              disabled={isLoading}
+            >
+              {hideSelected ? "フィルタ解除" : "当選除外"}
             </Button>
           </div>
         </header>
