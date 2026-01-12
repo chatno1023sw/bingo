@@ -140,7 +140,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   };
 
   const [isVenueBoostActive, setIsVenueBoostActive] = useState(false);
-  const [isVolumeDialogOpen, setIsVolumeDialogOpen] = useState(false);
+  const [_isVolumeDialogOpen, setIsVolumeDialogOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const baseBgmBounds = useMemo(
@@ -250,7 +250,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 />
               ),
               onDialogOpenChange: setIsVolumeDialogOpen,
-              venueBoostActive: isVenueBoostActive && !isVolumeDialogOpen,
+              venueBoostActive: isVenueBoostActive,
             }}
           />
           <div className="flex flex-1 flex-col gap-6 overflow-hidden px-3 pb-6 lg:flex-row lg:px-4">
