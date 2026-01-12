@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
 
@@ -84,7 +84,7 @@ export const VenueBoostControl: FC<VenueBoostControlProps> = ({
         preventOutsideClose={isProcessing}
       >
         <div className="space-y-3 px-6 pt-4 pb-2 text-base text-foreground">
-          <p>会場ブーストを使うと最大音量が５倍になるよ！</p>
+          <p>会場ブーストを使うと最大音量が音源の最大値になるよ！</p>
           <p>ボタンを押したら音量をいったん０にするから調節してね！</p>
         </div>
         <div className="px-6">
