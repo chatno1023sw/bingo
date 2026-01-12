@@ -9,7 +9,7 @@ mcp.config.json
 .react-router/
 .serena/
 .specify/
-.vendor/
+vendor/
 local/
 
 
