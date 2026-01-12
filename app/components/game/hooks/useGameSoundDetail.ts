@@ -1,4 +1,3 @@
-import { Howl } from "howler";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import {
@@ -81,21 +80,23 @@ export const useGameSoundDetail = ({
     if (volume <= 0) {
       return;
     }
-    const sample = new Howl({
-      src: [resolveAudioPath(path)],
-      volume: Math.min(1, Math.max(0, volume)),
-      html5: true,
-    });
+    if (typeof window === "undefined") {
+      return;
+    }
+    const audio = new Audio(resolveAudioPath(path));
+    audio.preload = "auto";
+    audio.volume = Math.min(1, Math.max(0, volume));
     const cleanup = () => {
-      sample.off("end", cleanup);
-      sample.off("loaderror", cleanup);
-      sample.off("playerror", cleanup);
-      sample.unload();
+      audio.removeEventListener("ended", cleanup);
+      audio.removeEventListener("error", cleanup);
+      audio.src = "";
     };
-    sample.on("end", cleanup);
-    sample.on("loaderror", cleanup);
-    sample.on("playerror", cleanup);
-    sample.play();
+    audio.addEventListener("ended", cleanup);
+    audio.addEventListener("error", cleanup);
+    const playResult = audio.play();
+    if (playResult instanceof Promise) {
+      playResult.catch(cleanup);
+    }
   }, []);
 
   const computeDrumrollVolume = useCallback(() => {
