@@ -68,6 +68,9 @@ export const useGameSoundDetail = ({
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
     initialDetail.cymbalVolumeScale,
   );
+  const playDrumrollSample = useCallback(() => {}, []);
+  const playCymbalSample = useCallback(() => {}, []);
+  const playVoiceSample = useCallback(() => {}, []);
 
   useEffect(() => {
     saveSoundDetailPreference({
@@ -83,6 +86,10 @@ export const useGameSoundDetail = ({
         label: "ドラムロール",
         value: drumrollVolumeScale,
         onChange: setDrumrollVolumeScale,
+        sampleControl: {
+          ariaLabel: "ドラムロールのサンプル音を再生",
+          onPlay: playDrumrollSample,
+        },
         min: 0,
         max: 2,
         step: 0.05,
@@ -91,6 +98,10 @@ export const useGameSoundDetail = ({
         label: "シンバル",
         value: cymbalVolumeScale,
         onChange: setCymbalVolumeScale,
+        sampleControl: {
+          ariaLabel: "シンバルのサンプル音を再生",
+          onPlay: playCymbalSample,
+        },
         min: 0,
         max: 2,
         step: 0.05,
@@ -99,12 +110,23 @@ export const useGameSoundDetail = ({
         label: "音声読み上げ",
         value: voiceVolume,
         onChange: setVoiceVolume,
+        sampleControl: {
+          ariaLabel: "音声読み上げのサンプルを再生",
+          onPlay: playVoiceSample,
+        },
         min: 0,
         max: 1,
         step: 0.01,
       },
     ],
-    [cymbalVolumeScale, drumrollVolumeScale, voiceVolume],
+    [
+      cymbalVolumeScale,
+      drumrollVolumeScale,
+      playCymbalSample,
+      playDrumrollSample,
+      playVoiceSample,
+      voiceVolume,
+    ],
   );
 
   const handleGameBgmVolumeChange = useCallback(

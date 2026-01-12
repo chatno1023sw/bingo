@@ -1,5 +1,6 @@
 import { type FC, type ReactNode, useEffect, useRef, useState } from "react";
 import type { BgmPreference } from "~/common/types";
+import { BgmIconButton } from "~/components/common/BgmIconButton";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { Button } from "~/components/common/Button";
 import { CommonDialog } from "~/components/common/CommonDialog";
@@ -56,9 +57,27 @@ export type VolumeSliderConfig = {
   step?: number;
   /** 無効化フラグ */
   disabled?: boolean;
+  /** サンプル再生ボタン設定 */
+  sampleControl?: SampleControlConfig;
 };
 
 export type SliderBounds = Pick<VolumeSliderConfig, "min" | "max" | "step">;
+
+/**
+ * スライダーのサンプル再生ボタン設定です。
+ *
+ * - 副作用: ありません。
+ * - 入力制約: `ariaLabel` は音声種別を明示します。
+ * - 戻り値: サンプルボタンの制御パラメータを表します。
+ */
+export type SampleControlConfig = {
+  /** サンプル音再生 */
+  onPlay: () => void;
+  /** 説明テキスト */
+  ariaLabel: string;
+  /** 無効化フラグ */
+  disabled?: boolean;
+};
 
 /**
  * BGM アイコンと音量スライダーをまとめた共通コンポーネントです。
@@ -119,7 +138,8 @@ export const BgmControl: FC<BgmControlProps> = ({
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
     row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
-    label: "min-w-32 text-right text-xl whitespace-nowrap",
+    labelWrap: "flex min-w-32 items-center justify-end gap-2 text-right text-xl",
+    label: "whitespace-nowrap",
     sliderWrap: "flex w-full",
   } as const;
 
@@ -149,7 +169,16 @@ export const BgmControl: FC<BgmControlProps> = ({
     const step = config.step ?? 0.01;
     return (
       <div key={config.label} className={sliderLayout.row}>
-        <span className={sliderLayout.label}>{config.label}</span>
+        <div className={sliderLayout.labelWrap}>
+          <span className={sliderLayout.label}>{config.label}</span>
+          {config.sampleControl ? (
+            <BgmIconButton
+              ariaLabel={config.sampleControl.ariaLabel}
+              onClick={config.sampleControl.onPlay}
+              disabled={!isReady || config.sampleControl.disabled}
+            />
+          ) : null}
+        </div>
         <div className={sliderLayout.sliderWrap}>
           <Slider
             value={[config.value]}
