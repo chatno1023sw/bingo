@@ -1,5 +1,5 @@
 import { Howl } from "howler";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import {
   muteSoundDetailPreference,
@@ -69,143 +69,75 @@ export const useGameSoundDetail = ({
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
     initialDetail.cymbalVolumeScale,
   );
-  const drumrollSampleRef = useRef<Howl | null>(null);
-  const cymbalSampleRef = useRef<Howl | null>(null);
-  const voiceSampleRef = useRef<Howl | null>(null);
-  const soundVolumeRef = useRef(soundVolume);
-  const drumrollScaleRef = useRef(drumrollVolumeScale);
-  const cymbalScaleRef = useRef(cymbalVolumeScale);
-  const voiceVolumeRef = useRef(voiceVolume);
 
-  const updateSampleVolumes = useCallback(() => {
-    const baseVolume =
-      Math.min(1, Math.max(0, soundVolumeRef.current)) * audioSettings.se.baseVolumeScale;
-    const drumrollVolume = Math.min(
-      1,
-      Math.max(0, baseVolume * drumrollScaleRef.current * audioSettings.se.drumrollBoost),
-    );
-    const cymbalVolume = Math.min(
-      1,
-      Math.max(0, baseVolume * cymbalScaleRef.current * audioSettings.se.cymbalBoost),
-    );
-    if (drumrollSampleRef.current) {
-      drumrollSampleRef.current.volume(drumrollVolume);
+  const computeBaseSoundVolume = useCallback(() => {
+    if (soundVolume <= 0) {
+      return 0;
     }
-    if (cymbalSampleRef.current) {
-      cymbalSampleRef.current.volume(cymbalVolume);
+    return Math.min(1, Math.max(0, soundVolume)) * audioSettings.se.baseVolumeScale;
+  }, [soundVolume]);
+
+  const playSampleOnce = useCallback((path: string, volume: number) => {
+    if (volume <= 0) {
+      return;
     }
+    const sample = new Howl({
+      src: [resolveAudioPath(path)],
+      volume: Math.min(1, Math.max(0, volume)),
+      html5: true,
+    });
+    const cleanup = () => {
+      sample.off("end", cleanup);
+      sample.off("loaderror", cleanup);
+      sample.off("playerror", cleanup);
+      sample.unload();
+    };
+    sample.on("end", cleanup);
+    sample.on("loaderror", cleanup);
+    sample.on("playerror", cleanup);
+    sample.play();
   }, []);
 
-  const updateVoiceSampleVolume = useCallback(() => {
-    const voiceGain = Math.min(
-      1,
-      Math.max(0, voiceVolumeRef.current * audioSettings.number.voicePlaybackScale),
-    );
-    if (voiceSampleRef.current) {
-      voiceSampleRef.current.volume(voiceGain);
+  const computeDrumrollVolume = useCallback(() => {
+    if (drumrollVolumeScale <= 0) {
+      return 0;
     }
-  }, []);
+    const baseVolume = computeBaseSoundVolume();
+    return Math.min(
+      1,
+      Math.max(0, baseVolume * drumrollVolumeScale * audioSettings.se.drumrollBoost),
+    );
+  }, [computeBaseSoundVolume, drumrollVolumeScale]);
 
-  useEffect(() => {
-    soundVolumeRef.current = soundVolume;
-    updateSampleVolumes();
-  }, [soundVolume, updateSampleVolumes]);
+  const computeCymbalVolume = useCallback(() => {
+    if (cymbalVolumeScale <= 0) {
+      return 0;
+    }
+    const baseVolume = computeBaseSoundVolume();
+    return Math.min(1, Math.max(0, baseVolume * cymbalVolumeScale * audioSettings.se.cymbalBoost));
+  }, [computeBaseSoundVolume, cymbalVolumeScale]);
 
-  useEffect(() => {
-    drumrollScaleRef.current = drumrollVolumeScale;
-    updateSampleVolumes();
-  }, [drumrollVolumeScale, updateSampleVolumes]);
-
-  useEffect(() => {
-    cymbalScaleRef.current = cymbalVolumeScale;
-    updateSampleVolumes();
-  }, [cymbalVolumeScale, updateSampleVolumes]);
-
-  useEffect(() => {
-    voiceVolumeRef.current = voiceVolume;
-    updateVoiceSampleVolume();
-  }, [updateVoiceSampleVolume, voiceVolume]);
-
-  useEffect(() => {
-    const drumroll = new Howl({
-      src: [resolveAudioPath(audioPaths.se.drumroll)],
-      preload: true,
-    });
-    const cymbal = new Howl({
-      src: [resolveAudioPath(audioPaths.se.cymbal)],
-      preload: true,
-    });
-    drumrollSampleRef.current = drumroll;
-    cymbalSampleRef.current = cymbal;
-    updateSampleVolumes();
-    return () => {
-      drumroll.unload();
-      cymbal.unload();
-      if (drumrollSampleRef.current === drumroll) {
-        drumrollSampleRef.current = null;
-      }
-      if (cymbalSampleRef.current === cymbal) {
-        cymbalSampleRef.current = null;
-      }
-    };
-  }, [updateSampleVolumes]);
-
-  useEffect(() => {
-    const voiceSample = new Howl({
-      src: [resolveAudioPath(audioPaths.sample.voice)],
-      preload: true,
-    });
-    voiceSampleRef.current = voiceSample;
-    updateVoiceSampleVolume();
-    return () => {
-      voiceSample.unload();
-      if (voiceSampleRef.current === voiceSample) {
-        voiceSampleRef.current = null;
-      }
-    };
-  }, [updateVoiceSampleVolume]);
+  const computeVoiceSampleVolume = useCallback(() => {
+    if (soundVolume <= 0 || voiceVolume <= 0) {
+      return 0;
+    }
+    return Math.min(1, Math.max(0, voiceVolume * audioSettings.number.voicePlaybackScale));
+  }, [soundVolume, voiceVolume]);
 
   const playDrumrollSample = useCallback(() => {
-    const drumroll = drumrollSampleRef.current;
-    if (!drumroll) {
-      return;
-    }
-    if (soundVolume <= 0 || drumrollVolumeScale <= 0) {
-      return;
-    }
-    updateSampleVolumes();
-    drumroll.stop();
-    drumroll.seek(0);
-    drumroll.play();
-  }, [drumrollVolumeScale, soundVolume, updateSampleVolumes]);
+    const volume = computeDrumrollVolume();
+    playSampleOnce(audioPaths.se.drumroll, volume);
+  }, [computeDrumrollVolume, playSampleOnce]);
 
   const playCymbalSample = useCallback(() => {
-    const cymbal = cymbalSampleRef.current;
-    if (!cymbal) {
-      return;
-    }
-    if (soundVolume <= 0 || cymbalVolumeScale <= 0) {
-      return;
-    }
-    updateSampleVolumes();
-    cymbal.stop();
-    cymbal.seek(0);
-    cymbal.play();
-  }, [cymbalVolumeScale, soundVolume, updateSampleVolumes]);
+    const volume = computeCymbalVolume();
+    playSampleOnce(audioPaths.se.cymbal, volume);
+  }, [computeCymbalVolume, playSampleOnce]);
 
   const playVoiceSample = useCallback(() => {
-    const voice = voiceSampleRef.current;
-    if (!voice) {
-      return;
-    }
-    if (soundVolume <= 0 || voiceVolume <= 0) {
-      return;
-    }
-    updateVoiceSampleVolume();
-    voice.stop();
-    voice.seek(0);
-    voice.play();
-  }, [soundVolume, updateVoiceSampleVolume, voiceVolume]);
+    const volume = computeVoiceSampleVolume();
+    playSampleOnce(audioPaths.sample.voice, volume);
+  }, [computeVoiceSampleVolume, playSampleOnce]);
 
   useEffect(() => {
     saveSoundDetailPreference({
