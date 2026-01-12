@@ -1,6 +1,8 @@
 # ビンゴゲーム
 
 完全オフライン運用を想定したビンゴ抽選アプリです。Start/Game/Setting の 3 画面構成で、景品管理・抽選履歴・CSV 入力・BGM 設定を行います。ローカルのみでイベント運用できるツールチェーンを提供します。
+- Github Pages
+    - https://chatno1023sw.github.io/bingo/
 
 ## 技術スタック
 
