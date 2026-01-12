@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { audioSettings } from "~/common/constants/audio";
+import { Howl } from "howler";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import {
   muteSoundDetailPreference,
   resetSoundDetailPreference,
@@ -68,8 +69,98 @@ export const useGameSoundDetail = ({
   const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
     initialDetail.cymbalVolumeScale,
   );
-  const playDrumrollSample = useCallback(() => {}, []);
-  const playCymbalSample = useCallback(() => {}, []);
+  const drumrollSampleRef = useRef<Howl | null>(null);
+  const cymbalSampleRef = useRef<Howl | null>(null);
+  const soundVolumeRef = useRef(soundVolume);
+  const drumrollScaleRef = useRef(drumrollVolumeScale);
+  const cymbalScaleRef = useRef(cymbalVolumeScale);
+
+  const updateSampleVolumes = useCallback(() => {
+    const baseVolume =
+      Math.min(1, Math.max(0, soundVolumeRef.current)) * audioSettings.se.baseVolumeScale;
+    const drumrollVolume = Math.min(
+      1,
+      Math.max(0, baseVolume * drumrollScaleRef.current * audioSettings.se.drumrollBoost),
+    );
+    const cymbalVolume = Math.min(
+      1,
+      Math.max(0, baseVolume * cymbalScaleRef.current * audioSettings.se.cymbalBoost),
+    );
+    if (drumrollSampleRef.current) {
+      drumrollSampleRef.current.volume(drumrollVolume);
+    }
+    if (cymbalSampleRef.current) {
+      cymbalSampleRef.current.volume(cymbalVolume);
+    }
+  }, []);
+
+  useEffect(() => {
+    soundVolumeRef.current = soundVolume;
+    updateSampleVolumes();
+  }, [soundVolume, updateSampleVolumes]);
+
+  useEffect(() => {
+    drumrollScaleRef.current = drumrollVolumeScale;
+    updateSampleVolumes();
+  }, [drumrollVolumeScale, updateSampleVolumes]);
+
+  useEffect(() => {
+    cymbalScaleRef.current = cymbalVolumeScale;
+    updateSampleVolumes();
+  }, [cymbalVolumeScale, updateSampleVolumes]);
+
+  useEffect(() => {
+    const drumroll = new Howl({
+      src: [resolveAudioPath(audioPaths.se.drumroll)],
+      preload: true,
+    });
+    const cymbal = new Howl({
+      src: [resolveAudioPath(audioPaths.se.cymbal)],
+      preload: true,
+    });
+    drumrollSampleRef.current = drumroll;
+    cymbalSampleRef.current = cymbal;
+    updateSampleVolumes();
+    return () => {
+      drumroll.unload();
+      cymbal.unload();
+      if (drumrollSampleRef.current === drumroll) {
+        drumrollSampleRef.current = null;
+      }
+      if (cymbalSampleRef.current === cymbal) {
+        cymbalSampleRef.current = null;
+      }
+    };
+  }, [updateSampleVolumes]);
+
+  const playDrumrollSample = useCallback(() => {
+    const drumroll = drumrollSampleRef.current;
+    if (!drumroll) {
+      return;
+    }
+    if (soundVolume <= 0 || drumrollVolumeScale <= 0) {
+      return;
+    }
+    updateSampleVolumes();
+    drumroll.stop();
+    drumroll.seek(0);
+    drumroll.play();
+  }, [drumrollVolumeScale, soundVolume, updateSampleVolumes]);
+
+  const playCymbalSample = useCallback(() => {
+    const cymbal = cymbalSampleRef.current;
+    if (!cymbal) {
+      return;
+    }
+    if (soundVolume <= 0 || cymbalVolumeScale <= 0) {
+      return;
+    }
+    updateSampleVolumes();
+    cymbal.stop();
+    cymbal.seek(0);
+    cymbal.play();
+  }, [cymbalVolumeScale, soundVolume, updateSampleVolumes]);
+
   const playVoiceSample = useCallback(() => {}, []);
 
   useEffect(() => {
@@ -89,6 +180,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "ドラムロールのサンプル音を再生",
           onPlay: playDrumrollSample,
+          disabled: soundVolume <= 0 || drumrollVolumeScale <= 0,
         },
         min: 0,
         max: 2,
@@ -101,6 +193,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "シンバルのサンプル音を再生",
           onPlay: playCymbalSample,
+          disabled: soundVolume <= 0 || cymbalVolumeScale <= 0,
         },
         min: 0,
         max: 2,
@@ -125,6 +218,7 @@ export const useGameSoundDetail = ({
       playCymbalSample,
       playDrumrollSample,
       playVoiceSample,
+      soundVolume,
       voiceVolume,
     ],
   );
