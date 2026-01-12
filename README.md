@@ -31,7 +31,7 @@
 Node環境で動作します。Node環境を用意して以下の手順を実行してください。
 
 1. pnpmをインストール
-    1. https://pnpm.io/ja/installation
+    - https://pnpm.io/ja/installation
 2. 依存するライブラリのインストール
 
     ```bash
@@ -49,8 +49,8 @@ Node環境で動作します。Node環境を用意して以下の手順を実行
 
 1. bingoリポジトリのReleasesからlocal-build.zipをインストール
 2. ローカルサーバの構築
-    1. 例）VSCode
+    - 例）VSCode
         1. VSCodeをインストール
         2. 拡張機能(LiveServerをインストール)
-            1. https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
+            - https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
         3. index.htmlを選択してVSCode右下のGo Liveを押下
