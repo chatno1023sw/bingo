@@ -181,6 +181,36 @@ body {
   background-color: rgba(126, 34, 206, 0.4);
 }
 
+.toast-slide-in {
+  animation: toast-slide-in 240ms ease-out forwards;
+}
+
+.toast-slide-out {
+  animation: toast-slide-out 240ms ease-in forwards;
+}
+
+@keyframes toast-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
 @keyframes venue-border-pulse {
   0% {
     border-color: rgba(59, 130, 246, 0.9);

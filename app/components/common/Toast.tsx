@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import type { CSSProperties, FC } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 
 export type ToastProps = {
@@ -16,6 +16,8 @@ export type ToastProps = {
   style?: CSSProperties;
   /** 自動的に閉じるまでの時間（ミリ秒） */
   autoHideDurationMs?: number;
+  /** アニメーション時間 (ms) */
+  animationDurationMs?: number;
 };
 
 /**
@@ -33,7 +35,30 @@ export const Toast: FC<ToastProps> = ({
   className,
   style,
   autoHideDurationMs = 2000,
+  animationDurationMs = 240,
 }) => {
+  const [rendered, setRendered] = useState(open);
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true);
+      setExiting(false);
+      return;
+    }
+    if (!rendered) {
+      return;
+    }
+    setExiting(true);
+    const timer = window.setTimeout(() => {
+      setRendered(false);
+      setExiting(false);
+    }, animationDurationMs);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [animationDurationMs, open, rendered]);
+
   useEffect(() => {
     if (!open) {
       return;
@@ -45,9 +70,13 @@ export const Toast: FC<ToastProps> = ({
       window.clearTimeout(timer);
     };
   }, [autoHideDurationMs, onClose, open]);
-  if (!open) {
+
+  if (!rendered) {
     return null;
   }
+
+  const animationClass = exiting ? "toast-slide-out" : open ? "toast-slide-in" : "";
+
   return (
     <output
       aria-live="polite"
@@ -55,6 +84,7 @@ export const Toast: FC<ToastProps> = ({
       className={cn(
         "pointer-events-auto z-100 flex items-center gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3",
         "shadow-[0_12px_24px_rgba(15,23,42,0.45)] backdrop-blur",
+        animationClass,
         className,
       )}
     >
