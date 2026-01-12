@@ -70,10 +70,8 @@ export const useGameSoundDetail = ({
   );
 
   const computeBaseSoundVolume = useCallback(() => {
-    if (soundVolume <= 0) {
-      return 0;
-    }
-    return Math.min(1, Math.max(0, soundVolume)) * audioSettings.se.baseVolumeScale;
+    const masterVolume = soundVolume > 0 ? soundVolume : audioSettings.se.defaultVolume;
+    return Math.min(1, Math.max(0, masterVolume)) * audioSettings.se.baseVolumeScale;
   }, [soundVolume]);
 
   const playSampleOnce = useCallback((path: string, volume: number) => {
@@ -119,11 +117,11 @@ export const useGameSoundDetail = ({
   }, [computeBaseSoundVolume, cymbalVolumeScale]);
 
   const computeVoiceSampleVolume = useCallback(() => {
-    if (soundVolume <= 0 || voiceVolume <= 0) {
+    if (voiceVolume <= 0) {
       return 0;
     }
     return Math.min(1, Math.max(0, voiceVolume * audioSettings.number.voicePlaybackScale));
-  }, [soundVolume, voiceVolume]);
+  }, [voiceVolume]);
 
   const playDrumrollSample = useCallback(() => {
     const volume = computeDrumrollVolume();
