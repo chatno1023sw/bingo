@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, type ReactNode, useEffect, useRef, useState } from "react";
 import type { BgmPreference } from "~/common/types";
 import { BgmToggle } from "~/components/common/BgmToggle";
 import { Button } from "~/components/common/Button";
@@ -29,6 +29,16 @@ export type BgmControlProps = {
   onResetToDefault?: () => void;
   /** すべての音量をミュートする操作 */
   onMuteAll?: () => void;
+  /** BGM スライダーの範囲上書き */
+  mainSliderBounds?: SliderBounds;
+  /** 効果音スライダーの範囲上書き */
+  soundSliderBounds?: SliderBounds;
+  /** フッターへ追加表示する要素 */
+  footerExtras?: ReactNode;
+  /** ダイアログ開閉通知 */
+  onDialogOpenChange?: (open: boolean) => void;
+  /** 会場ブースト強調状態 */
+  venueBoostActive?: boolean;
 };
 
 export type VolumeSliderConfig = {
@@ -47,6 +57,8 @@ export type VolumeSliderConfig = {
   /** 無効化フラグ */
   disabled?: boolean;
 };
+
+export type SliderBounds = Pick<VolumeSliderConfig, "min" | "max" | "step">;
 
 /**
  * BGM アイコンと音量スライダーをまとめた共通コンポーネントです。
@@ -68,6 +80,11 @@ export const BgmControl: FC<BgmControlProps> = ({
   className,
   onResetToDefault,
   onMuteAll,
+  mainSliderBounds,
+  soundSliderBounds,
+  footerExtras,
+  onDialogOpenChange,
+  venueBoostActive = false,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -95,6 +112,10 @@ export const BgmControl: FC<BgmControlProps> = ({
     };
   }, [open, useDialog]);
 
+  useEffect(() => {
+    onDialogOpenChange?.(open);
+  }, [onDialogOpenChange, open]);
+
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
     row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
@@ -107,6 +128,7 @@ export const BgmControl: FC<BgmControlProps> = ({
       label: "BGM",
       value: preference.volume,
       onChange: onVolumeChange,
+      ...mainSliderBounds,
     },
     ...(showSoundSlider && soundPreference && onSoundVolumeChange
       ? [
@@ -114,6 +136,7 @@ export const BgmControl: FC<BgmControlProps> = ({
             label: "ボタン音量",
             value: soundPreference.volume,
             onChange: onSoundVolumeChange,
+            ...soundSliderBounds,
           },
         ]
       : []),
@@ -151,12 +174,41 @@ export const BgmControl: FC<BgmControlProps> = ({
     </div>
   );
 
+  const hasFooter = Boolean(onResetToDefault) || Boolean(footerExtras);
+  const footerContent = !hasFooter ? null : (
+    <div className="flex w-full flex-col gap-4">
+      {onResetToDefault ? (
+        <div className="flex w-full flex-col items-center justify-center gap-3 sm:flex-row">
+          {onMuteAll ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full rounded-full border border-border bg-card px-4 py-3 text-secondary-foreground text-sm hover:bg-muted"
+              onClick={onMuteAll}
+            >
+              音量なし
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            className="w-full rounded-full px-4 py-3"
+            onClick={onResetToDefault}
+          >
+            デフォルト値
+          </Button>
+        </div>
+      ) : null}
+      {footerExtras}
+    </div>
+  );
+
   return (
     <div ref={rootRef} className={cn("relative flex items-center", className)}>
       <BgmToggle
         enabled={preference.volume > 0}
         onToggle={() => setOpen((prev) => !prev)}
         disabled={!isReady}
+        boosted={venueBoostActive}
       />
       {useDialog ? (
         <CommonDialog
@@ -165,30 +217,8 @@ export const BgmControl: FC<BgmControlProps> = ({
           title="音量設定"
           contentClassName="w-[min(92vw,420px)]"
           showCloseButton
-          footer={
-            onResetToDefault ? (
-              <div className="flex w-full items-center justify-center gap-3 sm:flex-row">
-                {onMuteAll ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="w-full rounded-full border border-border bg-card px-4 py-3 text-secondary-foreground text-sm hover:bg-muted"
-                    onClick={onMuteAll}
-                  >
-                    音量なし
-                  </Button>
-                ) : null}
-                <Button
-                  type="button"
-                  className="w-full rounded-full px-4 py-3"
-                  onClick={onResetToDefault}
-                >
-                  デフォルト値
-                </Button>
-              </div>
-            ) : undefined
-          }
-          footerClassName="px-6 pb-6"
+          footer={footerContent ?? undefined}
+          footerClassName={footerContent ? "px-6 pb-6" : undefined}
         >
           <div className="mt-2 space-y-3">{sliderContent}</div>
         </CommonDialog>

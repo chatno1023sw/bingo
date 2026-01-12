@@ -12,6 +12,7 @@ const buttonVariants = cva(
         outline: "border border-border bg-background hover:bg-muted",
         ghost: "hover:bg-muted hover:bg-transparent",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        venue: "venue-neon-button rounded-full px-6 py-3 text-lg font-bold tracking-wide",
       },
       size: {
         default: "h-10 px-2 py-2",

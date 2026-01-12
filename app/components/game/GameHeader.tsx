@@ -1,7 +1,11 @@
 import { X } from "lucide-react";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 import type { BgmPreference } from "~/common/types";
-import { BgmControl, type VolumeSliderConfig } from "~/components/common/BgmControl";
+import {
+  BgmControl,
+  type SliderBounds,
+  type VolumeSliderConfig,
+} from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { cn } from "~/lib/utils";
 
@@ -26,6 +30,11 @@ export type GameHeaderProps = {
     extraSliders: VolumeSliderConfig[];
     onResetToDefault: () => void;
     onMuteAll: () => void;
+    mainSliderBounds?: SliderBounds;
+    soundSliderBounds?: SliderBounds;
+    footerExtras?: ReactNode;
+    onDialogOpenChange?: (open: boolean) => void;
+    venueBoostActive?: boolean;
   };
 };
 
@@ -83,6 +92,11 @@ export const GameHeader: FC<GameHeaderProps> = ({
           useDialog
           onResetToDefault={bgmControl.onResetToDefault}
           onMuteAll={bgmControl.onMuteAll}
+          mainSliderBounds={bgmControl.mainSliderBounds}
+          soundSliderBounds={bgmControl.soundSliderBounds}
+          footerExtras={bgmControl.footerExtras}
+          onDialogOpenChange={bgmControl.onDialogOpenChange}
+          venueBoostActive={bgmControl.venueBoostActive}
         />
         <Button
           type="button"
