@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
-import type { FC } from "react";
+import type { CSSProperties, FC } from "react";
+import { useEffect } from "react";
 import { cn } from "~/lib/utils";
 
 export type ToastProps = {
@@ -11,6 +12,10 @@ export type ToastProps = {
   onClose: () => void;
   /** 追加クラス */
   className?: string;
+  /** 追加スタイル */
+  style?: CSSProperties;
+  /** 自動的に閉じるまでの時間（ミリ秒） */
+  autoHideDurationMs?: number;
 };
 
 /**
@@ -21,15 +26,34 @@ export type ToastProps = {
  * - 戻り値: 表示時は通知要素、`open` が false のときは `null` を返します。
  * - Chrome DevTools MCP では表示位置と × ボタンで閉じられることを確認します。
  */
-export const Toast: FC<ToastProps> = ({ open, message, onClose, className }) => {
+export const Toast: FC<ToastProps> = ({
+  open,
+  message,
+  onClose,
+  className,
+  style,
+  autoHideDurationMs = 2000,
+}) => {
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      onClose();
+    }, autoHideDurationMs);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [autoHideDurationMs, onClose, open]);
   if (!open) {
     return null;
   }
   return (
     <output
       aria-live="polite"
+      style={{ zIndex: 9999, ...style }}
       className={cn(
-        "pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3",
+        "pointer-events-auto z-100 flex items-center gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3",
         "shadow-[0_12px_24px_rgba(15,23,42,0.45)] backdrop-blur",
         className,
       )}

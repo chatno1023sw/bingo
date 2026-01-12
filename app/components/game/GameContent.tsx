@@ -319,7 +319,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
         open={Boolean(toastMessage)}
         message={toastMessage ?? ""}
         onClose={handleCloseToast}
-        className="fixed right-6 bottom-6 z-60 max-w-xs"
+        className="fixed right-6 bottom-6 max-w-xs"
       />
     </PrizeProvider>
   );
