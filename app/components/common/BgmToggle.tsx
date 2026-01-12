@@ -41,9 +41,15 @@ export const BgmToggle: FC<BgmToggleProps> = ({
       disabled={disabled}
     >
       {enabled ? (
-        <Volume2Icon className={cn("h-6 w-6", boosted && "text-white")} aria-hidden="true" />
+        <Volume2Icon
+          className={cn("h-6 w-6", boosted && "venue-boosted-icon")}
+          aria-hidden="true"
+        />
       ) : (
-        <VolumeOffIcon className={cn("h-6 w-6", boosted && "text-white")} aria-hidden="true" />
+        <VolumeOffIcon
+          className={cn("h-6 w-6", boosted && "venue-boosted-icon")}
+          aria-hidden="true"
+        />
       )}
     </Button>
   );
