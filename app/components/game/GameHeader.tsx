@@ -1,8 +1,13 @@
 import { X } from "lucide-react";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 import type { BgmPreference } from "~/common/types";
-import { BgmControl, type VolumeSliderConfig } from "~/components/common/BgmControl";
+import {
+  BgmControl,
+  type SliderBounds,
+  type VolumeSliderConfig,
+} from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
+import { VenueLabel } from "~/components/common/VenueLabel";
 import { cn } from "~/lib/utils";
 
 export type GameHeaderProps = {
@@ -26,6 +31,16 @@ export type GameHeaderProps = {
     extraSliders: VolumeSliderConfig[];
     onResetToDefault: () => void;
     onMuteAll: () => void;
+    mainSliderBounds?: SliderBounds;
+    soundSliderBounds?: SliderBounds;
+    footerExtras?: ReactNode;
+    onDialogOpenChange?: (open: boolean) => void;
+  };
+  /** 会場ブーストラベル */
+  venueLabel?: {
+    text: string;
+    visible: boolean;
+    className?: string;
   };
 };
 
@@ -44,6 +59,7 @@ export const GameHeader: FC<GameHeaderProps> = ({
   onToggleHistoryColumns,
   onNavigateBack,
   bgmControl,
+  venueLabel,
 }) => {
   return (
     <header className="flex items-center gap-6 px-6 py-4">
@@ -73,6 +89,9 @@ export const GameHeader: FC<GameHeaderProps> = ({
         </Button>
       </div>
       <div className="flex items-center gap-3">
+        {venueLabel?.visible ? (
+          <VenueLabel text={venueLabel.text} className={venueLabel.className} />
+        ) : null}
         <BgmControl
           preference={bgmControl.preference}
           soundPreference={bgmControl.soundPreference}
@@ -83,6 +102,10 @@ export const GameHeader: FC<GameHeaderProps> = ({
           useDialog
           onResetToDefault={bgmControl.onResetToDefault}
           onMuteAll={bgmControl.onMuteAll}
+          mainSliderBounds={bgmControl.mainSliderBounds}
+          soundSliderBounds={bgmControl.soundSliderBounds}
+          footerExtras={bgmControl.footerExtras}
+          onDialogOpenChange={bgmControl.onDialogOpenChange}
         />
         <Button
           type="button"

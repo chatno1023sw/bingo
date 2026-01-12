@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { type FC, useCallback, useEffect, useMemo } from "react";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { audioSettings } from "~/common/constants/audio";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
@@ -8,6 +8,7 @@ import { useGameSession } from "~/common/hooks/useGameSession";
 import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { Button } from "~/components/common/Button";
+import { Toast } from "~/components/common/Toast";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
 import { GameHeader } from "~/components/game/GameHeader";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
@@ -18,6 +19,7 @@ import { useGameBgmController } from "~/components/game/hooks/useGameBgmControll
 import { useGameLayoutControls } from "~/components/game/hooks/useGameLayoutControls";
 import { useGameSoundDetail } from "~/components/game/hooks/useGameSoundDetail";
 import { useNumberAnnouncement } from "~/components/game/hooks/useNumberAnnouncement";
+import { VenueBoostControl } from "~/components/game/VenueBoostControl";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -137,6 +139,67 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     startBingoBackgroundSequence(sequenceDurationMs);
   };
 
+  const [isVenueBoostActive, setIsVenueBoostActive] = useState(false);
+  const [isVolumeDialogOpen, setIsVolumeDialogOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const baseBgmBounds = useMemo(
+    () => ({
+      min: audioSettings.bgm.volumeRange.min,
+      max: audioSettings.bgm.volumeRange.max,
+      step: 0.01,
+    }),
+    [],
+  );
+  const boostedBgmBounds = useMemo(
+    () => ({
+      min: audioSettings.bgm.volumeRange.min,
+      max: audioSettings.bgm.defaultVolume * 5,
+      step: 0.05,
+    }),
+    [],
+  );
+  const baseSoundBounds = useMemo(
+    () => ({
+      min: audioSettings.se.volumeRange.min,
+      max: audioSettings.se.volumeRange.max,
+      step: 0.01,
+    }),
+    [],
+  );
+  const boostedSoundBounds = useMemo(
+    () => ({
+      min: audioSettings.se.volumeRange.min,
+      max: audioSettings.se.defaultVolume * 5,
+      step: 0.05,
+    }),
+    [],
+  );
+
+  const handleShowToast = useCallback((message: string) => {
+    setToastMessage(message);
+  }, []);
+
+  const handleCloseToast = useCallback(() => {
+    setToastMessage(null);
+  }, []);
+
+  const handleActivateVenueBoost = useCallback(async () => {
+    await handleGameBgmVolumeChange(audioSettings.bgm.volumeRange.min);
+    await setSoundVolume(audioSettings.se.volumeRange.min);
+    setIsVenueBoostActive(true);
+    handleShowToast("会場ブースト起動中！");
+  }, [handleGameBgmVolumeChange, handleShowToast, setSoundVolume]);
+
+  const handleDeactivateVenueBoost = useCallback(async () => {
+    await handleGameBgmVolumeChange(audioSettings.bgm.volumeRange.min);
+    await setSoundVolume(audioSettings.se.volumeRange.min);
+    setIsVenueBoostActive(false);
+    handleShowToast("会場ブースト解除！");
+  }, [handleGameBgmVolumeChange, handleShowToast, setSoundVolume]);
+
+  const shouldShowVenueLabel = isVenueBoostActive && !isVolumeDialogOpen;
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -179,6 +242,20 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
               extraSliders: extraSoundSliders,
               onResetToDefault: resetSoundDetailToDefault,
               onMuteAll: handleMuteAllAudio,
+              mainSliderBounds: isVenueBoostActive ? boostedBgmBounds : baseBgmBounds,
+              soundSliderBounds: isVenueBoostActive ? boostedSoundBounds : baseSoundBounds,
+              footerExtras: (
+                <VenueBoostControl
+                  isActive={isVenueBoostActive}
+                  onActivate={handleActivateVenueBoost}
+                  onDeactivate={handleDeactivateVenueBoost}
+                />
+              ),
+              onDialogOpenChange: setIsVolumeDialogOpen,
+            }}
+            venueLabel={{
+              text: "会場ブースト起動中！",
+              visible: shouldShowVenueLabel,
             }}
           />
           <div className="flex flex-1 flex-col gap-6 overflow-hidden px-3 pb-6 lg:flex-row lg:px-4">
@@ -237,6 +314,12 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
         onClose={acknowledgeAudioNotice}
         onMuteAll={handleMuteAllAudio}
         onEnableAll={handleEnableAllAudio}
+      />
+      <Toast
+        open={Boolean(toastMessage)}
+        message={toastMessage ?? ""}
+        onClose={handleCloseToast}
+        className="fixed right-6 bottom-6 z-60 max-w-xs"
       />
     </PrizeProvider>
   );
