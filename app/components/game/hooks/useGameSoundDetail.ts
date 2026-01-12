@@ -71,9 +71,11 @@ export const useGameSoundDetail = ({
   );
   const drumrollSampleRef = useRef<Howl | null>(null);
   const cymbalSampleRef = useRef<Howl | null>(null);
+  const voiceSampleRef = useRef<Howl | null>(null);
   const soundVolumeRef = useRef(soundVolume);
   const drumrollScaleRef = useRef(drumrollVolumeScale);
   const cymbalScaleRef = useRef(cymbalVolumeScale);
+  const voiceVolumeRef = useRef(voiceVolume);
 
   const updateSampleVolumes = useCallback(() => {
     const baseVolume =
@@ -94,6 +96,16 @@ export const useGameSoundDetail = ({
     }
   }, []);
 
+  const updateVoiceSampleVolume = useCallback(() => {
+    const voiceGain = Math.min(
+      1,
+      Math.max(0, voiceVolumeRef.current * audioSettings.number.voicePlaybackScale),
+    );
+    if (voiceSampleRef.current) {
+      voiceSampleRef.current.volume(voiceGain);
+    }
+  }, []);
+
   useEffect(() => {
     soundVolumeRef.current = soundVolume;
     updateSampleVolumes();
@@ -108,6 +120,11 @@ export const useGameSoundDetail = ({
     cymbalScaleRef.current = cymbalVolumeScale;
     updateSampleVolumes();
   }, [cymbalVolumeScale, updateSampleVolumes]);
+
+  useEffect(() => {
+    voiceVolumeRef.current = voiceVolume;
+    updateVoiceSampleVolume();
+  }, [updateVoiceSampleVolume, voiceVolume]);
 
   useEffect(() => {
     const drumroll = new Howl({
@@ -132,6 +149,21 @@ export const useGameSoundDetail = ({
       }
     };
   }, [updateSampleVolumes]);
+
+  useEffect(() => {
+    const voiceSample = new Howl({
+      src: [resolveAudioPath(audioPaths.sample.voice)],
+      preload: true,
+    });
+    voiceSampleRef.current = voiceSample;
+    updateVoiceSampleVolume();
+    return () => {
+      voiceSample.unload();
+      if (voiceSampleRef.current === voiceSample) {
+        voiceSampleRef.current = null;
+      }
+    };
+  }, [updateVoiceSampleVolume]);
 
   const playDrumrollSample = useCallback(() => {
     const drumroll = drumrollSampleRef.current;
@@ -161,7 +193,19 @@ export const useGameSoundDetail = ({
     cymbal.play();
   }, [cymbalVolumeScale, soundVolume, updateSampleVolumes]);
 
-  const playVoiceSample = useCallback(() => {}, []);
+  const playVoiceSample = useCallback(() => {
+    const voice = voiceSampleRef.current;
+    if (!voice) {
+      return;
+    }
+    if (soundVolume <= 0 || voiceVolume <= 0) {
+      return;
+    }
+    updateVoiceSampleVolume();
+    voice.stop();
+    voice.seek(0);
+    voice.play();
+  }, [soundVolume, updateVoiceSampleVolume, voiceVolume]);
 
   useEffect(() => {
     saveSoundDetailPreference({
@@ -206,6 +250,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "音声読み上げのサンプルを再生",
           onPlay: playVoiceSample,
+          disabled: soundVolume <= 0 || voiceVolume <= 0,
         },
         min: 0,
         max: 1,
