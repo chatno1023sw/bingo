@@ -157,7 +157,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "ドラムロールのサンプル音を再生",
           onPlay: playDrumrollSample,
-          disabled: soundVolume <= 0 || drumrollVolumeScale <= 0,
+          disabled: drumrollVolumeScale <= 0,
         },
         min: 0,
         max: 2,
@@ -170,7 +170,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "シンバルのサンプル音を再生",
           onPlay: playCymbalSample,
-          disabled: soundVolume <= 0 || cymbalVolumeScale <= 0,
+          disabled: cymbalVolumeScale <= 0,
         },
         min: 0,
         max: 2,
@@ -183,7 +183,7 @@ export const useGameSoundDetail = ({
         sampleControl: {
           ariaLabel: "音声読み上げのサンプルを再生",
           onPlay: playVoiceSample,
-          disabled: soundVolume <= 0 || voiceVolume <= 0,
+          disabled: voiceVolume <= 0,
         },
         min: 0,
         max: 1,
@@ -196,7 +196,6 @@ export const useGameSoundDetail = ({
       playCymbalSample,
       playDrumrollSample,
       playVoiceSample,
-      soundVolume,
       voiceVolume,
     ],
   );
