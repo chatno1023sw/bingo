@@ -137,15 +137,10 @@ export const BgmControl: FC<BgmControlProps> = ({
 
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-4" : "flex w-full flex-col gap-3",
-    row: cn(
-      "grid w-full items-center",
-      useDialog
-        ? "grid-cols-[auto_auto,minmax(0,1fr)] gap-3"
-        : "grid-cols-[auto_auto,minmax(0,1fr)] gap-2",
-    ),
+    row: cn("flex w-full items-center", useDialog ? "gap-3" : "gap-2"),
     label: "flex w-32 justify-end pr-2 text-right text-xl whitespace-nowrap",
     iconWrap: "flex w-9 justify-center",
-    sliderWrap: cn("flex w-full min-w-0", useDialog ? "pr-2" : "pr-1"),
+    sliderWrap: cn("flex min-w-0 flex-1", useDialog ? "pr-2" : "pr-1"),
   } as const;
 
   const sliderConfigs: VolumeSliderConfig[] = [
