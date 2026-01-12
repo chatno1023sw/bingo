@@ -37,6 +37,8 @@ export type BgmControlProps = {
   footerExtras?: ReactNode;
   /** ダイアログ開閉通知 */
   onDialogOpenChange?: (open: boolean) => void;
+  /** 会場ブースト強調状態 */
+  venueBoostActive?: boolean;
 };
 
 export type VolumeSliderConfig = {
@@ -82,6 +84,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   soundSliderBounds,
   footerExtras,
   onDialogOpenChange,
+  venueBoostActive = false,
 }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -205,6 +208,7 @@ export const BgmControl: FC<BgmControlProps> = ({
         enabled={preference.volume > 0}
         onToggle={() => setOpen((prev) => !prev)}
         disabled={!isReady}
+        boosted={venueBoostActive}
       />
       {useDialog ? (
         <CommonDialog

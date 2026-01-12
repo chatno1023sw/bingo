@@ -198,8 +198,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     handleShowToast("会場ブースト解除！");
   }, [handleGameBgmVolumeChange, handleShowToast, setSoundVolume]);
 
-  const shouldShowVenueLabel = isVenueBoostActive && !isVolumeDialogOpen;
-
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -252,10 +250,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 />
               ),
               onDialogOpenChange: setIsVolumeDialogOpen,
-            }}
-            venueLabel={{
-              text: "会場ブースト起動中！",
-              visible: shouldShowVenueLabel,
+              venueBoostActive: isVenueBoostActive && !isVolumeDialogOpen,
             }}
           />
           <div className="flex flex-1 flex-col gap-6 overflow-hidden px-3 pb-6 lg:flex-row lg:px-4">

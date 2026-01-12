@@ -7,7 +7,6 @@ import {
   type VolumeSliderConfig,
 } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
-import { VenueLabel } from "~/components/common/VenueLabel";
 import { cn } from "~/lib/utils";
 
 export type GameHeaderProps = {
@@ -35,12 +34,7 @@ export type GameHeaderProps = {
     soundSliderBounds?: SliderBounds;
     footerExtras?: ReactNode;
     onDialogOpenChange?: (open: boolean) => void;
-  };
-  /** 会場ブーストラベル */
-  venueLabel?: {
-    text: string;
-    visible: boolean;
-    className?: string;
+    venueBoostActive?: boolean;
   };
 };
 
@@ -59,7 +53,6 @@ export const GameHeader: FC<GameHeaderProps> = ({
   onToggleHistoryColumns,
   onNavigateBack,
   bgmControl,
-  venueLabel,
 }) => {
   return (
     <header className="flex items-center gap-6 px-6 py-4">
@@ -89,9 +82,6 @@ export const GameHeader: FC<GameHeaderProps> = ({
         </Button>
       </div>
       <div className="flex items-center gap-3">
-        {venueLabel?.visible ? (
-          <VenueLabel text={venueLabel.text} className={venueLabel.className} />
-        ) : null}
         <BgmControl
           preference={bgmControl.preference}
           soundPreference={bgmControl.soundPreference}
@@ -106,6 +96,7 @@ export const GameHeader: FC<GameHeaderProps> = ({
           soundSliderBounds={bgmControl.soundSliderBounds}
           footerExtras={bgmControl.footerExtras}
           onDialogOpenChange={bgmControl.onDialogOpenChange}
+          venueBoostActive={bgmControl.venueBoostActive}
         />
         <Button
           type="button"
