@@ -80,7 +80,7 @@ export const CurrentNumber: FC<CurrentNumberProps> = ({
             </span>
           ) : null}
           <span className="relative z-10 inline-flex items-center justify-center leading-none">
-            <span className="inline-block">{display}</span>
+            <span className="inline-block whitespace-nowrap">{display}</span>
             {!isDrawing && bingoLetter ? (
               <span
                 className={cn(

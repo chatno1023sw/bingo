@@ -1,43 +1,23 @@
-import { Howl } from "howler";
-import { Loader2, X } from "lucide-react";
-import {
-  type FC,
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  audioPaths,
-  audioSettings,
-  buildLetterVoicePath,
-  buildNumberVoicePath,
-  resolveAudioPath,
-} from "~/common/constants/audio";
-import { type BingoLetter, bingoNumberRanges } from "~/common/constants/bingo";
+import { Loader2 } from "lucide-react";
+import { type FC, useCallback, useEffect, useMemo } from "react";
+import { audioSettings } from "~/common/constants/audio";
 import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
-import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
-import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
 import { PrizeProvider } from "~/common/contexts/PrizeContext";
 import { useBgmPlayers } from "~/common/hooks/useBgmPlayers";
 import { useGameSession } from "~/common/hooks/useGameSession";
-import {
-  getSoundDetailPreference,
-  muteSoundDetailPreference,
-  resetSoundDetailPreference,
-  saveSoundDetailPreference,
-} from "~/common/services/soundDetailPreferenceService";
-import { consumeGameBgmUnlock } from "~/common/utils/audioUnlock";
+import { getSoundDetailPreference } from "~/common/services/soundDetailPreferenceService";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
-import { BgmControl } from "~/components/common/BgmControl";
 import { Button } from "~/components/common/Button";
 import { CurrentNumber } from "~/components/game/CurrentNumber";
+import { GameHeader } from "~/components/game/GameHeader";
 import { HistoryPanel } from "~/components/game/HistoryPanel";
 import { ResetDialog } from "~/components/game/ResetDialog";
 import { SidePanel } from "~/components/game/SidePanel";
-import { cn } from "~/lib/utils";
+import { useBingoBackgroundSequence } from "~/components/game/hooks/useBingoBackgroundSequence";
+import { useGameBgmController } from "~/components/game/hooks/useGameBgmController";
+import { useGameLayoutControls } from "~/components/game/hooks/useGameLayoutControls";
+import { useGameSoundDetail } from "~/components/game/hooks/useGameSoundDetail";
+import { useNumberAnnouncement } from "~/components/game/hooks/useNumberAnnouncement";
 
 export type GameContentProps = {
   /** Start ビューへ戻る */
@@ -73,118 +53,51 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     handleReset,
     handleBackToStart,
   } = useGameSession({ onNavigateToStart: onNavigateStart });
-  const { gameBgm, sound } = useAudioPreferences();
-  const { registerGameBgmHandler } = useAudioUnlock();
-  const { preference, isReady, setVolume } = gameBgm;
-  const { preference: soundPreference, setVolume: setSoundVolume } = sound;
-  const initialSoundDetailRef = useRef(getSoundDetailPreference());
-  const [voiceVolume, setVoiceVolume] = useState<number>(initialSoundDetailRef.current.voiceVolume);
-  const [drumrollVolumeScale, setDrumrollVolumeScale] = useState<number>(
-    initialSoundDetailRef.current.drumrollVolumeScale,
-  );
-  const [cymbalVolumeScale, setCymbalVolumeScale] = useState<number>(
-    initialSoundDetailRef.current.cymbalVolumeScale,
-  );
-  const [bingoBackgroundLetter, setBingoBackgroundLetter] = useState<BingoLetter | null>(null);
-  const [isFirst, setIsFirst] = useState(true);
-  const [historyColumns, setHistoryColumns] = useState<3 | 4>(4);
-  const isFirstState = useMemo(() => ({ isFirst, setIsFirst }), [isFirst]);
+  const { preference, soundPreference, isReady, requestBgmPlay, setBgmVolume, setSoundVolume } =
+    useGameBgmController();
+  const initialSoundDetail = useMemo(() => getSoundDetailPreference(), []);
+  const {
+    isFirstState,
+    historyColumns,
+    historyToggleLabel,
+    handleToggleHistoryColumns,
+    handleClearHistory,
+  } = useGameLayoutControls({
+    onRequestReset: openResetDialog,
+  });
   const { acknowledged: audioNoticeAcknowledged, markAcknowledged } = useAudioNotice();
+  const acknowledgeAudioNotice = useCallback(() => {
+    markAcknowledged();
+  }, [markAcknowledged]);
+  const {
+    voiceVolume,
+    drumrollVolumeScale,
+    cymbalVolumeScale,
+    extraSoundSliders,
+    handleMuteAllAudio,
+    handleEnableAllAudio,
+    handleGameBgmVolumeChange,
+    resetSoundDetailToDefault,
+  } = useGameSoundDetail({
+    initialDetail: initialSoundDetail,
+    bgmVolume: preference.volume,
+    soundVolume: soundPreference.volume,
+    acknowledgeAudioNotice,
+    setBgmVolume,
+    setSoundVolume,
+    requestBgmPlay,
+  });
 
-  const numberVoiceRef = useRef<Howl | null>(null);
-  const letterVoiceRef = useRef<Howl | null>(null);
-  const pendingAnnounceRef = useRef(false);
-  const pendingNumberRef = useRef<number | null>(null);
-  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastAnnouncedRef = useRef<number | null>(null);
-  const bingoLetterTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const ANNOUNCE_DELAY_MS = audioSettings.number.announceDelayMs;
-
-  const cleanupVoice = useCallback((voiceRef: MutableRefObject<Howl | null>) => {
-    if (voiceRef.current) {
-      voiceRef.current.stop();
-      voiceRef.current.unload();
-      voiceRef.current = null;
-    }
-  }, []);
-
-  const playVoiceClip = useCallback(
-    (src: string, targetRef: MutableRefObject<Howl | null>, onEnd?: () => void) => {
-      cleanupVoice(targetRef);
-      const voice = new Howl({
-        src: [resolveAudioPath(src)],
-        preload: true,
-        volume: voiceVolume * audioSettings.number.voicePlaybackScale,
-        onend: () => {
-          voice.unload();
-          if (targetRef.current === voice) {
-            targetRef.current = null;
-          }
-          onEnd?.();
-        },
-        onloaderror: () => {
-          onEnd?.();
-        },
-        onplayerror: () => {
-          onEnd?.();
-        },
-      });
-      targetRef.current = voice;
-      voice.play();
-    },
-    [cleanupVoice, voiceVolume],
-  );
-
-  const playAnnouncementVoice = useCallback(
-    (number: number) => {
-      if (soundPreference.volume <= 0 || voiceVolume <= 0) {
-        return;
-      }
-      const letter = bingoNumberRanges.getLetter(number);
-      const playNumber = () => {
-        playVoiceClip(buildNumberVoicePath(number), numberVoiceRef);
-      };
-      if (!letter) {
-        playNumber();
-        return;
-      }
-      playVoiceClip(buildLetterVoicePath(letter), letterVoiceRef, playNumber);
-    },
-    [playVoiceClip, soundPreference.volume, voiceVolume],
-  );
-
-  const tryAnnounceNumber = useCallback(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
-    const number = pendingNumberRef.current;
-    if (number === null) {
-      return;
-    }
-    if (lastAnnouncedRef.current === number) {
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      return;
-    }
-    if (announceTimerRef.current) {
-      clearTimeout(announceTimerRef.current);
-    }
-    announceTimerRef.current = setTimeout(() => {
-      playAnnouncementVoice(number);
-      lastAnnouncedRef.current = number;
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      announceTimerRef.current = null;
-    }, ANNOUNCE_DELAY_MS);
-  }, [playAnnouncementVoice, ANNOUNCE_DELAY_MS]);
-
-  useEffect(
-    () => () => {
-      cleanupVoice(numberVoiceRef);
-      cleanupVoice(letterVoiceRef);
-    },
-    [cleanupVoice],
-  );
+  const {
+    bingoBackgroundLetter,
+    startSequence: startBingoBackgroundSequence,
+    clearSequence,
+  } = useBingoBackgroundSequence();
+  const { prepareAnnouncement, cancelAnnouncement, handleCurrentNumberChange } =
+    useNumberAnnouncement({
+      voiceVolume,
+      soundVolume: soundPreference.volume,
+    });
 
   const { playDrumroll, getDrumrollDurationMs } = useBgmPlayers({
     onDrumrollEnd: completeDrawAnimation,
@@ -194,197 +107,28 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     cymbalVolumeScale,
   });
 
-  const bgmRef = useRef<Howl | null>(null);
-  const bgmPlayingRef = useRef(false);
-  const bgmPendingRef = useRef(false);
-  const bgmUnlockAttachedRef = useRef(false);
-
-  const requestBgmPlay = useCallback(() => {
-    const bgm = bgmRef.current;
-    if (!bgm) {
-      return;
-    }
-    const howlWithPlaying = bgm as Howl & { playing?: (id?: number) => boolean };
-    if (typeof howlWithPlaying.playing === "function" && howlWithPlaying.playing()) {
-      bgmPlayingRef.current = true;
-      return;
-    }
-    bgm.play();
-    bgmPlayingRef.current = true;
-  }, []);
-
-  const handleUserUnlock = useCallback(() => {
-    if (!bgmPendingRef.current) {
-      return;
-    }
-    bgmPendingRef.current = false;
-    bgmUnlockAttachedRef.current = false;
-    requestBgmPlay();
-  }, [requestBgmPlay]);
-
-  const attachUnlockListeners = useCallback(() => {
-    if (bgmUnlockAttachedRef.current) {
-      return;
-    }
-    bgmUnlockAttachedRef.current = true;
-    const handler = () => handleUserUnlock();
-    document.addEventListener("pointerdown", handler, { once: true });
-    document.addEventListener("keydown", handler, { once: true });
-  }, [handleUserUnlock]);
+  useEffect(() => {
+    handleCurrentNumberChange(session?.gameState.currentNumber ?? null);
+  }, [handleCurrentNumberChange, session?.gameState.currentNumber]);
 
   useEffect(() => {
-    const bgm = new Howl({
-      // maou_bgm_acoustic02.mp3
-      src: [resolveAudioPath(audioPaths.bgm.game)],
-      loop: true,
-      preload: true,
-      onplayerror: () => {
-        bgmPendingRef.current = true;
-        bgmPlayingRef.current = false;
-        attachUnlockListeners();
-      },
-    });
-    bgmRef.current = bgm;
-    return () => {
-      bgm.stop();
-      bgm.unload();
-      bgmRef.current = null;
-    };
-  }, [attachUnlockListeners]);
-
-  useEffect(() => {
-    const bgm = bgmRef.current;
-    if (!bgm) {
-      return;
-    }
-    bgm.volume(preference.volume * audioSettings.bgm.gameVolumeScale);
-    if (preference.volume > 0) {
-      if (!bgmPlayingRef.current) {
-        requestBgmPlay();
-      }
-      return;
-    }
-    if (bgmPlayingRef.current) {
-      bgm.stop();
-      bgmPlayingRef.current = false;
-    }
-  }, [preference.volume, requestBgmPlay]);
-
-  useEffect(() => {
-    if (consumeGameBgmUnlock()) {
-      requestBgmPlay();
-    }
-  }, [requestBgmPlay]);
-
-  useEffect(() => {
-    return registerGameBgmHandler(() => {
-      if (preference.volume > 0) {
-        requestBgmPlay();
-      }
-    });
-  }, [preference.volume, registerGameBgmHandler, requestBgmPlay]);
-
-  const clearBingoBackgroundSequence = useCallback(() => {
-    for (const timerId of bingoLetterTimersRef.current) {
-      clearTimeout(timerId);
-    }
-    bingoLetterTimersRef.current = [];
-    setBingoBackgroundLetter(null);
-  }, []);
-
-  const startBingoBackgroundSequence = useCallback(
-    (durationMs: number) => {
-      clearBingoBackgroundSequence();
-      const letters: BingoLetter[] = ["B", "I", "N", "G", "O"];
-      if (durationMs <= 0) {
-        setBingoBackgroundLetter(letters[0]);
-        return;
-      }
-      const segmentMs = durationMs / letters.length;
-      setBingoBackgroundLetter(letters[0]);
-      letters.slice(1).forEach((letter, index) => {
-        const timerId = setTimeout(
-          () => {
-            setBingoBackgroundLetter(letter);
-          },
-          Math.round(segmentMs * (index + 1)),
-        );
-        bingoLetterTimersRef.current.push(timerId);
-      });
-      const endTimerId = setTimeout(() => {
-        setBingoBackgroundLetter(null);
-      }, Math.round(durationMs));
-      bingoLetterTimersRef.current.push(endTimerId);
-    },
-    [clearBingoBackgroundSequence],
-  );
-
-  useEffect(() => {
-    return () => {
-      clearBingoBackgroundSequence();
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-        announceTimerRef.current = null;
-      }
-      if (numberVoiceRef.current) {
-        numberVoiceRef.current.stop();
-        numberVoiceRef.current.unload();
-        numberVoiceRef.current = null;
-      }
-    };
-  }, [clearBingoBackgroundSequence]);
-
-  useEffect(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
     if (drawError) {
-      pendingAnnounceRef.current = false;
-      pendingNumberRef.current = null;
-      if (announceTimerRef.current) {
-        clearTimeout(announceTimerRef.current);
-        announceTimerRef.current = null;
-      }
+      cancelAnnouncement();
     }
-  }, [drawError]);
-
-  useEffect(() => {
-    if (!pendingAnnounceRef.current) {
-      return;
-    }
-    const currentNumber = session?.gameState.currentNumber ?? null;
-    if (currentNumber === null) {
-      return;
-    }
-    pendingNumberRef.current = currentNumber;
-    tryAnnounceNumber();
-  }, [session?.gameState.currentNumber, tryAnnounceNumber]);
+  }, [drawError, cancelAnnouncement]);
 
   useEffect(() => {
     if (isAnimating) {
       return;
     }
-    clearBingoBackgroundSequence();
-  }, [clearBingoBackgroundSequence, isAnimating]);
-
-  useEffect(() => {
-    saveSoundDetailPreference({
-      voiceVolume,
-      drumrollVolumeScale,
-      cymbalVolumeScale,
-    });
-  }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
-
-  const acknowledgeAudioNotice = useCallback(() => {
-    markAcknowledged();
-  }, [markAcknowledged]);
+    clearSequence();
+  }, [clearSequence, isAnimating]);
 
   const handleDrawWithBgm = () => {
     if (isButtonDisabled) {
       return;
     }
-    pendingAnnounceRef.current = soundPreference.volume > 0;
-    pendingNumberRef.current = null;
+    prepareAnnouncement(soundPreference.volume > 0);
     startDrawAnimation();
     playDrumroll();
     const drumrollDurationMs = getDrumrollDurationMs();
@@ -392,79 +136,6 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
       drumrollDurationMs > 0 ? drumrollDurationMs : audioSettings.se.fallbackWaitMs;
     startBingoBackgroundSequence(sequenceDurationMs);
   };
-
-  const extraSoundSliders = [
-    {
-      label: "ドラムロール",
-      value: drumrollVolumeScale,
-      onChange: setDrumrollVolumeScale,
-      min: 0,
-      max: 2,
-      step: 0.05,
-    },
-    {
-      label: "シンバル",
-      value: cymbalVolumeScale,
-      onChange: setCymbalVolumeScale,
-      min: 0,
-      max: 2,
-      step: 0.05,
-    },
-    {
-      label: "音声読み上げ",
-      value: voiceVolume,
-      onChange: setVoiceVolume,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    },
-  ];
-
-  const handleMuteAllAudio = useCallback(() => {
-    acknowledgeAudioNotice();
-    void setVolume(0);
-    void setSoundVolume(0);
-    const muted = muteSoundDetailPreference();
-    setVoiceVolume(muted.voiceVolume);
-    setDrumrollVolumeScale(muted.drumrollVolumeScale);
-    setCymbalVolumeScale(muted.cymbalVolumeScale);
-  }, [acknowledgeAudioNotice, setVolume, setSoundVolume]);
-
-  const handleEnableAllAudio = useCallback(() => {
-    acknowledgeAudioNotice();
-    const restoredBgmVolume =
-      preference.volume > 0 ? preference.volume : audioSettings.bgm.defaultVolume;
-    const restoredSoundVolume =
-      soundPreference.volume > 0 ? soundPreference.volume : audioSettings.se.defaultVolume;
-    void setVolume(restoredBgmVolume);
-    void setSoundVolume(restoredSoundVolume);
-    const defaults = resetSoundDetailPreference();
-    setVoiceVolume(defaults.voiceVolume);
-    setDrumrollVolumeScale(defaults.drumrollVolumeScale);
-    setCymbalVolumeScale(defaults.cymbalVolumeScale);
-    requestBgmPlay();
-  }, [
-    acknowledgeAudioNotice,
-    preference.volume,
-    requestBgmPlay,
-    setVolume,
-    setSoundVolume,
-    soundPreference.volume,
-  ]);
-
-  const handleToggleHistoryColumns = useCallback(() => {
-    setHistoryColumns((prev) => (prev === 4 ? 3 : 4));
-  }, []);
-
-  const handleGameBgmVolumeChange = useCallback(
-    async (volume: number) => {
-      await setVolume(volume);
-      if (volume > 0) {
-        requestBgmPlay();
-      }
-    },
-    [requestBgmPlay, setVolume],
-  );
 
   if (isLoading) {
     return (
@@ -489,78 +160,36 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
     );
   }
 
-  const historyToggleLabel = historyColumns === 4 ? "3列表示" : "4列表示";
-
   return (
     <PrizeProvider initialPrizes={session.prizes}>
       <main className="h-screen overflow-hidden bg-background text-foreground">
         <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
-          <header className="flex items-center px-6 py-4">
-            <div className="flex flex-1 items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                className={cn(
-                  "rounded-full border border-border px-3 py-1 text-secondary-foreground text-xs hover:bg-muted",
-                  "relative top-2",
-                )}
-                onClick={handleToggleHistoryColumns}
-              >
-                {historyToggleLabel}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className={cn(
-                  "rounded-full border border-border px-3 py-1 text-sm hover:bg-muted",
-                  "relative top-2",
-                )}
-                onClick={() => {
-                  isFirstState.setIsFirst(true);
-                  openResetDialog();
-                }}
-                disabled={isLoading || isResetting || session.historyView.length === 0}
-              >
-                クリア
-              </Button>
-            </div>
-            <div className="relative flex items-center gap-3">
-              <BgmControl
-                preference={preference}
-                soundPreference={soundPreference}
-                isReady={isReady}
-                onVolumeChange={handleGameBgmVolumeChange}
-                onSoundVolumeChange={setSoundVolume}
-                extraSliders={extraSoundSliders}
-                useDialog
-                onResetToDefault={() => {
-                  void handleGameBgmVolumeChange(audioSettings.bgm.defaultVolume);
-                  void setSoundVolume(audioSettings.se.defaultVolume);
-                  const defaults = resetSoundDetailPreference();
-                  setVoiceVolume(defaults.voiceVolume);
-                  setDrumrollVolumeScale(defaults.drumrollVolumeScale);
-                  setCymbalVolumeScale(defaults.cymbalVolumeScale);
-                }}
-                onMuteAll={handleMuteAllAudio}
+          <GameHeader
+            onClear={handleClearHistory}
+            clearDisabled={isLoading || isResetting || session.historyView.length === 0}
+            historyToggleLabel={historyToggleLabel}
+            onToggleHistoryColumns={handleToggleHistoryColumns}
+            onNavigateBack={handleBackToStart}
+            bgmControl={{
+              preference,
+              soundPreference,
+              isReady,
+              onVolumeChange: handleGameBgmVolumeChange,
+              onSoundVolumeChange: setSoundVolume,
+              extraSliders: extraSoundSliders,
+              onResetToDefault: resetSoundDetailToDefault,
+              onMuteAll: handleMuteAllAudio,
+            }}
+          />
+          <div className="flex flex-1 flex-col gap-6 overflow-hidden px-3 pb-6 lg:flex-row lg:px-4">
+            <aside className="min-h-[18rem] lg:min-h-0 lg:min-w-[20rem] lg:flex-[0_0_28vw]">
+              <HistoryPanel
+                recent={session.historyView}
+                columns={historyColumns}
+                className="h-full"
               />
-              <Button
-                type="button"
-                variant="secondary"
-                className="rounded-full!"
-                aria-label="Start 画面に戻る"
-                onClick={handleBackToStart}
-              >
-                <X className="aspect-square h-6 w-6" />
-              </Button>
-            </div>
-          </header>
-          <div className="flex flex-1 items-stretch overflow-hidden px-2 pb-6">
-            <HistoryPanel
-              recent={session.historyView}
-              columns={historyColumns}
-              className="min-w-[20rem] flex-[0_0_28vw]"
-            />
-            <section className="flex min-w-0 flex-1 flex-col px-4 py-6">
+            </aside>
+            <section className="flex min-w-0 flex-1 flex-col px-1 py-4 lg:px-4 lg:py-6">
               <div className="flex min-h-0 flex-1 items-center justify-center">
                 <CurrentNumber
                   value={displayNumber}
@@ -591,8 +220,9 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
                 </p>
               </div>
             </section>
-
-            <SidePanel className="min-w-[20rem] flex-[0_0_28vw]" />
+            <aside className="min-h-[18rem] lg:min-h-0 lg:min-w-[20rem] lg:flex-[0_0_28vw]">
+              <SidePanel className="h-full" />
+            </aside>
           </div>
         </div>
       </main>

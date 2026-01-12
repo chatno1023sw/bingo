@@ -62,8 +62,8 @@ export const PrizeSortableItem: FC<PrizeSortableItemProps> = ({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative w-full max-w-75 rounded-3xl bg-card p-6 shadow-[0_12px_24px_hsl(var(--foreground)/0.16)] transition-transform duration-200 ease-out",
-        isDragging ? "bg-muted" : "bg-card",
+        "relative w-full max-w-75 rounded-3xl border-2 border-none p-6 shadow-[0_12px_24px_hsl(var(--foreground)/0.16)] transition-transform duration-200 ease-out",
+        isDragging ? "bg-muted" : selected ? "bg-muted-foreground/30" : "bg-card",
       )}
       {...attributes}
       {...listeners}
