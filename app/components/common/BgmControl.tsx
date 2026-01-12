@@ -137,10 +137,15 @@ export const BgmControl: FC<BgmControlProps> = ({
 
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-4" : "flex w-full flex-col gap-3",
-    row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
-    labelWrap: "flex min-w-28 items-center justify-end gap-2 text-right text-xl",
-    label: "whitespace-nowrap",
-    sliderWrap: cn("flex min-w-0 flex-1", useDialog ? "pr-2" : "pr-1"),
+    row: cn(
+      "grid w-full items-center",
+      useDialog
+        ? "grid-cols-[auto_auto,minmax(0,1fr)] gap-3"
+        : "grid-cols-[auto_auto,minmax(0,1fr)] gap-2",
+    ),
+    label: "flex w-32 justify-end pr-2 text-right text-xl whitespace-nowrap",
+    iconWrap: "flex w-9 justify-center",
+    sliderWrap: cn("flex w-full min-w-0", useDialog ? "pr-2" : "pr-1"),
   } as const;
 
   const sliderConfigs: VolumeSliderConfig[] = [
@@ -169,8 +174,8 @@ export const BgmControl: FC<BgmControlProps> = ({
     const step = config.step ?? 0.01;
     return (
       <div key={config.label} className={sliderLayout.row}>
-        <div className={sliderLayout.labelWrap}>
-          <span className={sliderLayout.label}>{config.label}</span>
+        <span className={sliderLayout.label}>{config.label}</span>
+        <div className={sliderLayout.iconWrap}>
           {config.sampleControl ? (
             <BgmIconButton
               ariaLabel={config.sampleControl.ariaLabel}
