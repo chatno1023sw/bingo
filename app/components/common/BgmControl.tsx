@@ -138,7 +138,7 @@ export const BgmControl: FC<BgmControlProps> = ({
   const sliderLayout = {
     container: useDialog ? "flex w-full flex-col gap-4 px-2" : "flex w-full flex-col gap-3",
     row: cn("flex items-center gap-3", useDialog ? "justify-start" : "gap-2"),
-    labelWrap: "flex min-w-32 items-center justify-end gap-2 text-right text-xl",
+    labelWrap: "flex min-w-28 items-center justify-end gap-2 text-right text-xl",
     label: "whitespace-nowrap",
     sliderWrap: "flex w-full",
   } as const;

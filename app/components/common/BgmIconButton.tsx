@@ -34,7 +34,7 @@ export const BgmIconButton: FC<BgmIconButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex h-7 w-7 items-center justify-center rounded-full border border-border bg-secondary text-secondary-foreground transition hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-secondary-foreground transition hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
