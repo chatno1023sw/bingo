@@ -31,7 +31,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   onToggleDisplay,
 }) => {
   if (prizes.length === 0) {
-    return <p className="text-muted-foreground text-sm">まだ景品が登録されてないよ</p>;
+    return <p className="text-muted-foreground text-sm">表示できる景品がありません</p>;
   }
 
   return (
