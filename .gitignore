@@ -9,7 +9,8 @@ mcp.config.json
 .react-router/
 .serena/
 .specify/
-vendor/
+vendor/*
+!react-router-testing/
 local/
 
 
@@ -26,9 +27,3 @@ coverage/
 *.swp
 .env.local
 .env.*.local
-
-vendor/*
-!vendor/react-router-testing/
-!vendor/react-router-testing/**
-!vendor/mizchi-similarity/
-!vendor/mizchi-similarity/**
