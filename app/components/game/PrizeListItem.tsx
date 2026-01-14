@@ -69,7 +69,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
           type="button"
           className={cn(
             "line-clamp-2 w-full min-w-0 cursor-pointer break-all text-left text-[clamp(1.4rem,1.7vw,1.95rem)] focus:outline-none",
-            prize.selected ? "text-muted-foreground line-through" : "text-foreground",
+            prize.selected ? "text-muted-foreground" : "text-foreground",
           )}
           onClick={() => onToggleDisplay(prize.id)}
           disabled={disabled}
