@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { audioPaths, audioSettings, resolveAudioPath } from "~/common/constants/audio";
 import {
   muteSoundDetailPreference,
@@ -52,6 +52,10 @@ export type UseGameSoundDetailResult = {
  * - 戻り値: 音量値と操作関数を返します。
  * - Chrome DevTools MCP では音量ダイアログの操作が反映されることを確認します。
  */
+type SampleKey = "drumroll" | "cymbal" | "voice";
+
+const clampVolume = (volume: number) => Math.min(1, Math.max(0, volume));
+
 export const useGameSoundDetail = ({
   initialDetail,
   bgmVolume,
@@ -74,69 +78,120 @@ export const useGameSoundDetail = ({
     return Math.min(1, Math.max(0, masterVolume)) * audioSettings.se.baseVolumeScale;
   }, [soundVolume]);
 
-  const playSampleOnce = useCallback((path: string, volume: number) => {
-    if (volume <= 0) {
+  const sampleAudioRef = useRef<Record<SampleKey, HTMLAudioElement | null>>({
+    drumroll: null,
+    cymbal: null,
+    voice: null,
+  });
+
+  const stopSample = useCallback((key: SampleKey) => {
+    const current = sampleAudioRef.current[key];
+    if (!current) {
       return;
     }
-    if (typeof window === "undefined") {
-      return;
-    }
-    const audio = new Audio(resolveAudioPath(path));
-    audio.preload = "auto";
-    audio.volume = Math.min(1, Math.max(0, volume));
-    const cleanup = () => {
-      audio.removeEventListener("ended", cleanup);
-      audio.removeEventListener("error", cleanup);
-      audio.src = "";
-    };
-    audio.addEventListener("ended", cleanup);
-    audio.addEventListener("error", cleanup);
-    const playResult = audio.play();
-    if (playResult instanceof Promise) {
-      playResult.catch(cleanup);
-    }
+    current.pause();
+    current.src = "";
+    sampleAudioRef.current[key] = null;
   }, []);
 
-  const computeDrumrollVolume = useCallback(() => {
-    if (drumrollVolumeScale <= 0) {
-      return 0;
+  const playManagedSample = useCallback(
+    (key: SampleKey, path: string, volume: number) => {
+      stopSample(key);
+      if (volume <= 0 || typeof window === "undefined") {
+        return;
+      }
+      const audio = new Audio(resolveAudioPath(path));
+      audio.preload = "auto";
+      audio.volume = clampVolume(volume);
+      const cleanup = () => {
+        audio.removeEventListener("ended", cleanup);
+        audio.removeEventListener("error", cleanup);
+        if (sampleAudioRef.current[key] === audio) {
+          sampleAudioRef.current[key] = null;
+        }
+      };
+      audio.addEventListener("ended", cleanup);
+      audio.addEventListener("error", cleanup);
+      sampleAudioRef.current[key] = audio;
+      const playResult = audio.play();
+      if (playResult instanceof Promise) {
+        playResult.catch(cleanup);
+      }
+    },
+    [stopSample],
+  );
+
+  const updateSampleVolume = useCallback((key: SampleKey, volume: number) => {
+    const audio = sampleAudioRef.current[key];
+    if (!audio) {
+      return;
     }
-    const baseVolume = computeBaseSoundVolume();
-    return Math.min(
-      1,
-      Math.max(0, baseVolume * drumrollVolumeScale * audioSettings.se.drumrollBoost),
-    );
-  }, [computeBaseSoundVolume, drumrollVolumeScale]);
+    audio.volume = clampVolume(volume);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      (Object.keys(sampleAudioRef.current) as SampleKey[]).forEach((key) => {
+        stopSample(key);
+      });
+    };
+  }, [stopSample]);
+
+  const calcDrumrollVolume = useCallback(
+    (scale: number) => {
+      if (scale <= 0) {
+        return 0;
+      }
+      const baseVolume = computeBaseSoundVolume();
+      return clampVolume(baseVolume * scale * audioSettings.se.drumrollBoost);
+    },
+    [computeBaseSoundVolume],
+  );
+
+  const computeDrumrollVolume = useCallback(() => {
+    return calcDrumrollVolume(drumrollVolumeScale);
+  }, [calcDrumrollVolume, drumrollVolumeScale]);
+
+  const calcCymbalVolume = useCallback(
+    (scale: number) => {
+      if (scale <= 0) {
+        return 0;
+      }
+      const baseVolume = computeBaseSoundVolume();
+      return clampVolume(baseVolume * scale * audioSettings.se.cymbalBoost);
+    },
+    [computeBaseSoundVolume],
+  );
 
   const computeCymbalVolume = useCallback(() => {
-    if (cymbalVolumeScale <= 0) {
+    return calcCymbalVolume(cymbalVolumeScale);
+  }, [calcCymbalVolume, cymbalVolumeScale]);
+
+  const calcVoiceSampleVolume = useCallback((volume: number) => {
+    if (volume <= 0) {
       return 0;
     }
-    const baseVolume = computeBaseSoundVolume();
-    return Math.min(1, Math.max(0, baseVolume * cymbalVolumeScale * audioSettings.se.cymbalBoost));
-  }, [computeBaseSoundVolume, cymbalVolumeScale]);
+    return clampVolume(volume * audioSettings.number.voicePlaybackScale);
+  }, []);
 
   const computeVoiceSampleVolume = useCallback(() => {
-    if (voiceVolume <= 0) {
-      return 0;
-    }
-    return Math.min(1, Math.max(0, voiceVolume * audioSettings.number.voicePlaybackScale));
-  }, [voiceVolume]);
+    return calcVoiceSampleVolume(voiceVolume);
+  }, [calcVoiceSampleVolume, voiceVolume]);
 
   const playDrumrollSample = useCallback(() => {
     const volume = computeDrumrollVolume();
-    playSampleOnce(audioPaths.se.drumroll, volume);
-  }, [computeDrumrollVolume, playSampleOnce]);
+    playManagedSample("drumroll", audioPaths.se.drumroll, volume);
+  }, [computeDrumrollVolume, playManagedSample]);
 
   const playCymbalSample = useCallback(() => {
     const volume = computeCymbalVolume();
-    playSampleOnce(audioPaths.se.cymbal, volume);
-  }, [computeCymbalVolume, playSampleOnce]);
+    playManagedSample("cymbal", audioPaths.se.cymbal, volume);
+  }, [computeCymbalVolume, playManagedSample]);
 
   const playVoiceSample = useCallback(() => {
     const volume = computeVoiceSampleVolume();
-    playSampleOnce(audioPaths.sample.voice, volume);
-  }, [computeVoiceSampleVolume, playSampleOnce]);
+    playManagedSample("voice", audioPaths.sample.voice, volume);
+  }, [computeVoiceSampleVolume, playManagedSample]);
 
   useEffect(() => {
     saveSoundDetailPreference({
@@ -146,12 +201,36 @@ export const useGameSoundDetail = ({
     });
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
+  const handleDrumrollScaleChange = useCallback(
+    (value: number) => {
+      setDrumrollVolumeScale(value);
+      updateSampleVolume("drumroll", calcDrumrollVolume(value));
+    },
+    [calcDrumrollVolume, updateSampleVolume],
+  );
+
+  const handleCymbalScaleChange = useCallback(
+    (value: number) => {
+      setCymbalVolumeScale(value);
+      updateSampleVolume("cymbal", calcCymbalVolume(value));
+    },
+    [calcCymbalVolume, updateSampleVolume],
+  );
+
+  const handleVoiceVolumeChange = useCallback(
+    (value: number) => {
+      setVoiceVolume(value);
+      updateSampleVolume("voice", calcVoiceSampleVolume(value));
+    },
+    [calcVoiceSampleVolume, updateSampleVolume],
+  );
+
   const extraSoundSliders: VolumeSliderConfig[] = useMemo(
     () => [
       {
         label: "ドラムロール",
         value: drumrollVolumeScale,
-        onChange: setDrumrollVolumeScale,
+        onChange: handleDrumrollScaleChange,
         sampleControl: {
           ariaLabel: "ドラムロールのサンプル音を再生",
           onPlay: playDrumrollSample,
@@ -164,7 +243,7 @@ export const useGameSoundDetail = ({
       {
         label: "シンバル",
         value: cymbalVolumeScale,
-        onChange: setCymbalVolumeScale,
+        onChange: handleCymbalScaleChange,
         sampleControl: {
           ariaLabel: "シンバルのサンプル音を再生",
           onPlay: playCymbalSample,
@@ -177,7 +256,7 @@ export const useGameSoundDetail = ({
       {
         label: "音声読み上げ",
         value: voiceVolume,
-        onChange: setVoiceVolume,
+        onChange: handleVoiceVolumeChange,
         sampleControl: {
           ariaLabel: "音声読み上げのサンプルを再生",
           onPlay: playVoiceSample,
@@ -189,6 +268,9 @@ export const useGameSoundDetail = ({
       },
     ],
     [
+      handleCymbalScaleChange,
+      handleDrumrollScaleChange,
+      handleVoiceVolumeChange,
       cymbalVolumeScale,
       drumrollVolumeScale,
       playCymbalSample,

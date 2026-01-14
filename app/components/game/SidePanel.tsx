@@ -105,7 +105,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
             type="button"
             className="w-full rounded-full bg-primary px-6 py-2 text-primary-foreground text-sm shadow-sm disabled:opacity-40"
             onClick={handleRouletteStart}
-            disabled={isLoading || prizes.length === 0}
+            disabled={isLoading || prizes.length === 0 || summary.selected === summary.total}
           >
             景品ルーレット
           </Button>
