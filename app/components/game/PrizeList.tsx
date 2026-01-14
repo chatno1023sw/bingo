@@ -13,6 +13,8 @@ export type PrizeListProps = {
   itemNameOverrides: Set<string>;
   /** 表示名切り替え操作 */
   onToggleDisplay: (id: string) => void;
+  /** 画像表示対象 ID 集合 */
+  imageVisibleIds: Set<string>;
 };
 
 /**
@@ -29,6 +31,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   onToggle,
   itemNameOverrides,
   onToggleDisplay,
+  imageVisibleIds,
 }) => {
   if (prizes.length === 0) {
     return <p className="text-muted-foreground text-sm">表示できる景品がありません</p>;
@@ -36,16 +39,20 @@ export const PrizeList: FC<PrizeListProps> = ({
 
   return (
     <ul className="h-full w-full min-w-0 space-y-3">
-      {prizes.map((prize) => (
-        <PrizeListItem
-          key={prize.id}
-          prize={prize}
-          disabled={disabled}
-          onToggle={onToggle}
-          showPrizeNameOnly={!itemNameOverrides.has(prize.id)}
-          onToggleDisplay={onToggleDisplay}
-        />
-      ))}
+      {prizes.map((prize) => {
+        const shouldShowItemName = itemNameOverrides.has(prize.id) || imageVisibleIds.has(prize.id);
+        return (
+          <PrizeListItem
+            key={prize.id}
+            prize={prize}
+            disabled={disabled}
+            onToggle={onToggle}
+            showPrizeNameOnly={!shouldShowItemName}
+            onToggleDisplay={onToggleDisplay}
+            shouldShowImage={shouldShowItemName}
+          />
+        );
+      })}
     </ul>
   );
 };

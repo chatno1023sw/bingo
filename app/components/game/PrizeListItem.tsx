@@ -16,6 +16,8 @@ export type PrizeListItemProps = {
   showPrizeNameOnly: boolean;
   /** 表示名切り替え操作 */
   onToggleDisplay: (id: string) => void;
+  /** 画像を表示するかどうか */
+  shouldShowImage: boolean;
 };
 
 /**
@@ -32,6 +34,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   onToggle,
   showPrizeNameOnly,
   onToggleDisplay,
+  shouldShowImage,
 }) => {
   const resolvedImagePath = useStoredImage(prize.imagePath);
   const hasImage = Boolean(resolvedImagePath);
@@ -53,23 +56,30 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <div className="flex aspect-4/3 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted">
-        {hasImage ? (
-          <img
-            src={resolvedImagePath ?? ""}
-            alt={`${prize.prizeName || "景品"} 画像`}
-            className="h-full w-full object-cover object-center"
-          />
-        ) : (
-          <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
-        )}
-      </div>
+      {shouldShowImage && (
+        <div
+          className={cn(
+            "flex aspect-4/3 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted",
+            !hasImage && "border border-muted-foreground",
+          )}
+        >
+          {hasImage ? (
+            <img
+              src={resolvedImagePath ?? ""}
+              alt={`${prize.prizeName || "景品"} 画像`}
+              className="h-full w-full object-cover object-center"
+            />
+          ) : (
+            <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+          )}
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <button
           type="button"
           className={cn(
             "line-clamp-2 w-full min-w-0 cursor-pointer break-all text-left text-[clamp(1.4rem,1.7vw,1.95rem)] focus:outline-none",
-            prize.selected ? "text-muted-foreground line-through" : "text-foreground",
+            prize.selected ? "text-muted-foreground" : "text-foreground",
           )}
           onClick={() => onToggleDisplay(prize.id)}
           disabled={disabled}

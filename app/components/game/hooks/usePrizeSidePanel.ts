@@ -15,6 +15,7 @@ export type UsePrizeSidePanelResult = {
   showPrizeNameOnly: boolean;
   hideSelected: boolean;
   itemNameOverrides: Set<string>;
+  imageVisibleIds: Set<string>;
   rouletteOpen: boolean;
   resultOpen: boolean;
   resultPrize: ReturnType<typeof usePrizeManager>["prizes"][number] | null;
@@ -46,6 +47,7 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
   const [showPrizeNameOnly, setShowPrizeNameOnly] = useState(true);
   const [hideSelected, setHideSelected] = useState(false);
   const [itemNameOverrides, setItemNameOverrides] = useState<Set<string>>(new Set());
+  const [imageVisibleIds, setImageVisibleIds] = useState<Set<string>>(new Set());
 
   const summary = useMemo(() => {
     const selected = prizes.filter((prize) => prize.selected).length;
@@ -92,6 +94,10 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
     });
   };
 
+  useEffect(() => {
+    setImageVisibleIds(new Set(prizes.filter((prize) => prize.selected).map((prize) => prize.id)));
+  }, [prizes]);
+
   const handleToggleDisplayAll = () => {
     setShowPrizeNameOnly((prev) => {
       const next = !prev;
@@ -135,6 +141,7 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
     showPrizeNameOnly,
     hideSelected,
     itemNameOverrides,
+    imageVisibleIds,
     rouletteOpen,
     resultOpen,
     resultPrize,

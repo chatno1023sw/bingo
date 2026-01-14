@@ -29,6 +29,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
     showPrizeNameOnly,
     hideSelected,
     itemNameOverrides,
+    imageVisibleIds,
     rouletteOpen,
     resultOpen,
     resultPrize,
@@ -94,6 +95,7 @@ export const SidePanel = ({ className = "" }: SidePanelProps) => {
                 onToggle={togglePrize}
                 itemNameOverrides={itemNameOverrides}
                 onToggleDisplay={handleToggleDisplay}
+                imageVisibleIds={imageVisibleIds}
               />
             </div>
           )}
