@@ -39,17 +39,21 @@ export const PrizeList: FC<PrizeListProps> = ({
 
   return (
     <ul className="h-full w-full min-w-0 space-y-3">
-      {prizes.map((prize) => (
-        <PrizeListItem
-          key={prize.id}
-          prize={prize}
-          disabled={disabled}
-          onToggle={onToggle}
-          showPrizeNameOnly={!itemNameOverrides.has(prize.id)}
-          onToggleDisplay={onToggleDisplay}
-          shouldShowImage={imageVisibleIds.has(prize.id)}
-        />
-      ))}
+      {prizes.map((prize) => {
+        const shouldShowImage = imageVisibleIds.has(prize.id);
+        const shouldShowItemName = itemNameOverrides.has(prize.id) || shouldShowImage;
+        return (
+          <PrizeListItem
+            key={prize.id}
+            prize={prize}
+            disabled={disabled}
+            onToggle={onToggle}
+            showPrizeNameOnly={!shouldShowItemName}
+            onToggleDisplay={onToggleDisplay}
+            shouldShowImage={shouldShowImage}
+          />
+        );
+      })}
     </ul>
   );
 };
