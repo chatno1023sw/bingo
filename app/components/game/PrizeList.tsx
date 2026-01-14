@@ -40,8 +40,7 @@ export const PrizeList: FC<PrizeListProps> = ({
   return (
     <ul className="h-full w-full min-w-0 space-y-3">
       {prizes.map((prize) => {
-        const shouldShowImage = imageVisibleIds.has(prize.id);
-        const shouldShowItemName = itemNameOverrides.has(prize.id) || shouldShowImage;
+        const shouldShowItemName = itemNameOverrides.has(prize.id) || imageVisibleIds.has(prize.id);
         return (
           <PrizeListItem
             key={prize.id}
@@ -50,7 +49,7 @@ export const PrizeList: FC<PrizeListProps> = ({
             onToggle={onToggle}
             showPrizeNameOnly={!shouldShowItemName}
             onToggleDisplay={onToggleDisplay}
-            shouldShowImage={shouldShowImage}
+            shouldShowImage={shouldShowItemName}
           />
         );
       })}
