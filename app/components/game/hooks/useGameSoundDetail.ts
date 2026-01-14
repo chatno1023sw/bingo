@@ -121,6 +121,14 @@ export const useGameSoundDetail = ({
     [stopSample],
   );
 
+  const updateSampleVolume = useCallback((key: SampleKey, volume: number) => {
+    const audio = sampleAudioRef.current[key];
+    if (!audio) {
+      return;
+    }
+    audio.volume = clampVolume(volume);
+  }, []);
+
   useEffect(() => {
     return () => {
       (Object.keys(sampleAudioRef.current) as SampleKey[]).forEach((key) => {
@@ -129,31 +137,46 @@ export const useGameSoundDetail = ({
     };
   }, [stopSample]);
 
+  const calcDrumrollVolume = useCallback(
+    (scale: number) => {
+      if (scale <= 0) {
+        return 0;
+      }
+      const baseVolume = computeBaseSoundVolume();
+      return clampVolume(baseVolume * scale * audioSettings.se.drumrollBoost);
+    },
+    [computeBaseSoundVolume],
+  );
+
   const computeDrumrollVolume = useCallback(() => {
-    if (drumrollVolumeScale <= 0) {
-      return 0;
-    }
-    const baseVolume = computeBaseSoundVolume();
-    return Math.min(
-      1,
-      Math.max(0, baseVolume * drumrollVolumeScale * audioSettings.se.drumrollBoost),
-    );
-  }, [computeBaseSoundVolume, drumrollVolumeScale]);
+    return calcDrumrollVolume(drumrollVolumeScale);
+  }, [calcDrumrollVolume, drumrollVolumeScale]);
+
+  const calcCymbalVolume = useCallback(
+    (scale: number) => {
+      if (scale <= 0) {
+        return 0;
+      }
+      const baseVolume = computeBaseSoundVolume();
+      return clampVolume(baseVolume * scale * audioSettings.se.cymbalBoost);
+    },
+    [computeBaseSoundVolume],
+  );
 
   const computeCymbalVolume = useCallback(() => {
-    if (cymbalVolumeScale <= 0) {
+    return calcCymbalVolume(cymbalVolumeScale);
+  }, [calcCymbalVolume, cymbalVolumeScale]);
+
+  const calcVoiceSampleVolume = useCallback((volume: number) => {
+    if (volume <= 0) {
       return 0;
     }
-    const baseVolume = computeBaseSoundVolume();
-    return Math.min(1, Math.max(0, baseVolume * cymbalVolumeScale * audioSettings.se.cymbalBoost));
-  }, [computeBaseSoundVolume, cymbalVolumeScale]);
+    return clampVolume(volume * audioSettings.number.voicePlaybackScale);
+  }, []);
 
   const computeVoiceSampleVolume = useCallback(() => {
-    if (voiceVolume <= 0) {
-      return 0;
-    }
-    return Math.min(1, Math.max(0, voiceVolume * audioSettings.number.voicePlaybackScale));
-  }, [voiceVolume]);
+    return calcVoiceSampleVolume(voiceVolume);
+  }, [calcVoiceSampleVolume, voiceVolume]);
 
   const playDrumrollSample = useCallback(() => {
     const volume = computeDrumrollVolume();
@@ -178,12 +201,36 @@ export const useGameSoundDetail = ({
     });
   }, [voiceVolume, drumrollVolumeScale, cymbalVolumeScale]);
 
+  const handleDrumrollScaleChange = useCallback(
+    (value: number) => {
+      setDrumrollVolumeScale(value);
+      updateSampleVolume("drumroll", calcDrumrollVolume(value));
+    },
+    [calcDrumrollVolume, updateSampleVolume],
+  );
+
+  const handleCymbalScaleChange = useCallback(
+    (value: number) => {
+      setCymbalVolumeScale(value);
+      updateSampleVolume("cymbal", calcCymbalVolume(value));
+    },
+    [calcCymbalVolume, updateSampleVolume],
+  );
+
+  const handleVoiceVolumeChange = useCallback(
+    (value: number) => {
+      setVoiceVolume(value);
+      updateSampleVolume("voice", calcVoiceSampleVolume(value));
+    },
+    [calcVoiceSampleVolume, updateSampleVolume],
+  );
+
   const extraSoundSliders: VolumeSliderConfig[] = useMemo(
     () => [
       {
         label: "ドラムロール",
         value: drumrollVolumeScale,
-        onChange: setDrumrollVolumeScale,
+        onChange: handleDrumrollScaleChange,
         sampleControl: {
           ariaLabel: "ドラムロールのサンプル音を再生",
           onPlay: playDrumrollSample,
@@ -196,7 +243,7 @@ export const useGameSoundDetail = ({
       {
         label: "シンバル",
         value: cymbalVolumeScale,
-        onChange: setCymbalVolumeScale,
+        onChange: handleCymbalScaleChange,
         sampleControl: {
           ariaLabel: "シンバルのサンプル音を再生",
           onPlay: playCymbalSample,
@@ -209,7 +256,7 @@ export const useGameSoundDetail = ({
       {
         label: "音声読み上げ",
         value: voiceVolume,
-        onChange: setVoiceVolume,
+        onChange: handleVoiceVolumeChange,
         sampleControl: {
           ariaLabel: "音声読み上げのサンプルを再生",
           onPlay: playVoiceSample,
@@ -221,6 +268,9 @@ export const useGameSoundDetail = ({
       },
     ],
     [
+      handleCymbalScaleChange,
+      handleDrumrollScaleChange,
+      handleVoiceVolumeChange,
       cymbalVolumeScale,
       drumrollVolumeScale,
       playCymbalSample,
