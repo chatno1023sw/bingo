@@ -1,4 +1,3 @@
-import { Image } from "lucide-react";
 import type { FC } from "react";
 import { useStoredImage } from "~/common/hooks/useStoredImage";
 import type { Prize } from "~/common/types";
@@ -56,17 +55,15 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
         prize.selected ? "border-border bg-muted opacity-70" : "border-border bg-card",
       )}
     >
-      <div className="flex aspect-4/3 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted">
-        {hasImage && shouldShowImage ? (
+      {hasImage && shouldShowImage && (
+        <div className="flex aspect-4/3 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted">
           <img
             src={resolvedImagePath ?? ""}
             alt={`${prize.prizeName || "景品"} 画像`}
             className="h-full w-full object-cover object-center"
           />
-        ) : (
-          <Image className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
-        )}
-      </div>
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <button
           type="button"
