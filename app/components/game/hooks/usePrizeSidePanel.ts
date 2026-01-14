@@ -22,7 +22,6 @@ export type UsePrizeSidePanelResult = {
   togglePrize: ReturnType<typeof usePrizeManager>["togglePrize"];
   handleToggleDisplay: (id: string) => void;
   handleToggleDisplayAll: () => void;
-  allowImageForPrize: (id: string) => void;
   handleToggleSelectedFilter: () => void;
   handleRouletteStart: () => void;
   handleRouletteComplete: (
@@ -95,14 +94,9 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
     });
   };
 
-  const allowImageForPrize = (id: string) => {
-    setImageVisibleIds((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-  };
+  useEffect(() => {
+    setImageVisibleIds(new Set(prizes.filter((prize) => prize.selected).map((prize) => prize.id)));
+  }, [prizes]);
 
   const handleToggleDisplayAll = () => {
     setShowPrizeNameOnly((prev) => {
@@ -154,7 +148,6 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
     togglePrize,
     handleToggleDisplay,
     handleToggleDisplayAll,
-    allowImageForPrize,
     handleToggleSelectedFilter,
     handleRouletteStart,
     handleRouletteComplete,
