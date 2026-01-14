@@ -15,12 +15,14 @@ export type UsePrizeSidePanelResult = {
   showPrizeNameOnly: boolean;
   hideSelected: boolean;
   itemNameOverrides: Set<string>;
+  imageVisibleIds: Set<string>;
   rouletteOpen: boolean;
   resultOpen: boolean;
   resultPrize: ReturnType<typeof usePrizeManager>["prizes"][number] | null;
   togglePrize: ReturnType<typeof usePrizeManager>["togglePrize"];
   handleToggleDisplay: (id: string) => void;
   handleToggleDisplayAll: () => void;
+  allowImageForPrize: (id: string) => void;
   handleToggleSelectedFilter: () => void;
   handleRouletteStart: () => void;
   handleRouletteComplete: (
@@ -46,6 +48,7 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
   const [showPrizeNameOnly, setShowPrizeNameOnly] = useState(true);
   const [hideSelected, setHideSelected] = useState(false);
   const [itemNameOverrides, setItemNameOverrides] = useState<Set<string>>(new Set());
+  const [imageVisibleIds, setImageVisibleIds] = useState<Set<string>>(new Set());
 
   const summary = useMemo(() => {
     const selected = prizes.filter((prize) => prize.selected).length;
@@ -88,6 +91,15 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
       } else {
         next.add(id);
       }
+      return next;
+    });
+  };
+
+  const allowImageForPrize = (id: string) => {
+    setImageVisibleIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
       return next;
     });
   };
@@ -135,12 +147,14 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
     showPrizeNameOnly,
     hideSelected,
     itemNameOverrides,
+    imageVisibleIds,
     rouletteOpen,
     resultOpen,
     resultPrize,
     togglePrize,
     handleToggleDisplay,
     handleToggleDisplayAll,
+    allowImageForPrize,
     handleToggleSelectedFilter,
     handleRouletteStart,
     handleRouletteComplete,

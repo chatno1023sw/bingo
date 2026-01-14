@@ -16,6 +16,8 @@ export type PrizeListItemProps = {
   showPrizeNameOnly: boolean;
   /** 表示名切り替え操作 */
   onToggleDisplay: (id: string) => void;
+  /** 画像を表示するかどうか */
+  shouldShowImage: boolean;
 };
 
 /**
@@ -32,6 +34,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
   onToggle,
   showPrizeNameOnly,
   onToggleDisplay,
+  shouldShowImage,
 }) => {
   const resolvedImagePath = useStoredImage(prize.imagePath);
   const hasImage = Boolean(resolvedImagePath);
@@ -54,7 +57,7 @@ export const PrizeListItem: FC<PrizeListItemProps> = ({
       )}
     >
       <div className="flex aspect-4/3 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted">
-        {hasImage ? (
+        {hasImage && shouldShowImage ? (
           <img
             src={resolvedImagePath ?? ""}
             alt={`${prize.prizeName || "景品"} 画像`}
