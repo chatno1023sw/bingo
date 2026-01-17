@@ -87,6 +87,7 @@ export const PrizeResultDialog: FC<PrizeResultDialogProps> = ({ open, prize, onC
         headerClassName="text-center"
         contentClassName="flex flex-col items-center justify-center"
         overlayHidden
+        preventOutsideClose
         showCloseButton
       >
         <div className="flex flex-col items-center justify-center space-y-4">
