@@ -9,10 +9,14 @@
    - 実際: 4. でボタンを押した瞬間に結果ダイアログが閉じ、2. の当選結果がリセットされる。
 
 ## 原因
-- `app/components/game/hooks/usePrizeSidePanel.ts` 内の `handleRouletteStart` で `setResultOpen(false)` を実行している。
-- 「景品ルーレット」ボタンが押されるたびに `resultOpen` が false へ強制的に切り替わり、`PrizeResultDialog` がアンマウントされる。
-- そのため、次の景品抽選が完了して新しい結果が届くまで画面上から当選情報が消えてしまう。
+- `PrizeResultDialog` では背景を暗くしないため `CommonDialog` の `overlayHidden` を有効化しているが、`preventOutsideClose` を指定していない（`app/components/game/PrizeResultDialog.tsx:82-113`）。
+- `CommonDialog` が内部で利用している Radix Dialog は外側をクリックすると `onOpenChange(false)` が発火し、そのまま `onClose` が呼ばれてダイアログが閉じる（`app/components/common/CommonDialog.tsx:62-87`）。
+- そのため、結果ダイアログ表示中に「抽選を開始！」ボタンや「景品ルーレット」ボタンをクリックすると、それだけで結果ダイアログが閉じて状態がリセットされてしまう。
+
+## あるべき実装
+- 景品ルーレットの当選結果は、ユーザが明示的に閉じるまで画面に残し続ける必要がある。
+- `CommonDialog` には外側クリックを無効化する `preventOutsideClose` が用意されているため、`PrizeResultDialog` からこのフラグを有効化し、クローズは閉じるボタン（または Esc）操作に限定する。
 
 ## 対応方針
-- ルーレット開始時には結果ダイアログを閉じず、ユーザの操作もしくは新しい当選結果の確定時にのみ切り替える。
-- `handleRouletteStart` から `setResultOpen(false)` を取り除き、`handleRouletteComplete` で当選結果確定時に `setResultOpen(true)` へ切り替える現行の流れを維持する。
+- `PrizeResultDialog` の `CommonDialog` 呼び出しに `preventOutsideClose` を追加し、外側クリックでは閉じないようにする。
+- これにより結果ダイアログを表示したまま他の操作（抽選ルーレットや景品ルーレット）を実行しても、ユーザが手動で閉じるまで結果が保持される。
