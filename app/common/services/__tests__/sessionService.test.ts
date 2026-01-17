@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { BgmPreference, GameState, PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
 import { hasStoredPrizeSelection } from "~/common/services/prizeService";
-import { startSession, resumeSession } from "~/common/services/sessionService";
+import { persistSessionState, startSession, resumeSession } from "~/common/services/sessionService";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -167,6 +167,30 @@ describe("sessionService", () => {
     const result = await resumeSession();
 
     expect(result).toEqual(storedPayload);
+  });
+
+  it("persistSessionState does not overwrite stored prizes", async () => {
+    const storedPrizes = createStoredPrizes();
+    localStorage.setItem(storageKeys.prizes, JSON.stringify(storedPrizes));
+
+    const nextGameState: GameState = {
+      currentNumber: 1,
+      drawHistory: [{ number: 1, sequence: 1, drawnAt: baseDate.toISOString() }],
+      isDrawing: false,
+      createdAt: baseDate.toISOString(),
+      updatedAt: baseDate.toISOString(),
+    };
+    const nextBgm: BgmPreference = {
+      enabled: true,
+      volume: 0.2,
+      updatedAt: baseDate.toISOString(),
+    };
+
+    await persistSessionState({ gameState: nextGameState, bgm: nextBgm });
+
+    expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(storedPrizes);
+    expect(parseStoredJson<GameState>(storageKeys.gameState)).toEqual(nextGameState);
+    expect(parseStoredJson<BgmPreference>(storageKeys.bgm)).toEqual(nextBgm);
   });
 
   it("hasStoredPrizeSelection returns true when any prize is selected", () => {
