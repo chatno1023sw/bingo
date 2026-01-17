@@ -3,10 +3,10 @@ import { audioSettings } from "~/common/constants/audio";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
-  hasStoredPrizeSelection,
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
+import { hasStoredPrizeSelection } from "~/common/services/prizeService";
 import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
 import { BgmControl } from "~/components/common/BgmControl";
 import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";

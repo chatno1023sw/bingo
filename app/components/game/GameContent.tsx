@@ -222,7 +222,7 @@ export const GameContent: FC<GameContentProps> = ({ onNavigateStart }) => {
   }
 
   return (
-    <PrizeProvider initialPrizes={session.prizes}>
+    <PrizeProvider>
       <main className="h-screen overflow-hidden bg-background text-foreground">
         <div className="flex h-full w-full flex-col border border-border bg-card shadow-[0_4px_20px_hsl(var(--foreground)/0.08)]">
           <GameHeader

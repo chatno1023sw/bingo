@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StartView } from "~/components/start/StartView";
+import { hasStoredPrizeSelection } from "~/common/services/prizeService";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
-  hasStoredPrizeSelection,
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
@@ -14,6 +14,9 @@ vi.mock("~/common/services/sessionService", () => ({
   resumeSession: vi.fn(),
   hasStoredDrawHistory: vi.fn(),
   hasStoredGameState: vi.fn(),
+}));
+
+vi.mock("~/common/services/prizeService", () => ({
   hasStoredPrizeSelection: vi.fn(),
 }));
 
@@ -90,7 +93,6 @@ const createEnvelope = () => ({
     createdAt: "2025-01-01T00:00:00.000Z",
     updatedAt: "2025-01-01T00:00:00.000Z",
   },
-  prizes: [],
   bgm: {
     enabled: true,
     volume: 0.6,

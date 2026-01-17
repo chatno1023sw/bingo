@@ -1,5 +1,4 @@
 import type { BgmPreference } from "./bgm";
-import type { PrizeList } from "./prize";
 
 /**
  * ゲーム進行中の履歴エントリを表す。
@@ -32,13 +31,11 @@ export type GameState = {
 };
 
 /**
- * loader などで gameState/prizes/bgm をまとめて返す際のラッパー。
+ * loader などで gameState/bgm をまとめて返す際のラッパー。
  */
-export type GameStateEnvelope = {
+export type GameSessionEnvelope = {
   /** ゲーム状態 */
   gameState: GameState;
-  /** 景品一覧 */
-  prizes: PrizeList;
   /** BGM 設定 */
   bgm: BgmPreference;
 };

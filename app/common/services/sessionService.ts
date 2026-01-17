@@ -1,5 +1,6 @@
 import { audioSettings } from "~/common/constants/audio";
-import type { GameState, GameStateEnvelope, Prize, PrizeList, BgmPreference } from "~/common/types";
+import type { BgmPreference, GameSessionEnvelope, GameState } from "~/common/types";
+import { resetPrizeSelections } from "~/common/services/prizeService";
 import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
 
 export type SessionStartOptions = {
@@ -49,16 +50,6 @@ const readStoredGameState = (): GameState | null =>
   readStorageJson<GameState | null>(storageKeys.gameState, null);
 
 /**
- * 保存済みの景品一覧を取得します。
- *
- * - 副作用: localStorage を読み取ります。
- * - 入力制約: ありません。
- * - 戻り値: 景品一覧を返します。
- * - Chrome DevTools MCP では localStorage を確認します。
- */
-const readStoredPrizes = (): PrizeList => readStorageJson<PrizeList>(storageKeys.prizes, []);
-
-/**
  * 保存済みの BGM 設定を取得します。
  *
  * - 副作用: localStorage を読み取ります。
@@ -72,67 +63,50 @@ const readStoredBgm = (timestamp: string): BgmPreference => {
 };
 
 /**
- * 景品の選出状態を初期化します。
- *
- * - 副作用: ありません。
- * - 入力制約: `prizes` は PrizeList を渡してください。
- * - 戻り値: 選出状態を解除した配列を返します。
- * - Chrome DevTools MCP では選出状態の変更を確認します。
- */
-const resetPrizeSelections = (prizes: PrizeList): PrizeList =>
-  prizes.map<Prize>((prize) => ({
-    ...prize,
-    selected: false,
-  }));
-
-/**
  * `/session/start` に対応するスタブ。
  */
 export const startSession = async (
   options: SessionStartOptions = {},
-): Promise<GameStateEnvelope> => {
+): Promise<GameSessionEnvelope> => {
   const now = new Date().toISOString();
   const shouldResetPrizes = options.resetPrizes ?? true;
-  const storedPrizes = readStoredPrizes();
-  const prizes = shouldResetPrizes ? resetPrizeSelections(storedPrizes) : [...storedPrizes];
+  if (shouldResetPrizes) {
+    await resetPrizeSelections();
+  }
   const gameState = createDefaultGameState(now);
   const bgm = readStoredBgm(now);
 
-  await persistSessionState({ gameState, prizes, bgm });
-  return { gameState, prizes, bgm };
+  await persistSessionState({ gameState, bgm });
+  return { gameState, bgm };
 };
 
 /**
  * `/session/resume` に対応するスタブ。
  * 保存データが無い場合は null を返す想定。
  */
-export const resumeSession = async (): Promise<GameStateEnvelope | null> => {
+export const resumeSession = async (): Promise<GameSessionEnvelope | null> => {
   const storedGameState = readStoredGameState();
   if (!storedGameState) {
     return null;
   }
 
   const now = new Date().toISOString();
-  const prizes = readStoredPrizes();
   const bgm = readStoredBgm(now);
 
   return {
     gameState: storedGameState,
-    prizes,
     bgm,
   };
 };
 
 /**
- * GameState/Prize/BGM をまとめて永続化する。
+ * GameState/BGM を永続化する。
  */
 export const persistSessionState = async (payload: {
   gameState: GameState;
-  prizes: PrizeList;
   bgm: BgmPreference;
 }): Promise<void> => {
   writeStorageJson(storageKeys.gameState, payload.gameState);
-  writeStorageJson(storageKeys.prizes, payload.prizes);
   writeStorageJson(storageKeys.bgm, payload.bgm);
 };
 
@@ -150,19 +124,6 @@ export const hasStoredDrawHistory = (): boolean => {
     return false;
   }
   return storedGameState.drawHistory.length > 0;
-};
-
-/**
- * 保存済みの景品選出が存在するかを判定します。
- *
- * - 入力制約: 引数は受け取りません。
- * - 副作用: localStorage から 景品一覧 を読み取ります。
- * - 戻り値: selected が true の景品があれば true、それ以外は false です。
- * - Chrome DevTools MCP では Start 画面で景品選出がある場合に確認ダイアログが開くことを確認します。
- */
-export const hasStoredPrizeSelection = (): boolean => {
-  const storedPrizes = readStoredPrizes();
-  return storedPrizes.some((prize) => prize.selected);
 };
 
 /**

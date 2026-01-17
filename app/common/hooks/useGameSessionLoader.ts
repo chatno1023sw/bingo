@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { getHistoryView } from "~/common/services/historyService";
 import { resumeSession, startSession } from "~/common/services/sessionService";
-import type { DrawHistoryEntry, GameStateEnvelope } from "~/common/types";
+import type { DrawHistoryEntry, GameSessionEnvelope } from "~/common/types";
 import { getAvailableNumbers } from "~/common/utils/bingoEngine";
 
-export type GameLoaderData = GameStateEnvelope & {
+export type GameLoaderData = GameSessionEnvelope & {
   historyView: DrawHistoryEntry[];
   availableNumbers: number[];
 };
 
-export const ensureSession = async (): Promise<GameStateEnvelope> => {
+export const ensureSession = async (): Promise<GameSessionEnvelope> => {
   const resumed = await resumeSession();
   if (resumed) {
     return resumed;
@@ -17,7 +17,7 @@ export const ensureSession = async (): Promise<GameStateEnvelope> => {
   return startSession();
 };
 
-export const buildLoaderData = async (envelope: GameStateEnvelope): Promise<GameLoaderData> => {
+export const buildLoaderData = async (envelope: GameSessionEnvelope): Promise<GameLoaderData> => {
   const historyView = getHistoryView(envelope.gameState);
   const availableNumbers = getAvailableNumbers(envelope.gameState.drawHistory);
   return {

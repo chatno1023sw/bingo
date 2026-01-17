@@ -61,6 +61,34 @@ export const getPrizes = async (): Promise<PrizeList> => {
 };
 
 /**
+ * 保存済みの景品の選出状態を初期化します。
+ *
+ * - 副作用: localStorage に保存します。
+ * - 入力制約: ありません。
+ * - 戻り値: 正規化済みの景品一覧を返します。
+ */
+export const resetPrizeSelections = async (): Promise<PrizeList> => {
+  const prizes = await getPrizes();
+  const cleared = prizes.map((prize) => ({
+    ...prize,
+    selected: false,
+  }));
+  return persistPrizes(cleared);
+};
+
+/**
+ * 保存済みの景品選出が存在するかを判定します。
+ *
+ * - 入力制約: 引数は受け取りません。
+ * - 副作用: localStorage から 景品一覧 を読み取ります。
+ * - 戻り値: selected が true の景品があれば true、それ以外は false です。
+ */
+export const hasStoredPrizeSelection = (): boolean => {
+  const stored = readPrizes();
+  return stored.some((prize) => prize.selected);
+};
+
+/**
  * `/prizes/toggle`
  */
 export const togglePrize = async (id: string, selected: boolean): Promise<PrizeList> => {

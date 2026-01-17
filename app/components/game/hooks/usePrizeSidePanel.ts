@@ -111,7 +111,6 @@ export const usePrizeSidePanel = (): UsePrizeSidePanelResult => {
   };
 
   const handleRouletteStart = () => {
-    setResultOpen(false);
     setRouletteOpen(true);
   };
 
