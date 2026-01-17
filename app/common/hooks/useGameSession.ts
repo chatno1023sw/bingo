@@ -1,8 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { persistSessionState } from "~/common/services/sessionService";
-import { getPrizes } from "~/common/services/prizeService";
-import type { GameStateEnvelope } from "~/common/types";
 import { drawNextNumber, NoAvailableNumbersError } from "~/common/utils/bingoEngine";
 import { markStartBgmUnlock } from "~/common/utils/audioUnlock";
 import { useDrawAnimation } from "~/common/hooks/useDrawAnimation";
@@ -54,14 +52,9 @@ export const useGameSession = (options: UseGameSessionOptions = {}): UseGameSess
     try {
       const currentSession = session ?? (await ensureSession());
       const nextGameState = drawNextNumber(currentSession.gameState);
-      const latestPrizes = await getPrizes();
-      const updatedEnvelope: GameStateEnvelope = {
-        ...currentSession,
-        gameState: nextGameState,
-        prizes: latestPrizes,
-      };
-      await persistSessionState(updatedEnvelope);
-      const nextData = await buildLoaderData(updatedEnvelope);
+      const nextEnvelope = { gameState: nextGameState, bgm: currentSession.bgm };
+      await persistSessionState(nextEnvelope);
+      const nextData = await buildLoaderData(nextEnvelope);
       setSession(nextData);
       setDrawError(null);
     } catch (error) {
@@ -100,14 +93,9 @@ export const useGameSession = (options: UseGameSessionOptions = {}): UseGameSess
         isDrawing: false,
         updatedAt: now,
       };
-      const latestPrizes = await getPrizes();
-      const updatedEnvelope = {
-        ...session,
-        gameState: nextGameState,
-        prizes: latestPrizes,
-      };
-      await persistSessionState(updatedEnvelope);
-      const nextData = await buildLoaderData(updatedEnvelope);
+      const nextEnvelope = { gameState: nextGameState, bgm: session.bgm };
+      await persistSessionState(nextEnvelope);
+      const nextData = await buildLoaderData(nextEnvelope);
       setSession(nextData);
       setDrawError(null);
       setResetOpen(false);

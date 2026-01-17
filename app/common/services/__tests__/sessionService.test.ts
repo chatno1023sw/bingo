@@ -1,11 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import type { BgmPreference, GameState, PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
-import {
-  hasStoredPrizeSelection,
-  startSession,
-  resumeSession,
-} from "~/common/services/sessionService";
+import { hasStoredPrizeSelection } from "~/common/services/prizeService";
+import { startSession, resumeSession } from "~/common/services/sessionService";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -64,13 +61,8 @@ const createStoredPrizes = (): PrizeList => [
 /**
  * テスト用にセッション情報を保存します。
  */
-const storeEnvelope = (payload: {
-  gameState: GameState;
-  prizes: PrizeList;
-  bgm: BgmPreference;
-}) => {
+const storeEnvelope = (payload: { gameState: GameState; bgm: BgmPreference }) => {
   localStorage.setItem(storageKeys.gameState, JSON.stringify(payload.gameState));
-  localStorage.setItem(storageKeys.prizes, JSON.stringify(payload.prizes));
   localStorage.setItem(storageKeys.bgm, JSON.stringify(payload.bgm));
 };
 
@@ -127,24 +119,22 @@ describe("sessionService", () => {
       updatedAt: baseDate.toISOString(),
     });
     expect(parseStoredJson<GameState>(storageKeys.gameState)).toEqual(result.gameState);
-    expect(result.prizes).toEqual(
+    expect(result.bgm).toEqual(storedBgm);
+    expect(parseStoredJson<BgmPreference>(storageKeys.bgm)).toEqual(storedBgm);
+    expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(
       storedPrizes.map((prize) => ({
         ...prize,
         selected: false,
       })),
     );
-    expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(result.prizes);
-    expect(result.bgm).toEqual(storedBgm);
-    expect(parseStoredJson<BgmPreference>(storageKeys.bgm)).toEqual(storedBgm);
   });
 
   it("startSession respects resetPrizes=false by keeping existing selection", async () => {
     const storedPrizes = createStoredPrizes();
     localStorage.setItem(storageKeys.prizes, JSON.stringify(storedPrizes));
 
-    const result = await startSession({ resetPrizes: false });
+    await startSession({ resetPrizes: false });
 
-    expect(result.prizes).toEqual(storedPrizes);
     expect(parseStoredJson<PrizeList>(storageKeys.prizes)).toEqual(storedPrizes);
   });
 
@@ -166,7 +156,6 @@ describe("sessionService", () => {
         createdAt: "2024-12-31T22:59:00.000Z",
         updatedAt: "2024-12-31T23:01:00.000Z",
       },
-      prizes: createStoredPrizes(),
       bgm: {
         enabled: true,
         volume: 0.6,
