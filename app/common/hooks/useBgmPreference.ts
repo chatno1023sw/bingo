@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import type { BgmPreference } from "~/common/types";
 import {
   createDefaultBgmPreference,
   getBgmPreference,
   saveBgmPreference,
 } from "~/common/services/bgmService";
+import type { BgmPreference, GameStorageKeys } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
-import type { GameStorageKeys } from "~/common/types";
 
 /**
  * エラーをメッセージ化します。

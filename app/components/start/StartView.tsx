@@ -1,25 +1,25 @@
 import { type FC, useCallback, useEffect, useState } from "react";
 import { audioSettings } from "~/common/constants/audio";
+import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
+import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
+import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
+import { hasStoredPrizeSelection } from "~/common/services/prizeService";
 import {
   hasStoredDrawHistory,
   hasStoredGameState,
   resumeSession,
   startSession,
 } from "~/common/services/sessionService";
-import { hasStoredPrizeSelection } from "~/common/services/prizeService";
-import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
-import { BgmControl } from "~/components/common/BgmControl";
-import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
-import { StartMenu } from "~/components/start/StartMenu";
-import { StartOverDialog } from "~/components/start/StartOverDialog";
 import {
   muteSoundDetailPreference,
   resetSoundDetailPreference,
 } from "~/common/services/soundDetailPreferenceService";
-import { useAudioNotice } from "~/common/contexts/AudioNoticeContext";
-import { useAudioPreferences } from "~/common/contexts/AudioPreferenceContext";
-import { useAudioUnlock } from "~/common/contexts/AudioUnlockContext";
+import { consumeStartBgmUnlock, markGameBgmUnlock } from "~/common/utils/audioUnlock";
+import { AudioNoticeDialog } from "~/components/common/AudioNoticeDialog";
+import { BgmControl } from "~/components/common/BgmControl";
 import { useStartBgmController } from "~/components/start/hooks/useStartBgmController";
+import { StartMenu } from "~/components/start/StartMenu";
+import { StartOverDialog } from "~/components/start/StartOverDialog";
 
 export type StartViewProps = {
   /** Game ビューへ切り替える */

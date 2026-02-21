@@ -1,4 +1,4 @@
-import { createContext, useContext, type FC, type PropsWithChildren } from "react";
+import { createContext, type FC, type PropsWithChildren, useContext } from "react";
 
 export type SoundContextValue = {
   /** 効果音と BGM を有効にするか */

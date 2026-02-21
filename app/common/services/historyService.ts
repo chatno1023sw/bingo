@@ -1,4 +1,4 @@
-import type { GameState, DrawHistoryEntry } from "~/common/types";
+import type { DrawHistoryEntry, GameState } from "~/common/types";
 
 /**
  * 抽選履歴を表示順に整形します。

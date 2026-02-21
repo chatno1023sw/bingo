@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { PrizeList } from "~/common/types";
 import { createEmptyPrize } from "~/common/hooks/setting/prizeDraftUtils";
+import type { PrizeList } from "~/common/types";
 
 export type UsePrizeDraftOperationsParams = {
   /** 下書き状態の setter */

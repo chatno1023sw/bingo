@@ -1,4 +1,5 @@
 import { type FC, useLayoutEffect, useState } from "react";
+import type { RouterState } from "react-router";
 import {
   type ClientOnErrorFunction,
   UNSAFE_FrameworkContext as FrameworkContext,
@@ -6,12 +7,11 @@ import {
   UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery,
 } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import type { RouterState } from "react-router";
 import {
   getRouter,
   getSsrInfo,
-  subscribeRouter,
   type HashHydratedRouterOptions,
+  subscribeRouter,
 } from "./hashHydratedRouterState";
 
 export type HashHydratedRouterProps = HashHydratedRouterOptions & {

@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import { useCallback } from "react";
-import type { PrizeList } from "~/common/types";
 import { buildParsedPrize, normalizeSelected } from "~/common/hooks/setting/prizeDraftUtils";
+import type { PrizeList } from "~/common/types";
 
 export type UseSettingCsvImportParams = {
   setDraftPrizes: React.Dispatch<React.SetStateAction<PrizeList>>;

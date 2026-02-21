@@ -1,7 +1,7 @@
 import { audioSettings } from "~/common/constants/audio";
-import type { BgmPreference, GameSessionEnvelope, GameState } from "~/common/types";
 import { resetPrizeSelections } from "~/common/services/prizeService";
-import { readStorageJson, writeStorageJson, storageKeys } from "~/common/utils/storage";
+import type { BgmPreference, GameSessionEnvelope, GameState } from "~/common/types";
+import { readStorageJson, storageKeys, writeStorageJson } from "~/common/utils/storage";
 
 export type SessionStartOptions = {
   /** 景品の選出状態を初期化するかどうか */

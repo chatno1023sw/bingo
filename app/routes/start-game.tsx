@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { AudioNoticeProvider } from "~/common/contexts/AudioNoticeContext";
 import { AudioPreferenceProvider } from "~/common/contexts/AudioPreferenceContext";
 import { AudioUnlockProvider } from "~/common/contexts/AudioUnlockContext";
-import { AudioNoticeProvider } from "~/common/contexts/AudioNoticeContext";
 import { SoundProvider } from "~/common/contexts/SoundContext";
 import { GameContent } from "~/components/game/GameContent";
 import { StartView } from "~/components/start/StartView";

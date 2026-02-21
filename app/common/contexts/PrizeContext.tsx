@@ -1,10 +1,10 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import type { PrizeList } from "~/common/types";
 import {
   getPrizes,
-  togglePrize as togglePrizeService,
   savePrizes as savePrizesService,
+  togglePrize as togglePrizeService,
 } from "~/common/services/prizeService";
+import type { PrizeList } from "~/common/types";
 import { storageKeys } from "~/common/utils/storage";
 
 export type PrizeContextValue = {

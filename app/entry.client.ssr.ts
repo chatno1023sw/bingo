@@ -1,12 +1,12 @@
 export {
-  getRouter,
-  getSsrInfo,
-  subscribeRouter,
-  type HashHydratedRouterOptions,
-  type DataRouter,
-} from "~/common/router/hashHydratedRouterState";
-export {
   HashHydratedRouter,
   type HashHydratedRouterProps,
 } from "~/common/router/HashHydratedRouter";
+export {
+  type DataRouter,
+  getRouter,
+  getSsrInfo,
+  type HashHydratedRouterOptions,
+  subscribeRouter,
+} from "~/common/router/hashHydratedRouterState";
 export { hydrateHashRouter } from "~/common/router/hydrateHashRouter";
