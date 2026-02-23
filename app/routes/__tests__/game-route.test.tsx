@@ -35,6 +35,24 @@ vi.mock("~/common/hooks/useBgmPreference", () => ({
   }),
 }));
 
+vi.mock("~/common/contexts/AudioNoticeContext", () => ({
+  useAudioNotice: () => ({
+    acknowledged: true,
+    markAcknowledged: vi.fn(),
+  }),
+}));
+
+vi.mock("~/components/game/hooks/useGameBgmController", () => ({
+  useGameBgmController: () => ({
+    preference: { enabled: true, volume: 0.6, updatedAt: "2025-01-01T00:00:00.000Z" },
+    soundPreference: { enabled: true, volume: 0.5, updatedAt: "2025-01-01T00:00:00.000Z" },
+    isReady: true,
+    requestBgmPlay: vi.fn(),
+    setBgmVolume: vi.fn(async () => {}),
+    setSoundVolume: vi.fn(async () => {}),
+  }),
+}));
+
 vi.mock("~/common/services/sessionService", () => ({
   resumeSession: vi.fn(),
   startSession: vi.fn(),
@@ -52,7 +70,7 @@ vi.mock("~/common/utils/bingoEngine", () => ({
 }));
 
 vi.mock("howler", () => ({
-  Howl: vi.fn().mockImplementation((options) => {
+  Howl: vi.fn(function HowlMock(options) {
     const src = Array.isArray(options.src) ? options.src[0] : options.src;
     if (typeof src === "string") {
       howlOptionsBySrc.set(src, options);
@@ -65,6 +83,23 @@ vi.mock("howler", () => ({
       unload: vi.fn(),
     };
   }),
+}));
+
+vi.mock("~/components/game/hooks/useGameSoundDetail", () => ({
+  useGameSoundDetail: () => ({
+    voiceVolume: 0.5,
+    drumrollVolumeScale: 1,
+    cymbalVolumeScale: 1,
+    extraSoundSliders: [],
+    handleMuteAllAudio: vi.fn(),
+    handleEnableAllAudio: vi.fn(),
+    handleGameBgmVolumeChange: vi.fn(async () => {}),
+    resetSoundDetailToDefault: vi.fn(),
+  }),
+}));
+
+vi.mock("~/components/game/SidePanel", () => ({
+  SidePanel: () => null,
 }));
 
 /**
@@ -123,7 +158,7 @@ describe("game route client flow", () => {
   test("初期読み込みで現在状態を描画する", async () => {
     vi.mocked(resumeSession).mockResolvedValue(createEnvelope());
     vi.mocked(startSession).mockResolvedValue(createEnvelope());
-    vi.mocked(getHistoryView).mockResolvedValue(createHistoryView());
+    vi.mocked(getHistoryView).mockReturnValue(createHistoryView());
     vi.mocked(getAvailableNumbers).mockReturnValue([2, 3]);
 
     render(
@@ -158,8 +193,8 @@ describe("game route client flow", () => {
     vi.mocked(drawNextNumber).mockReturnValue(nextGameState);
     vi.mocked(persistSessionState).mockResolvedValue();
     vi.mocked(getHistoryView)
-      .mockResolvedValueOnce(createHistoryView())
-      .mockResolvedValueOnce([
+      .mockReturnValueOnce(createHistoryView())
+      .mockReturnValueOnce([
         {
           number: 1,
           sequence: 1,
