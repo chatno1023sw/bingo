@@ -18,6 +18,13 @@ vi.mock("~/common/services/prizeService", () => ({
   togglePrize: vi.fn(),
 }));
 
+vi.mock("~/common/hooks/setting/useUnsavedChangesGuard", () => ({
+  useUnsavedChangesGuard: () => ({
+    handleCancelConfirm: vi.fn(),
+    handleConfirmProceed: vi.fn(),
+  }),
+}));
+
 /**
  * テスト用の景品一覧を生成します。
  */

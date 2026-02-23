@@ -20,8 +20,13 @@ vi.mock("~/common/services/prizeService", () => ({
   hasStoredPrizeSelection: vi.fn(),
 }));
 
-const mockSetVolume = vi.fn();
-const mockSetSoundVolume = vi.fn();
+const { mockSetVolume, mockSetSoundVolume, requestGameBgmPlayMock, mockResumeAudioContext } =
+  vi.hoisted(() => ({
+    mockSetVolume: vi.fn(),
+    mockSetSoundVolume: vi.fn(),
+    requestGameBgmPlayMock: vi.fn(),
+    mockResumeAudioContext: vi.fn(),
+  }));
 
 vi.mock("~/common/contexts/AudioPreferenceContext", () => ({
   useAudioPreferences: () => ({
@@ -51,12 +56,10 @@ vi.mock("~/common/contexts/AudioPreferenceContext", () => ({
 
 vi.mock("~/common/contexts/AudioNoticeContext", () => ({
   useAudioNotice: () => ({
-    acknowledged: false,
+    acknowledged: true,
     markAcknowledged: vi.fn(),
   }),
 }));
-
-const requestGameBgmPlayMock = vi.fn();
 
 vi.mock("~/common/contexts/AudioUnlockContext", () => ({
   useAudioUnlock: () => ({
@@ -65,15 +68,15 @@ vi.mock("~/common/contexts/AudioUnlockContext", () => ({
   }),
 }));
 
-const mockResumeAudioContext = vi.fn();
-
 vi.mock("howler", () => ({
-  Howl: vi.fn().mockImplementation(() => ({
-    play: vi.fn(() => 1),
-    stop: vi.fn(),
-    volume: vi.fn(),
-    unload: vi.fn(),
-  })),
+  Howl: vi.fn(function HowlMock() {
+    return {
+      play: vi.fn(() => 1),
+      stop: vi.fn(),
+      volume: vi.fn(),
+      unload: vi.fn(),
+    };
+  }),
   Howler: {
     ctx: {
       state: "suspended",
@@ -102,6 +105,7 @@ const createEnvelope = () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockResumeAudioContext.mockResolvedValue(undefined);
   vi.mocked(hasStoredDrawHistory).mockReturnValue(false);
   vi.mocked(hasStoredGameState).mockReturnValue(false);
   vi.mocked(hasStoredPrizeSelection).mockReturnValue(false);
@@ -123,13 +127,13 @@ describe("start route client flow", () => {
 
   test("続きからで復元を実行して遷移する", async () => {
     const user = userEvent.setup();
+    vi.mocked(hasStoredGameState).mockReturnValue(true);
     vi.mocked(resumeSession).mockResolvedValue(createEnvelope());
     const onShowGame = vi.fn();
 
     render(<StartView onShowGame={onShowGame} onNavigateSetting={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "続きから" }));
-    await user.click(screen.getByRole("button", { name: "復元する" }));
 
     expect(resumeSession).toHaveBeenCalledTimes(1);
     expect(onShowGame).toHaveBeenCalled();
