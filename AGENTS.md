@@ -60,19 +60,70 @@
 ## Commit
 
 - Commit when implementation is complete for each **feature/unit** of work.
-- For commit titles, **add a primary-purpose prefix** such as fix: or refactor:, and **write the title in Japanese**.
+- For commit titles, **add a primary-purpose prefix** such as `fix:` or
+  `refactor:`, and **write the title in Japanese**.
 - In the commit description/body, describe what you did in **Japanese**.
 
 ## Test
 
-- When performing tests, create a test specification document and a test report.
-- For Playwright UI interaction tests, **take screenshots** and attach them to the test results. For complex interactions, record a video.
-  - Embed screenshots and videos into the corresponding test results in the test report.
+- When performing tests, create a test specification document and a test
+  report.
+- For Playwright UI interaction tests, **take screenshots** and attach them to
+  the test results. For complex interactions, record a video.
+  - Embed screenshots and videos into the corresponding test results in the
+    test report.
 - Each test defect must be fixed in a separate commit.
 
 ## Coding
 
-- Before implementing, review the diff, the staging area, and the commit history to detect any changes made by the user.
+- Before implementing, review the diff, the staging area, and the commit
+  history to detect any changes made by the user.
 - Implement TSDoc.
 - Leave comments for complex logic.
-- After completing each task, run Biome’s format, lint, and TypeScript type checks, and fix any errors.
+- After completing each task, run Biome's format, lint, and react-router type
+  checks, and fix any errors.
+
+## Regression Testing
+
+### When a feature/fix/test changes behavior
+
+1. Perform an impact analysis to identify which screens/functions may be
+   affected.
+2. Execute regression tests for the affected functionality.
+3. Document the results in a Markdown file at:
+   `test/regression/{screen_name}/{function_name}.md`
+
+### Output requirements (the Markdown file content)
+
+- Include:
+  - Execution date (YYYY-MM-DD)
+  - Brief explanation of what was tested (scope/intent)
+  - Step-by-step actions performed
+- Definition of “Action”:
+  - 1 action = 1 click
+  - Write a concise description of what you clicked/did
+  - Embed exactly 1 screenshot per action (one screenshot for each click)
+- Report format:
+  - Date: `{YYYY-MM-DD hh:mm:ss}`
+  - Summary:
+    `{Brief explanation of what you tested and why (based on impact analysis).}`
+  - Steps table template:
+
+    ```md
+    | # | Action (1 click) | Expected Result | Actual Result | Screenshot |
+    |---|------------------|-----------------|---------------|------------|
+    | 1 | {action_1} | {expected_1} | {actual_1} | ![]({screenshot_1}) |
+    | 2 | {action_2} | {expected_2} | {actual_2} | ![]({screenshot_2}) |
+    ```
+
+  - Add one row per click/action. Do not combine multiple clicks into one row.
+- Inputs you will be given:
+  - Change summary (what was added/changed/fixed)
+  - `{screen_name}`
+  - `{function_name}`
+  - A list of regression test actions (each action is a single click) with
+    expected/actual results and screenshot paths
+- Generate:
+  - The complete Markdown content for
+    `test/regression/{screen_name}/{function_name}.md` that complies with all
+    requirements above.
